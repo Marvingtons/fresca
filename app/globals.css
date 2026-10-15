@@ -110,40 +110,81 @@ html.lenis body {
   }
 }
 
-/* ───────── preloader: pre-paint state, set by the inline script in <head>
-   (lib/intro.ts). Without these classes everything renders final.
-   html.intro: first visit per session. The first painted frame is the label,
-   the 000 counter and the first thumbnail; the header and the hero frame wait. */
+/* ───────── hero wordmark band (every visit). FRESCA in caps, cap height 11vw,
+   letters tracked out so the F and A ink touch the gutters, baseline on the
+   hero's bottom edge minus the gutter. Instrument Serif metrics: cap height
+   0.72em, ascent 0.99, descent 0.31; FRESCA is 2.694em wide; F has a 0.019em
+   left bearing and A overhangs its advance by 0.018em (both cancelled below).
+   Line-height = ascent - descent puts the baseline on the box's bottom edge.
+   If the word cannot fit at 11vw (narrow screens), the cap height shrinks so
+   it keeps at least 12% of its width as tracking; it never wraps. */
+.wm-band {
+  container-type: inline-size;
+}
+.wm {
+  --wm-fs: min(calc(11vw / 0.72), calc(100cqw / (2.693 * 1.12)));
+  width: fit-content;
+  margin-inline: auto;
+  /* Room above the box so caps (0.72em) clear the 0.68em line box when the
+     wordmark is text-clipped during the opening. Cancelled by the margin. */
+  padding-top: 0.1em;
+  margin-top: -0.1em;
+  font-size: var(--wm-fs);
+  line-height: 0.68;
+  letter-spacing: calc((100cqw - 2.693 * var(--wm-fs)) / 5);
+  white-space: nowrap;
+  color: var(--ink);
+}
+.wm span:first-child {
+  margin-left: -0.019em;
+}
+.wm span:last-child {
+  letter-spacing: 0;
+  margin-right: 0.018em;
+}
+/* Photo frame: as before, but short enough to leave room for the band. */
+@media (min-width: 861px) {
+  .hero-media {
+    width: min(944px, 52vw, calc((100svh - 128px - 0.68 * 11vw / 0.72 - 92px) * 4 / 3));
+  }
+}
+
+/* ───────── opening: pre-paint state, set by the inline script in <head>
+   (lib/intro.ts) on the first visit per session. Without html.intro the page
+   renders final. The navy field covers the page; the band's wordmark sits on
+   it, centered at ~28px (--wm-s is set by an inline script right after it),
+   bone, lightly tracked. During the wipe it is a text-clipped gradient: bone
+   above the field's edge (--cut), ink below. */
 html.intro {
   overflow: hidden;
 }
 body.scroll-lock {
   overflow: hidden;
 }
-html.intro .site-header,
-html.intro .hero-media {
-  opacity: 0;
-  visibility: hidden;
-}
-html.intro .intro-frame:not(:first-child) {
-  opacity: 0;
-  visibility: hidden;
-}
-html:not(.intro) .intro-ui {
+.intro-field {
   display: none;
 }
-/* html.hero-in: every visit with motion. The hero waits in its entrance state
-   (the photo only scales on visits without the preloader). */
-html.hero-in:not(.intro) .hero-final {
-  transform: scale(1.03);
+html.intro .intro-field {
+  display: block;
 }
-html.hero-in .hero-ln > span {
-  transform: translateY(110%);
-}
-html.hero-in .hero-fade {
+html.intro .site-header {
   opacity: 0;
   visibility: hidden;
-  transform: translateY(14px);
+}
+html.intro .wm {
+  position: relative;
+  z-index: 46;
+  letter-spacing: 0.04em;
+  transform: translateY(calc(-50svh + var(--pad) + 50%)) scale(var(--wm-s, 0.13));
+  color: transparent;
+  background-image: linear-gradient(to bottom, var(--ground) var(--cut, 100%), var(--ink) var(--cut, 100%));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro-field {
+    display: none !important;
+  }
 }
 
 /* ───────── studio wall annotations (v6): 12-col grid, ruler, dimension
