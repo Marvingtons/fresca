@@ -3,6 +3,7 @@ import { Hanken_Grotesk, IBM_Plex_Mono, Instrument_Serif } from "next/font/googl
 import SmoothScroll from "@/components/SmoothScroll";
 import { site } from "@/content/site";
 import { introScript } from "@/lib/intro";
+import { heroMedia } from "@/lib/media/hero";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -60,6 +61,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: introScript }} />
+        {/* The hero poster is the first painted frame. */}
+        <link rel="preload" as="image" href={heroMedia.posterWebp} type="image/webp" fetchPriority="high" />
       </head>
       <body>
         <SmoothScroll>{children}</SmoothScroll>

@@ -144,34 +144,18 @@ html.lenis body {
   letter-spacing: 0;
   margin-right: 0.018em;
 }
-/* Hero still: one slow settle, 1.06 → 1 over 9s. Held while the opening covers
-   the page and started as the wipe reveals it (html.revealing). */
-@keyframes hero-settle {
-  from {
-    transform: scale(1.06);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-.hm-still {
-  animation: hero-settle 9s cubic-bezier(0.25, 0.6, 0.3, 1) both;
-}
-html.intro:not(.revealing) .hm-still {
-  animation-play-state: paused;
-}
-@media (prefers-reduced-motion: reduce) {
-  .hm-still {
-    animation: none;
-  }
+/* Hero film over its poster: centered crops hold up for these shots. */
+.hero-poster,
+.hero-video {
+  object-position: 50% 50%;
 }
 
 /* Hero scrims, navy. The bottom one holds ~80% behind the subline and ~60%
-   behind the headline, the top one ~80% behind the nav, so bone type passes
-   4.5:1 (body) and 3:1 (headline, wordmark) over the still's brightest pixels. */
+   behind the headline, the top one ~85% behind the nav, so bone type passes
+   4.5:1 (body) and 3:1 (headline, wordmark) over the brightest frames. */
 .hero-scrim-top {
   height: 20%;
-  background: linear-gradient(to bottom, rgb(43 58 85 / 0.84), rgb(43 58 85 / 0.62) 55%, rgb(43 58 85 / 0));
+  background: linear-gradient(to bottom, rgb(43 58 85 / 0.9), rgb(43 58 85 / 0.72) 55%, rgb(43 58 85 / 0));
 }
 .hero-scrim-bottom {
   height: 72%;

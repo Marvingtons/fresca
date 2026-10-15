@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { cta, hero, site } from "@/content/site";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { INTRO_KEY, markOpeningDone } from "@/lib/intro";
+import { heroMedia } from "@/lib/media/hero";
 import { MOTION } from "@/lib/motion";
 import HeroMedia from "./HeroMedia";
 import Line from "./LineReveal";
@@ -85,7 +86,7 @@ export default function Hero() {
             sessionStorage.setItem(INTRO_KEY, "1");
           } catch {}
           gsap.set([wm, field, header], { clearProps: "all" });
-          html.classList.remove("intro", "revealing");
+          html.classList.remove("intro");
           document.body.classList.remove("scroll-lock");
           start();
           ScrollTrigger.refresh();
@@ -126,8 +127,6 @@ export default function Hero() {
           // autoRound off: the tween must end on the CSS's sub-pixel letter-spacing, or the
           // letters shift by a pixel when the inline style is cleared.
           tl.to(wm, { letterSpacing: lsEnd, y: 0, scale: 1, duration: 0.9, ease: "power3.inOut", autoRound: false }, 0.8)
-            // The still's 9s settle starts as the media is revealed.
-            .add(() => html.classList.add("revealing"), 1.5)
             .to(
               wipe,
               {
@@ -161,9 +160,9 @@ export default function Hero() {
 
   return (
     <section ref={root} id="top" className="relative h-svh min-h-[520px] overflow-hidden bg-navy text-ground">
-      {/* Media: full bleed, cover, parallax on this wrapper (the still's settle is on the image). */}
+      {/* Media: full bleed, cover, parallax on this wrapper. */}
       <div className="hero-media absolute inset-0 will-change-transform">
-        <HeroMedia src={hero.media.src} poster={hero.media.poster} alt={hero.media.alt} focalPoint={hero.media.focalPoint} />
+        <HeroMedia media={heroMedia} alt={hero.mediaAlt} />
       </div>
       {/* Legibility: navy, not black. Top for the nav on the bright ceiling, bottom
           for the type. Stops are tuned so every line passes against the kitchen's

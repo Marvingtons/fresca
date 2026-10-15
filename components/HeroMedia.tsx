@@ -1,47 +1,65 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { onOpeningDone } from "@/lib/intro";
-import { prefersReducedMotion } from "@/lib/motion";
+import type { HeroMediaSources } from "@/lib/media/hero";
 
-const VIDEO = /\.(mp4|webm|mov|m4v)(\?.*)?$/i;
-
-type HeroMediaProps = {
-  /** A still image, or a video file. Swapping in a video is this one prop. */
-  src: string;
-  /** For a video: the still shown until playback starts (use its first frame). */
-  poster?: string;
-  alt: string;
-  /** object-position, e.g. "47% 100%": the point kept in frame at every crop. */
-  focalPoint?: string;
-};
+/** AV1 in WebM; anything but "" means the browser will try it. */
+const AV1 = 'video/webm; codecs="av01.0.08M.10"';
 
 /**
- * Full-bleed hero media, cover-fitted to its parent. A still gets a slow 9s
- * settle (1.06 → 1, see .hm-still in globals.css). A video is muted, looping
- * and inline, loads metadata only, and starts playing when the opening's wipe
- * is done; it pauses under reduced motion and whenever it is off screen.
+ * Full-bleed hero film over a server-rendered poster.
+ *
+ * - The poster (<picture>, webp with jpg fallback) is the first painted frame.
+ * - The source is picked on mount: over 768px, AV1 WebM where supported, else the
+ *   1080 MP4; 768px and under, the 720 MP4. Under reduced motion or Save-Data no
+ *   video element is created, so nothing is downloaded.
+ * - Playback waits for the opening's wipe (onOpeningDone; immediate on later
+ *   visits). If play() rejects (e.g. iOS Low Power Mode) the poster just stays.
+ * - Pauses when the hero is fully off screen or the tab is hidden.
+ * - Fades in over 400ms on `playing`, so poster → film is invisible.
+ * The file is a seamless loop: plain `loop`, no restart or `ended` handling.
  */
-export default function HeroMedia({ src, poster, alt, focalPoint = "50% 50%" }: HeroMediaProps) {
-  const isVideo = VIDEO.test(src);
+export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [src, setSrc] = useState<string | null>(null);
+  const [allowed, setAllowed] = useState(false);
+  const [playing, setPlaying] = useState(false);
+
+  // Choose the source (or none) once, on mount.
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+    if (reduce || saveData) return;
+    if (window.matchMedia("(min-width: 769px)").matches) {
+      setSrc(document.createElement("video").canPlayType(AV1) ? media.webm1080 : media.mp41080);
+    } else {
+      setSrc(media.mp4720);
+    }
+  }, [media]);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!isVideo || !video) return;
-    if (prefersReducedMotion()) {
-      video.pause();
-      return;
-    }
+    if (!src || !video) return;
+    // React does not reliably reflect `muted` to the DOM, and iOS will not
+    // autoplay without it: set the property and the attribute ourselves.
+    video.muted = true;
+    video.defaultMuted = true;
+    video.setAttribute("muted", "");
+
     let opened = false;
     let onScreen = true;
     const sync = () => {
-      if (opened && onScreen) video.play().catch(() => {});
-      else video.pause();
+      if (opened && onScreen && document.visibilityState === "visible") {
+        video.muted = true;
+        video.play().catch(() => {}); // rejected: leave the poster, no UI
+      } else {
+        video.pause();
+      }
     };
     const stopWaiting = onOpeningDone(() => {
       opened = true;
+      setAllowed(true);
       sync();
     });
     const io = new IntersectionObserver(([entry]) => {
@@ -49,27 +67,41 @@ export default function HeroMedia({ src, poster, alt, focalPoint = "50% 50%" }: 
       sync();
     });
     io.observe(video);
+    const onPlaying = () => setPlaying(true);
+    video.addEventListener("playing", onPlaying);
+    document.addEventListener("visibilitychange", sync);
     return () => {
       stopWaiting();
       io.disconnect();
+      video.removeEventListener("playing", onPlaying);
+      document.removeEventListener("visibilitychange", sync);
     };
-  }, [isVideo, src]);
+  }, [src]);
 
-  if (isVideo) {
-    return (
-      <video
-        ref={videoRef}
-        className="absolute inset-0 h-full w-full object-cover"
-        style={{ objectPosition: focalPoint }}
-        src={src}
-        poster={poster}
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        aria-label={alt}
-      />
-    );
-  }
-  return <Image src={src} alt={alt} fill priority sizes="100vw" quality={85} className="hm-still object-cover" style={{ objectPosition: focalPoint }} />;
+  return (
+    <>
+      <picture>
+        <source srcSet={media.posterWebp} type="image/webp" />
+        {/* eslint-disable-next-line @next/next/no-img-element -- plain img on purpose: server-rendered first frame, no optimizer */}
+        <img src={media.posterJpg} alt={alt} decoding="async" className="hero-poster absolute inset-0 h-full w-full object-cover" />
+      </picture>
+      {src && (
+        <video
+          ref={videoRef}
+          className={`hero-video absolute inset-0 h-full w-full object-cover transition-opacity duration-[400ms] ${playing ? "opacity-100" : "opacity-0"}`}
+          src={src}
+          poster={media.posterWebp}
+          muted
+          loop
+          playsInline
+          // Autoplay only once playback is allowed, so the film cannot start under the opening.
+          autoPlay={allowed}
+          preload="metadata"
+          disablePictureInPicture
+          aria-hidden="true"
+          tabIndex={-1}
+        />
+      )}
+    </>
+  );
 }
