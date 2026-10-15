@@ -8,17 +8,19 @@ const config: Config = {
     screens: { md: "861px" },
     extend: {
       colors: {
+        // Two fields only: cream (everything) and navy (Approach and the Contact
+        // footer). Terracotta is the single action color in both.
         ground: "#F4F2EB",
-        "ground-2": "#E7E4DB",
+        navy: "#2B3A55",
         ink: "#1D1C1A",
         body: "#4A4740",
         muted: "#6B665C",
         line: "rgba(29,28,26,.14)",
-        accent: "#2B3A55",
+        "line-dark": "rgba(244,242,235,.16)",
         "on-dark": "#CFC9BC",
-        gold: "#C9A86A",
-        panel: "#141311",
+        ochre: "#C9A86A", // drawing annotations only (dimensions, callouts), never actions
         error: "#E9B4A2",
+        terracotta: "#A9502F",
       },
       fontFamily: {
         serif: ["var(--serif)"],

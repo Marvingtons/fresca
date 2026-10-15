@@ -2,6 +2,7 @@
 
 import { useRef, type SyntheticEvent } from "react";
 import { faq } from "@/content/site";
+import Copy from "./Placeholder";
 
 export default function FAQ() {
   const list = useRef<HTMLDivElement>(null);
@@ -16,7 +17,7 @@ export default function FAQ() {
   };
 
   return (
-    <section id="faq" className="flex flex-wrap gap-x-20 gap-y-10 bg-ground-2 px-pad py-[clamp(96px,14vh,150px)]">
+    <section id="faq" className="flex flex-wrap gap-x-20 gap-y-10 border-t border-line px-pad py-[clamp(96px,14vh,150px)]">
       <div className="flex-[1_1_320px]">
         <p className="cap text-muted">{faq.eyebrow}</p>
         <h2 className="mt-4 font-serif text-[clamp(44px,5vw,80px)] font-normal leading-[.98]">{faq.heading}</h2>
@@ -34,7 +35,9 @@ export default function FAQ() {
               </span>
             </summary>
             <div className="overflow-hidden">
-              <p className="mb-[26px] max-w-[640px] text-body">{item.a}</p>
+              <p className="mb-[26px] max-w-[640px] text-body">
+                <Copy text={item.a} />
+              </p>
             </div>
           </details>
         ))}

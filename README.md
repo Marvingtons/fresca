@@ -1,6 +1,6 @@
 # Fresca Interior Design
 
-Marketing site for Fresca, a residential interior design studio in San Diego.
+Marketing site for Fresca, a residential interior design studio in Solana Beach.
 Next.js 14 (App Router), TypeScript, Tailwind, GSAP + ScrollTrigger, Lenis.
 
 ```bash
@@ -11,7 +11,8 @@ npm run build && npm run lint
 
 ## Where things live
 
-- **Copy and data:** `content/site.ts`. Every placeholder is marked `// DEMO:`.
+- **Copy and data:** `content/site.ts`. Missing content lives in
+  `content/placeholders.ts` and renders as `[PLACEHOLDER: ...]` in terracotta.
 - **Sections:** `components/` (one file per section, in page order in `app/page.tsx`).
 - **Design tokens:** `tailwind.config.ts` and the `:root` block in `app/globals.css`.
 - **Animation helpers:** `lib/gsap.ts` (plugin registration), `lib/motion.ts`

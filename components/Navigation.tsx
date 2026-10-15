@@ -5,6 +5,7 @@ import { cta, navLinks, site } from "@/content/site";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/motion";
 import { useSmoothScroll } from "./SmoothScroll";
+import Copy from "./Placeholder";
 
 function Wordmark({ label }: { label?: string }) {
   return (
@@ -22,6 +23,14 @@ export default function Navigation() {
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const { stop, start } = useSmoothScroll();
   const { contextSafe } = useGSAP({ scope: menuRef });
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const animateLinks = contextSafe(() => {
     if (prefersReducedMotion()) return;
@@ -62,25 +71,34 @@ export default function Navigation() {
 
   return (
     <>
-      {/* Difference blend keeps the header legible on any background. */}
-      <header className="site-header pointer-events-none fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-4 px-pad py-5 text-white mix-blend-difference [&>*]:pointer-events-auto">
+      {/* Solid cream bar: readable at the top of the page and over the dark sections.
+          A hairline appears once the page has scrolled. */}
+      <header
+        data-scrolled={scrolled || undefined}
+        className="site-header fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-6 border-b border-transparent bg-ground px-pad py-4 text-ink transition-colors duration-300 data-[scrolled]:border-line"
+      >
         <Wordmark label="Fresca Interior Design, home" />
-        <div className="flex items-center gap-2.5">
-          <button
-            ref={menuBtnRef}
-            type="button"
-            className="hbtn"
-            aria-expanded={open}
-            aria-controls="menu"
-            onClick={openMenu}
-          >
-            <i aria-hidden="true" className="block h-px w-4 -translate-y-0.5 bg-current shadow-[0_5px_0_currentColor]" />
-            Menu
-          </button>
-          <a className="hbtn max-md:hidden" href={cta.href}>
+        <nav aria-label="Main" className="flex items-center gap-[clamp(20px,2.6vw,40px)] max-md:hidden">
+          {navLinks.map((link) => (
+            <a key={link.href} href={link.href} className="nav-link text-sm">
+              {link.label}
+            </a>
+          ))}
+          <a href={cta.href} className="nav-cta text-sm">
             {cta.label}
           </a>
-        </div>
+        </nav>
+        <button
+          ref={menuBtnRef}
+          type="button"
+          className="hbtn md:hidden"
+          aria-expanded={open}
+          aria-controls="menu"
+          onClick={openMenu}
+        >
+          <i aria-hidden="true" className="block h-px w-4 -translate-y-0.5 bg-current shadow-[0_5px_0_currentColor]" />
+          Menu
+        </button>
       </header>
 
       <div
@@ -89,7 +107,7 @@ export default function Navigation() {
         // Rendered inert on the server too, before the effect above runs. React 18
         // only renders the attribute from a string, though the types say boolean.
         {...({ inert: "" } as object)}
-        className={`fixed inset-0 z-[60] flex flex-col bg-ink px-pad pb-8 pt-5 text-ground transition-[clip-path] duration-[900ms] ease-curtain ${
+        className={`fixed inset-0 z-[60] flex flex-col bg-navy px-pad pb-8 pt-5 text-ground transition-[clip-path] duration-[900ms] ease-curtain ${
           open ? "[clip-path:inset(0_0_0_0)]" : "[clip-path:inset(0_0_100%_0)]"
         }`}
       >
@@ -99,7 +117,7 @@ export default function Navigation() {
             Close
           </button>
         </div>
-        <nav aria-label="Main" className="flex flex-1 flex-col justify-center gap-1 py-10">
+        <nav aria-label="Menu" className="flex flex-1 flex-col justify-center gap-1 py-10">
           {navLinks.map((link, i) => (
             <span key={link.href} className="ln">
               <a
@@ -115,12 +133,12 @@ export default function Navigation() {
         </nav>
         <div className="flex flex-wrap justify-between gap-4 text-sm text-on-dark">
           <span>{site.location}</span>
-          <a className="no-underline" href={site.phone.href}>
-            {site.phone.label}
-          </a>
-          <a className="no-underline" href={`mailto:${site.email}`}>
-            {site.email}
-          </a>
+          <span>
+            <Copy text={site.phone.label} />
+          </span>
+          <span>
+            <Copy text={site.email} />
+          </span>
         </div>
       </div>
     </>

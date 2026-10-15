@@ -138,7 +138,7 @@ export default function ContactForm() {
         <input id="contact-company" name={HONEYPOT} type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
-      <button type="submit" disabled={sending} className="pill pill-light mt-3 cursor-pointer justify-self-start border-0 disabled:cursor-wait disabled:opacity-70">
+      <button type="submit" disabled={sending} className="pill pill-accent mt-3 cursor-pointer justify-self-start border-0 disabled:cursor-wait disabled:opacity-70">
         {sending ? contact.sending : contact.submit}
       </button>
       {status === "error" && (

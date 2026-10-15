@@ -6,7 +6,7 @@ import { showcase } from "@/content/site";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { MOTION, prefersReducedMotion } from "@/lib/motion";
 
-const { projects, labels } = showcase;
+const { projects } = showcase;
 const pad2 = (n: number) => String(n).padStart(2, "0");
 
 function Arrow({ dir, onClick }: { dir: "prev" | "next"; onClick: () => void }) {
@@ -95,7 +95,7 @@ export default function ProjectShowcase() {
         gsap.fromTo(titleRef.current, { yPercent: 110 }, { yPercent: 0, duration: 0.8, ease: "power3.out" });
       },
     });
-    gsap.fromTo(".sc-stats dd", { opacity: 1 }, { opacity: 0, duration: 0.3, yoyo: true, repeat: 1, repeatDelay: 0.25 });
+    gsap.fromTo(".sc-room", { opacity: 1 }, { opacity: 0, duration: 0.3, yoyo: true, repeat: 1, repeatDelay: 0.25 });
   });
 
   const p = projects[shown];
@@ -104,7 +104,7 @@ export default function ProjectShowcase() {
   return (
     <section ref={root} id="work" aria-label="Selected projects" className="relative h-[280vh]">
       <div className="sticky top-0 h-svh p-1.5">
-        <div className="relative h-full overflow-hidden rounded-lg bg-panel text-ground">
+        <div className="relative h-full overflow-hidden rounded-lg bg-navy text-ground">
           {[1, 2].map((g) => (
             <div
               key={g}
@@ -130,7 +130,7 @@ export default function ProjectShowcase() {
                 className={`sc-img object-cover ${i === 0 ? "opacity-100" : "opacity-0"}`}
               />
             ))}
-            <div className="sc-shade absolute inset-0 z-[3] bg-[rgba(14,13,12,.42)]" />
+            <div className="sc-shade absolute inset-0 z-[3] bg-[rgba(20,27,40,.42)]" />
           </div>
 
           <div aria-hidden="true" className="sc-chess-l absolute left-0 top-0 z-[6] h-0 w-1/2 bg-ground" />
@@ -150,28 +150,12 @@ export default function ProjectShowcase() {
                   {p.title}
                 </h3>
               </div>
-              <dl className="sc-stats sc-fade mt-6 flex flex-wrap gap-x-11 gap-y-5">
-                {(
-                  [
-                    [labels.weeks, p.weeks, "weeks"],
-                    [labels.area, p.area, "sq ft"],
-                    [labels.city, p.city, null],
-                  ] as const
-                ).map(([dt, value, unit]) => (
-                  <div key={dt} className="min-w-[96px]">
-                    <dt className="text-[10px] uppercase tracking-[.22em] text-on-dark">{dt}</dt>
-                    <dd className="mt-1.5 font-serif text-[30px] leading-none">
-                      {value}
-                      {unit && <small className="ml-1 font-sans text-[13px]">{unit}</small>}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
+              <p className="sc-room sc-fade mt-5 text-[10px] uppercase tracking-[.22em] text-on-dark">{p.room}</p>
             </div>
             <div className="sc-fade flex items-center gap-2.5">
               <Arrow dir="prev" onClick={() => go(-1)} />
               <Arrow dir="next" onClick={() => go(1)} />
-              <a className="pill pill-light" href={showcase.projectLink.href}>
+              <a className="pill pill-accent" href={showcase.projectLink.href}>
                 {showcase.projectLink.label}
               </a>
             </div>

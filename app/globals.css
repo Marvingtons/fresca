@@ -4,17 +4,30 @@
 
 :root {
   --ground: #f4f2eb;
-  --ground-2: #e7e4db;
   --ink: #1d1c1a;
   --body: #4a4740;
   --muted: #6b665c;
   --line: rgba(29, 28, 26, 0.14);
-  --accent: #2b3a55;
+  --navy: #2b3a55;
   --on-dark: #cfc9bc;
+  --terracotta: #a9502f;
   --serif: var(--font-instrument), Georgia, serif;
   --mono: var(--font-plex-mono), ui-monospace, monospace;
   --sans: var(--font-hanken), system-ui, sans-serif;
   --pad: clamp(16px, 2.2vw, 32px);
+}
+
+/* Missing content, see content/placeholders.ts. Never final copy. */
+.placeholder {
+  color: var(--terracotta);
+  font-family: var(--mono);
+  font-size: 0.85em;
+  font-style: normal;
+  letter-spacing: 0;
+}
+.bg-navy .placeholder,
+#menu .placeholder {
+  color: #e08a66;
 }
 
 /* Lenis */
@@ -50,9 +63,12 @@ html.lenis body {
     @apply text-[11px] uppercase tracking-[.24em];
   }
 
-  /* Masked line: the inner span slides up from below the mask. */
+  /* Masked line: the inner span slides up from below the mask. The padding
+     (cancelled by equal negative margins, so layout is unchanged) gives tall
+     ascenders and italic overhang room inside the clip; at leading .9 the mask
+     was cutting the tops off the "d"s in "considered.". */
   .ln {
-    @apply -mb-[.06em] block overflow-hidden pb-[.06em];
+    @apply -mx-[.1em] -mb-[.06em] -mt-[.14em] block overflow-hidden px-[.1em] pb-[.06em] pt-[.14em];
   }
   .ln > span {
     @apply block;
@@ -62,17 +78,35 @@ html.lenis body {
     @apply inline-flex min-h-[44px] cursor-pointer items-center gap-2.5 rounded-full border border-current bg-transparent px-5 text-xs uppercase tracking-[.18em] no-underline;
   }
 
+  /* Header text links: ink, underline drawn in on hover. The CTA is the
+     terracotta action color, underlined at rest. */
+  .nav-link,
+  .nav-cta {
+    @apply relative py-2 no-underline;
+  }
+  .nav-link::after,
+  .nav-cta::after {
+    @apply absolute inset-x-0 bottom-1 h-px origin-left bg-current content-[''];
+  }
+  .nav-link::after {
+    @apply scale-x-0 transition-transform duration-300 ease-curtain;
+  }
+  .nav-link:hover::after,
+  .nav-link:focus-visible::after {
+    @apply scale-x-100;
+  }
+  .nav-cta {
+    @apply text-terracotta hover:text-[#8f4227];
+  }
+
   .pill {
     @apply inline-flex min-h-[48px] items-center rounded-full px-6 text-xs uppercase tracking-[.18em] no-underline transition-colors duration-300;
   }
-  .pill-light {
-    @apply bg-ground text-ink hover:bg-white;
-  }
   .pill-line {
-    @apply border border-current hover:bg-ink hover:text-ground;
+    @apply border border-terracotta text-terracotta hover:bg-terracotta hover:text-ground;
   }
-  .pill-dark {
-    @apply bg-ink text-ground hover:bg-[#38352f];
+  .pill-accent {
+    @apply bg-terracotta text-ground hover:bg-[#8f4227];
   }
 }
 
@@ -86,21 +120,8 @@ html.intro .site-header {
   visibility: hidden;
 }
 html.intro .hero-media {
-  clip-path: inset(37% 41.5% 37% 41.5% round 3px);
-}
-html.intro .hero-media img {
   opacity: 0;
   visibility: hidden;
-}
-html.intro .hero-media .hero-cycle:first-child img {
-  opacity: 1;
-  visibility: visible;
-}
-html.intro .hero-final {
-  transform: scale(1.35);
-}
-html.intro .hero-shade {
-  opacity: 0;
 }
 html.intro .hero-ln > span {
   transform: translateY(110%);
@@ -110,8 +131,10 @@ html.intro .hero-fade {
   visibility: hidden;
   transform: translateY(14px);
 }
-html:not(.intro) .intro-ui,
-html:not(.intro) .hero-cycle {
+html.intro .intro-mark {
+  opacity: 0;
+}
+html:not(.intro) .intro-ui {
   display: none;
 }
 
@@ -290,6 +313,15 @@ html:not(.intro) .hero-cycle {
   left: calc(var(--len-fit) + 8px);
 }
 
+/* Plate label (Pl. 01): the same small caps label on both fields. Color follows
+   the field: muted on cream, on-dark on navy. */
+.plate {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  line-height: 1.4;
+}
+
 /* Plate labels: on narrow plates (v5 widths go down to 11% of the wall) the grid
    coordinate moves under the city instead of squeezing the title. */
 .pl {
@@ -323,7 +355,7 @@ html:not(.intro) .hero-cycle {
 
 /* ───────── approach blueprint (v6) */
 .blueprint {
-  background-color: var(--accent);
+  background-color: var(--navy);
   background-image: linear-gradient(rgba(244, 242, 235, 0.045) 1px, transparent 1px),
     linear-gradient(90deg, rgba(244, 242, 235, 0.045) 1px, transparent 1px),
     linear-gradient(rgba(244, 242, 235, 0.1) 1px, transparent 1px),
@@ -381,6 +413,32 @@ html:not(.intro) .hero-cycle {
 .drawn .ap-draw text {
   opacity: 1;
 }
+/* Plan stage room drawing: bone strokes at 85% so the blueprint grid shows
+   through, drawn on stage by stage over 2.4s. No fill, no color. The dash and
+   its transition sit on each stage's sub-groups; the lines (pathLength=1)
+   inherit them, so 19 transitions run instead of 415. */
+.ap-room {
+  max-width: 400px;
+}
+.ap-room .st > * {
+  fill: none;
+  stroke: rgba(244, 242, 235, 0.85);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* Dash of 1, gap of 2, offset just past the end: nothing (not even a round
+     cap dot) shows until the line starts drawing. */
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1.01;
+  transition: stroke-dashoffset var(--dur) cubic-bezier(0.6, 0, 0.2, 1) var(--at);
+}
+.ap-room .st-floor { --at: 0s; --dur: 0.65s; }
+.ap-room .st-ceiling { --at: 0.35s; --dur: 0.6s; }
+.ap-room .st-window { --at: 0.7s; --dur: 0.65s; }
+.ap-room .st-furniture { --at: 1.05s; --dur: 0.8s; }
+.ap-room .st-olive { --at: 1.75s; --dur: 0.65s; }
+.drawn .ap-room .st > * {
+  stroke-dashoffset: 0;
+}
 .ap-spec {
   list-style: none;
   margin: 22px 0 0;
@@ -395,7 +453,7 @@ html:not(.intro) .hero-cycle {
   align-items: baseline;
   gap: 8px;
   padding: 6px 0;
-  border-top: 1px solid rgba(244, 242, 235, 0.16);
+  border-top: 1px solid theme("colors.line-dark");
 }
 .ap-spec li span:nth-child(2) {
   flex: 1;
@@ -477,6 +535,7 @@ html:not(.intro) .hero-cycle {
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .ap-room .st > *,
   .ap-draw .dw {
     stroke-dashoffset: 0;
     transition: none;

@@ -127,7 +127,10 @@ export default function Approach() {
           >
             <div>
               <ApproachDrawing kind={panel.drawing} />
-              <span className="font-serif text-[30px] italic text-gold">{String(i + 1).padStart(2, "0")}</span>
+              <p className="plate text-on-dark">
+                {/* Continues the studio wall's plate numbering (Pl. 01–07). */}
+                Pl. {String(i + 8).padStart(2, "0")} <b className="ml-2 font-medium text-ground">{panel.title}</b>
+              </p>
               <h3 className="mb-3.5 mt-2 font-serif text-[clamp(48px,5vw,84px)] font-normal leading-[.95]">{panel.title}</h3>
               <p className="max-w-[340px] text-on-dark">{panel.text}</p>
               <ul className="ap-spec">

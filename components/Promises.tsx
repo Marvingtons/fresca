@@ -43,7 +43,7 @@ export default function Promises() {
         </div>
         <div className="flex max-w-[360px] flex-col items-start gap-6">
           <p className="text-body">{promises.intro}</p>
-          <a className="pill pill-dark" href={cta.href}>
+          <a className="pill pill-accent" href={cta.href}>
             {cta.label}
           </a>
         </div>
@@ -59,7 +59,7 @@ export default function Promises() {
             <h3 className="mb-3 font-serif text-[clamp(30px,2.8vw,44px)] font-normal leading-[1.05]">{row.title}</h3>
             <p className="max-w-[440px] text-body">{row.text}</p>
           </div>
-          <div className={`promise-media relative aspect-[16/10] overflow-hidden max-md:col-span-full ${row.board ? "bg-white" : "bg-ground-2"}`}>
+          <div className={`promise-media relative aspect-[16/10] overflow-hidden max-md:col-span-full ${row.board ? "bg-white" : "bg-ground"}`}>
             <Image
               src={row.image.src}
               alt={row.image.alt}

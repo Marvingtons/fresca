@@ -2,7 +2,6 @@ import AboutStack from "@/components/AboutStack";
 import Approach from "@/components/Approach";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
-import FounderQuote from "@/components/FounderQuote";
 import Hero from "@/components/Hero";
 import Navigation from "@/components/Navigation";
 import ProjectShowcase from "@/components/ProjectShowcase";
@@ -20,7 +19,6 @@ export default function Home() {
         <Promises />
         <Approach />
         <AboutStack />
-        <FounderQuote />
         <FAQ />
       </main>
       <Footer />
