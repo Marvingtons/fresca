@@ -11,11 +11,12 @@ const AV1 = 'video/webm; codecs="av01.0.08M.10"';
  * Full-bleed hero film over a server-rendered poster.
  *
  * - The poster (<picture>, webp with jpg fallback) is the first painted frame.
- * - The source is picked on mount: over 768px, AV1 WebM where supported, else the
- *   1080 MP4; 768px and under, the 720 MP4. Under reduced motion or Save-Data no
- *   video element is created, so nothing is downloaded.
- * - Playback waits for the opening's wipe (onOpeningDone; immediate on later
- *   visits). If play() rejects (e.g. iOS Low Power Mode) the poster just stays.
+ * - No video element exists until the opening has finished (onOpeningDone;
+ *   immediate on later visits), so nothing loads or decodes during it. Then the
+ *   source is picked: over 768px, AV1 WebM where supported, else the 1080 MP4;
+ *   768px and under, the 720 MP4. Under reduced motion or Save-Data no video
+ *   element is ever created. If play() rejects (e.g. iOS Low Power Mode) the
+ *   poster just stays.
  * - Pauses when the hero is fully off screen or the tab is hidden.
  * - Fades in over 400ms on `playing`, so poster → film is invisible.
  * The file is a seamless loop: plain `loop`, no restart or `ended` handling.
@@ -23,19 +24,20 @@ const AV1 = 'video/webm; codecs="av01.0.08M.10"';
 export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [src, setSrc] = useState<string | null>(null);
-  const [allowed, setAllowed] = useState(false);
   const [playing, setPlaying] = useState(false);
 
-  // Choose the source (or none) once, on mount.
+  // Choose the source (or none) once the opening is done.
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
     if (reduce || saveData) return;
-    if (window.matchMedia("(min-width: 769px)").matches) {
-      setSrc(document.createElement("video").canPlayType(AV1) ? media.webm1080 : media.mp41080);
-    } else {
-      setSrc(media.mp4720);
-    }
+    return onOpeningDone(() => {
+      if (window.matchMedia("(min-width: 769px)").matches) {
+        setSrc(document.createElement("video").canPlayType(AV1) ? media.webm1080 : media.mp41080);
+      } else {
+        setSrc(media.mp4720);
+      }
+    });
   }, [media]);
 
   useEffect(() => {
@@ -47,21 +49,16 @@ export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt
     video.defaultMuted = true;
     video.setAttribute("muted", "");
 
-    let opened = false;
     let onScreen = true;
     const sync = () => {
-      if (opened && onScreen && document.visibilityState === "visible") {
+      if (onScreen && document.visibilityState === "visible") {
         video.muted = true;
         video.play().catch(() => {}); // rejected: leave the poster, no UI
       } else {
         video.pause();
       }
     };
-    const stopWaiting = onOpeningDone(() => {
-      opened = true;
-      setAllowed(true);
-      sync();
-    });
+    sync();
     const io = new IntersectionObserver(([entry]) => {
       onScreen = entry.isIntersecting;
       sync();
@@ -71,7 +68,6 @@ export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt
     video.addEventListener("playing", onPlaying);
     document.addEventListener("visibilitychange", sync);
     return () => {
-      stopWaiting();
       io.disconnect();
       video.removeEventListener("playing", onPlaying);
       document.removeEventListener("visibilitychange", sync);
@@ -94,8 +90,7 @@ export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt
           muted
           loop
           playsInline
-          // Autoplay only once playback is allowed, so the film cannot start under the opening.
-          autoPlay={allowed}
+          autoPlay
           preload="metadata"
           disablePictureInPicture
           aria-hidden="true"
