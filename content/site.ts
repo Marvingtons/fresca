@@ -80,6 +80,9 @@ export const cta = { href: "#contact", label: "Book a consultation" };
 export const hero = {
   lines: ["Kitchens, baths,", "and whole homes,", "designed from", "the plan up."], // last line is italic
   text: "A residential design studio in Solana Beach.",
+  introLabel: "Fresca · Interior Design",
+  /** Preloader thumbnails, ~0.3s each, kept photos only; the hero photo always comes last. */
+  cycle: [img("walnut-island-kitchen"), img("cognac-living-room"), img("orb-chandelier-dining"), img("navy-chair-great-room")],
   image: {
     src: img("black-hood-kitchen"),
     alt: "White shaker kitchen with a black range hood, marble island and three glass pendants",
