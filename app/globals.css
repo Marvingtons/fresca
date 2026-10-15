@@ -110,32 +110,47 @@ html.lenis body {
   }
 }
 
-/* ───────── intro: pre-paint state, set by the inline script in <head> when
-   the intro will play. Without the class everything renders final. */
+/* ───────── opening: pre-paint state, set by the inline script in <head>
+   (lib/intro.ts). Without these classes everything renders final.
+   html.intro: first visit per session. The cream veil (inside the header)
+   covers the laid-out page and the nav wordmark sits centered on it at 1.6x.
+   The translate uses the wordmark's own box (50%), so it stays centered when
+   the web font swaps in; 16px is the header's top padding. */
+.intro-veil {
+  display: none;
+}
 html.intro {
   overflow: hidden;
 }
-html.intro .site-header {
+html.intro .intro-veil {
+  display: block;
+}
+html.intro .site-header .wordmark {
+  transform: translate(calc(50vw - var(--pad) - 50%), calc(50svh - 16px - 50%)) scale(1.6);
+}
+html.intro .nav-rest {
   opacity: 0;
   visibility: hidden;
 }
-html.intro .hero-media {
-  opacity: 0;
-  visibility: hidden;
+body.scroll-lock {
+  overflow: hidden;
 }
-html.intro .hero-ln > span {
+/* html.hero-in: every visit with motion. The hero waits in its entrance state. */
+html.hero-in .hero-final {
+  transform: scale(1.03);
+}
+html.hero-in .hero-ln > span {
   transform: translateY(110%);
 }
-html.intro .hero-fade {
+html.hero-in .hero-fade {
   opacity: 0;
   visibility: hidden;
   transform: translateY(14px);
 }
-html.intro .intro-mark {
-  opacity: 0;
-}
-html:not(.intro) .intro-ui {
-  display: none;
+@media (prefers-reduced-motion: reduce) {
+  .intro-veil {
+    display: none !important;
+  }
 }
 
 /* ───────── studio wall annotations (v6): 12-col grid, ruler, dimension
