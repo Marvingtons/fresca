@@ -7,9 +7,9 @@ import { prefersReducedMotion } from "@/lib/motion";
 import { useSmoothScroll } from "./SmoothScroll";
 import Copy from "./Placeholder";
 
-function Wordmark({ label }: { label?: string }) {
+function Wordmark({ label, className = "" }: { label?: string; className?: string }) {
   return (
-    <a href="#top" aria-label={label} className="flex flex-col leading-none no-underline">
+    <a href="#top" aria-label={label} className={`flex flex-col leading-none no-underline ${className}`}>
       <b className="font-serif text-[32px] font-normal italic">Fresca</b>{" "}
       <span className="mt-[3px] text-[9px] uppercase tracking-[.36em]">Interior Design</span>
     </a>
@@ -77,7 +77,7 @@ export default function Navigation() {
         data-scrolled={scrolled || undefined}
         className="site-header fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-6 border-b border-transparent bg-ground px-pad py-4 text-ink transition-colors duration-300 data-[scrolled]:border-line"
       >
-        <Wordmark label="Fresca Interior Design, home" />
+        <Wordmark label="Fresca Interior Design, home" className="wordmark" />
         <nav aria-label="Main" className="flex items-center gap-[clamp(20px,2.6vw,40px)] max-md:hidden">
           {navLinks.map((link) => (
             <a key={link.href} href={link.href} className="nav-link text-sm">

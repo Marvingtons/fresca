@@ -18,3 +18,29 @@ declare global {
 export function introIsPlaying() {
   return typeof document !== "undefined" && document.documentElement.classList.contains("intro");
 }
+
+// ───────── opening done: the navy wipe has finished (or there was no opening).
+// The hero video waits for this so its first frame is the first one seen.
+
+let openingDone = false;
+const openingDoneListeners = new Set<() => void>();
+
+/** Called by the opening when its wipe completes (and again, harmlessly, on skip). */
+export function markOpeningDone() {
+  if (openingDone) return;
+  openingDone = true;
+  openingDoneListeners.forEach((listener) => listener());
+  openingDoneListeners.clear();
+}
+
+/** Runs `listener` once the opening is done, right away if there is none. Returns an unsubscribe function. */
+export function onOpeningDone(listener: () => void) {
+  if (openingDone || !introIsPlaying()) {
+    listener();
+    return () => {};
+  }
+  openingDoneListeners.add(listener);
+  return () => {
+    openingDoneListeners.delete(listener);
+  };
+}

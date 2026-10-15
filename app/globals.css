@@ -125,15 +125,17 @@ html.lenis body {
   --wm-fs: min(calc(11vw / 0.72), calc(100cqw / (2.693 * 1.12)));
   width: fit-content;
   margin-inline: auto;
-  /* Room above the box so caps (0.72em) clear the 0.68em line box when the
-     wordmark is text-clipped during the opening. Cancelled by the margin. */
-  padding-top: 0.1em;
-  margin-top: -0.1em;
+  /* The box holds the whole glyph: caps rise 0.73em above the baseline (the
+     line box is 0.68em) and R, S and C dip 0.009em below it. Cancelled by the
+     margins, so the baseline stays on the gutter. */
+  padding: 0.06em 0 0.02em;
+  margin-top: -0.06em;
+  margin-bottom: -0.02em;
   font-size: var(--wm-fs);
   line-height: 0.68;
   letter-spacing: calc((100cqw - 2.693 * var(--wm-fs)) / 5);
   white-space: nowrap;
-  color: var(--ink);
+  color: var(--ground);
 }
 .wm span:first-child {
   margin-left: -0.019em;
@@ -142,19 +144,67 @@ html.lenis body {
   letter-spacing: 0;
   margin-right: 0.018em;
 }
-/* Photo frame: as before, but short enough to leave room for the band. */
-@media (min-width: 861px) {
-  .hero-media {
-    width: min(944px, 52vw, calc((100svh - 128px - 0.68 * 11vw / 0.72 - 92px) * 4 / 3));
+/* Hero still: one slow settle, 1.06 → 1 over 9s. Held while the opening covers
+   the page and started as the wipe reveals it (html.revealing). */
+@keyframes hero-settle {
+  from {
+    transform: scale(1.06);
   }
+  to {
+    transform: scale(1);
+  }
+}
+.hm-still {
+  animation: hero-settle 9s cubic-bezier(0.25, 0.6, 0.3, 1) both;
+}
+html.intro:not(.revealing) .hm-still {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hm-still {
+    animation: none;
+  }
+}
+
+/* Hero scrims, navy. The bottom one holds ~80% behind the subline and ~60%
+   behind the headline, the top one ~80% behind the nav, so bone type passes
+   4.5:1 (body) and 3:1 (headline, wordmark) over the still's brightest pixels. */
+.hero-scrim-top {
+  height: 20%;
+  background: linear-gradient(to bottom, rgb(43 58 85 / 0.84), rgb(43 58 85 / 0.62) 55%, rgb(43 58 85 / 0));
+}
+.hero-scrim-bottom {
+  height: 72%;
+  background: linear-gradient(to top, rgb(43 58 85 / 0.86), rgb(43 58 85 / 0.82) 40%, rgb(43 58 85 / 0.64) 72%, rgb(43 58 85 / 0));
+}
+
+/* ───────── nav over the hero: bone and transparent while the hero is under it,
+   the cream bar with ink once it has scrolled out (html.past-hero). The nav
+   wordmark waits until the FRESCA band has faded (html.band-gone). */
+.site-header {
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+html:not(.past-hero) .site-header {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--ground);
+}
+html:not(.past-hero) .site-header .nav-cta {
+  color: var(--ground);
+}
+.site-header .wordmark {
+  transition: opacity 0.3s, visibility 0.3s;
+}
+html:not(.band-gone) .site-header .wordmark {
+  opacity: 0;
+  visibility: hidden;
 }
 
 /* ───────── opening: pre-paint state, set by the inline script in <head>
    (lib/intro.ts) on the first visit per session. Without html.intro the page
    renders final. The navy field covers the page; the band's wordmark sits on
    it, centered at ~28px (--wm-s is set by an inline script right after it),
-   bone, lightly tracked. During the wipe it is a text-clipped gradient: bone
-   above the field's edge (--cut), ink below. */
+   bone, lightly tracked. */
 html.intro {
   overflow: hidden;
 }
@@ -176,10 +226,6 @@ html.intro .wm {
   z-index: 46;
   letter-spacing: 0.04em;
   transform: translateY(calc(-50svh + var(--pad) + 50%)) scale(var(--wm-s, 0.13));
-  color: transparent;
-  background-image: linear-gradient(to bottom, var(--ground) var(--cut, 100%), var(--ink) var(--cut, 100%));
-  -webkit-background-clip: text;
-  background-clip: text;
 }
 @media (prefers-reduced-motion: reduce) {
   .intro-field {

@@ -78,11 +78,16 @@ export const cta = { href: "#contact", label: "Book a consultation" };
 // ───────── hero
 
 export const hero = {
-  lines: ["Kitchens, baths,", "and whole homes,", "designed from", "the plan up."], // last line is italic
-  text: "A residential design studio in Solana Beach.",
-  image: {
+  lines: ["Designed from", "the plan up."], // second line is italic
+  text: "Kitchens, baths, and whole homes in Solana Beach.",
+  /** Full-bleed hero media. To run the film, set `src` to the video file and keep
+   *  `poster` as its first frame; nothing else changes. */
+  media: {
     src: img("black-hood-kitchen"),
+    poster: img("black-hood-kitchen"),
     alt: "White shaker kitchen with a black range hood, marble island and three glass pendants",
+    /** Keeps the island in frame from 1440 down to 390 wide. */
+    focalPoint: "47% 100%",
   },
 };
 
