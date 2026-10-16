@@ -21,7 +21,7 @@ const AV1 = 'video/webm; codecs="av01.0.08M.10"';
  * - Fades in over 400ms on `playing`, so poster → film is invisible.
  * The file is a seamless loop: plain `loop`, no restart or `ended` handling.
  */
-export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt: string }) {
+export default function HeroMedia({ media, alt, onVideo }: { media: HeroMediaSources; alt: string; onVideo?: (video: HTMLVideoElement | null) => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [src, setSrc] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -43,6 +43,7 @@ export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt
   useEffect(() => {
     const video = videoRef.current;
     if (!src || !video) return;
+    onVideo?.(video);
     // React does not reliably reflect `muted` to the DOM, and iOS will not
     // autoplay without it: set the property and the attribute ourselves.
     video.muted = true;
@@ -71,8 +72,9 @@ export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt
       io.disconnect();
       video.removeEventListener("playing", onPlaying);
       document.removeEventListener("visibilitychange", sync);
+      onVideo?.(null);
     };
-  }, [src]);
+  }, [src, onVideo]);
 
   return (
     <>

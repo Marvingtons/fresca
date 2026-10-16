@@ -11,6 +11,7 @@ const config: Config = {
         // Two fields only: cream (everything) and navy (Approach and the Contact
         // footer). Terracotta is the single action color in both.
         ground: "#F4F2EB",
+        plaster: "#EFE8DC", // opening veil only: warm ivory
         navy: "#2B3A55",
         ink: "#1D1C1A",
         body: "#4A4740",

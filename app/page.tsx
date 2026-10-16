@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import Navigation from "@/components/Navigation";
 import ProjectShowcase from "@/components/ProjectShowcase";
+import Statement from "@/components/Statement";
 import Promises from "@/components/Promises";
 import StudioWall from "@/components/StudioWall";
 
@@ -14,6 +15,7 @@ export default function Home() {
       <Navigation />
       <main>
         <Hero />
+        <Statement />
         <StudioWall />
         <ProjectShowcase />
         <Promises />

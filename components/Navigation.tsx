@@ -10,8 +10,9 @@ import Copy from "./Placeholder";
 function Wordmark({ label, className = "" }: { label?: string; className?: string }) {
   return (
     <a href="#top" aria-label={label} className={`flex flex-col leading-none no-underline ${className}`}>
-      <b className="font-serif text-[32px] font-normal italic">Fresca</b>{" "}
-      <span className="mt-[3px] text-[9px] uppercase tracking-[.36em]">Interior Design</span>
+      {/* The opening's signed word FLIPs onto this element (components/Hero.tsx). */}
+      <b className="wordmark-word font-serif text-[32px] font-normal italic [text-rendering:geometricPrecision]">Fresca</b>{" "}
+      <span className="wordmark-caps mt-[3px] text-[9px] uppercase tracking-[.36em]">Interior Design</span>
     </a>
   );
 }

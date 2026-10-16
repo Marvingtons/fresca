@@ -15,6 +15,10 @@
   --mono: var(--font-plex-mono), ui-monospace, monospace;
   --sans: var(--font-hanken), system-ui, sans-serif;
   --pad: clamp(16px, 2.2vw, 32px);
+  /* Whole pixels where supported, so the nav wordmark (and the opening's FLIP
+     onto it) lands on the pixel grid. */
+  --pad: round(clamp(16px, 2.2vw, 32px), 1px);
+  --plaster: #efe8dc;
 }
 
 /* Missing content, see content/placeholders.ts. Never final copy. */
@@ -110,19 +114,37 @@ html.lenis body {
   }
 }
 
-/* ───────── hero. Film over its poster, centered crops. Exactly two shades,
-   warm near-black (#14110F): a bottom one, strongest under the copy at the
-   bottom left (radial) over a weaker even layer, gone by 45% of the hero; a top
-   one for the nav, gone by 16%. The middle of the frame has no overlay. */
+/* ───────── hero. Film over its poster, centered crops. One warm near-black
+   (#14110F) shade at the bottom for the caption, gone by 22% of the hero, and
+   a thin one at the top for the nav. The middle of the frame has no overlay. */
 .hero-poster,
 .hero-video {
   object-position: 50% 50%;
 }
 .hero-shade-bottom {
-  height: 45%;
-  background:
-    radial-gradient(ellipse 90% 100% at 0% 100%, rgb(20 17 15 / 0.62), rgb(20 17 15 / 0) 100%),
-    linear-gradient(to top, rgb(20 17 15 / 0.3), rgb(20 17 15 / 0));
+  height: 22%;
+  background: linear-gradient(to top, rgb(20 17 15 / 0.45), rgb(20 17 15 / 0));
+}
+/* Hero CTA: a text link; its 1px underline draws in on hover. */
+.hero-cta {
+  position: relative;
+  text-decoration: none;
+}
+.hero-cta::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.hero-cta:hover::after,
+.hero-cta:focus-visible::after {
+  transform: scaleX(1);
 }
 .hero-shade-top {
   height: 16%;
@@ -143,61 +165,48 @@ html:not(.past-hero) .site-header .nav-cta {
   color: var(--ground);
 }
 
-/* ───────── opening: pre-paint state, set by the inline script in <head>
+/* ───────── preloader: pre-paint state, set by the inline script in <head>
    (lib/intro.ts) on the first visit per session. Without html.intro the page
-   renders final. The navy veil covers the laid-out hero (poster showing, no
-   video yet) with a copy of the nav wordmark centered at 3.2x. Moving elements
-   carry will-change only while html.intro is set. */
+   renders final. The ivory field and the framed still cover the laid-out hero
+   (poster showing, no film yet); still 01 is sized by an inline script before
+   first paint. will-change applies only while html.intro is set. */
 html.intro {
   overflow: hidden;
 }
 body.scroll-lock {
   overflow: hidden;
 }
-.intro-veil,
-.intro-copy {
+.preloader {
   display: none;
 }
-html.intro .intro-veil {
+html.intro .preloader {
   display: block;
 }
-html.intro .intro-copy {
-  display: flex;
-  /* The nav wordmark's slot (header gutter, 16px top padding), moved to the
-     viewport center and scaled; the script FLIPs it back onto the real one. */
-  left: var(--pad);
-  top: 16px;
-  transform: translate(calc(50vw - var(--pad) - 50%), calc(50svh - 16px - 50%)) scale(3.2);
+.pl-frame {
+  transform-origin: 50% 50%;
+}
+.pl-still {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  max-width: none;
+  transform-origin: 50% 50%;
+}
+html.intro .pl-frame,
+html.intro .pl-still {
   will-change: transform;
 }
-/* At 3.2x the wordmark is ~387px wide: on phones it would touch the edges. */
-@media (max-width: 480px) {
-  html.intro .intro-copy {
-    transform: translate(calc(50vw - var(--pad) - 50%), calc(50svh - 16px - 50%)) scale(2.6);
-  }
-}
-html.intro .site-header .wordmark,
-html.intro .site-header nav a,
-html.intro .site-header .hbtn {
+/* The shades wait too: still 07 has none, so the swap to the poster is exact. */
+html.intro .site-header,
+html.intro .hero-shade-top,
+html.intro .hero-shade-bottom,
+html.intro .hero-caption,
+html.intro .hero-cta {
   opacity: 0;
-}
-html.intro .hero-ln,
-html.intro .hero-sub,
-html.intro .hero-btn {
-  opacity: 0;
-  transform: translateY(16px);
-  will-change: transform, opacity;
-}
-html.intro .hero-poster {
-  transform: scale(1.04);
-  will-change: transform;
-}
-html.intro .intro-veil {
-  will-change: opacity;
+  visibility: hidden;
 }
 @media (prefers-reduced-motion: reduce) {
-  .intro-veil,
-  .intro-copy {
+  .preloader {
     display: none !important;
   }
 }

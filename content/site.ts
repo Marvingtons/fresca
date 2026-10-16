@@ -80,7 +80,22 @@ export const cta = { href: "#contact", label: "Book a consultation" };
 export const hero = {
   lines: ["Designed from", "the plan up."], // second line is italic
   text: "Kitchens, baths, and whole homes in Solana Beach.",
-  /** Hero film and poster URLs live in lib/media/hero.ts. */
+  /** Over the film, bottom left. */
+  caption: "Kitchens, baths, and whole homes. Solana Beach.",
+  /** Scene labels, synced to the film. `from` = the shot's first frame (24fps cuts,
+   *  measured by stepping frames). The film dissolves back into shot 01 as it loops. */
+  scenes: [
+    { from: 0, label: "01 / 06 · Kitchen" },
+    { from: 1.042, label: "02 / 06 · Kitchen" },
+    { from: 3.333, label: "03 / 06 · Bath" },
+    { from: 5.0, label: "04 / 06 · Primary bath" },
+    { from: 6.875, label: "05 / 06 · Family room" },
+    { from: 8.792, label: "06 / 06 · Primary bedroom" },
+  ],
+  /** Shown instead of the scene labels under reduced motion (no film). */
+  staticScene: "Kitchens, baths, whole homes",
+  preloaderLabel: "Fresca · Interior Design",
+
   mediaAlt: "A walk through kitchens, a bath, a living room and a bedroom designed by the studio",
 };
 
