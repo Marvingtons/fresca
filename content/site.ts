@@ -38,12 +38,13 @@ export type Photo = { src: string; alt: string };
 
 export const site = {
   name: "Fresca Interior Design",
-  shortName: "Fresca",
   url: "https://frescainteriordesign.com", // Unconfirmed: set NEXT_PUBLIC_SITE_URL to the real domain
   title: "Fresca Interior Design | Solana Beach",
   description:
     "Fresca is a residential interior design studio in Solana Beach designing kitchens, bathrooms and whole homes from the floor plan up.",
-  ogImage: { url: img("og-image"), width: 1200, height: 629, alt: "White shaker kitchen with a black range hood and marble island" },
+  /** Link previews: title and description for social cards, and the brand card image. */
+  share: { title: "Fresca Interior Design", description: "Kitchens, baths, and whole homes in Solana Beach." },
+  ogImage: { url: "/brand/og-image.png", width: 1200, height: 630, alt: "Fresca Interior Design" },
   location: "Solana Beach, California",
   /** Phone, email and Instagram render as text (no link) while they are placeholders. */
   phone: { label: placeholders.phone, href: "" },
@@ -94,7 +95,6 @@ export const hero = {
   ],
   /** Shown instead of the scene labels under reduced motion (no film). */
   staticScene: "Kitchens, baths, whole homes",
-  preloaderLabel: "Fresca · Interior Design",
 
   mediaAlt: "A walk through kitchens, a bath, a living room and a bedroom designed by the studio",
 };

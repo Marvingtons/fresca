@@ -85,11 +85,13 @@ export default function Hero() {
       const html = document.documentElement;
       const heroEl = root.current!;
       // Nav colour, on every visit: bone over the hero, ink once it has scrolled out.
+      // Depends only on the start, so it stays on at the very bottom of the page.
       const pastHero = ScrollTrigger.create({
         trigger: heroEl,
         start: "bottom top+=76",
-        end: "max",
-        onToggle: (self) => html.classList.toggle("past-hero", self.isActive),
+        onEnter: () => html.classList.add("past-hero"),
+        onLeaveBack: () => html.classList.remove("past-hero"),
+        onRefresh: (self) => html.classList.toggle("past-hero", self.scroll() > self.start),
       });
       const mm = gsap.matchMedia();
       // Scroll: the media moves up at 0.85x scroll speed.

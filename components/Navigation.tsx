@@ -5,14 +5,14 @@ import { cta, navLinks, site } from "@/content/site";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/motion";
 import { useSmoothScroll } from "./SmoothScroll";
+import BrandWordmark from "./BrandWordmark";
 import Copy from "./Placeholder";
 
-function Wordmark({ label, className = "" }: { label?: string; className?: string }) {
+/** The logo, linking home. currentColor follows the bar: bone over the hero, ink after it. */
+function HomeLink({ tabIndex }: { tabIndex?: number }) {
   return (
-    <a href="#top" aria-label={label} className={`flex flex-col leading-none no-underline ${className}`}>
-      {/* The opening's signed word FLIPs onto this element (components/Hero.tsx). */}
-      <b className="wordmark-word font-serif text-[32px] font-normal italic [text-rendering:geometricPrecision]">Fresca</b>{" "}
-      <span className="wordmark-caps mt-[3px] text-[9px] uppercase tracking-[.36em]">Interior Design</span>
+    <a href="/" aria-label="Fresca Interior Design, home" tabIndex={tabIndex} className="flex items-center no-underline">
+      <BrandWordmark />
     </a>
   );
 }
@@ -78,7 +78,7 @@ export default function Navigation() {
         data-scrolled={scrolled || undefined}
         className="site-header fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-6 border-b border-transparent bg-ground px-pad py-4 text-ink transition-colors duration-300 data-[scrolled]:border-line"
       >
-        <Wordmark label="Fresca Interior Design, home" className="wordmark" />
+        <HomeLink />
         <nav aria-label="Main" className="flex items-center gap-[clamp(20px,2.6vw,40px)] max-md:hidden">
           {navLinks.map((link) => (
             <a key={link.href} href={link.href} className="nav-link text-sm">
@@ -113,7 +113,7 @@ export default function Navigation() {
         }`}
       >
         <div className="flex items-center justify-between">
-          <Wordmark />
+          <HomeLink />
           <button ref={closeBtnRef} type="button" className="hbtn" onClick={() => closeMenu(true)}>
             Close
           </button>

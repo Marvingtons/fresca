@@ -16,12 +16,6 @@ export default function Footer() {
       const mm = gsap.matchMedia();
       mm.add(MOTION, () => {
         revealLines(root.current!);
-        // The giant wordmark rises into place.
-        gsap.fromTo(
-          ".f-word",
-          { yPercent: 40 },
-          { yPercent: 4, ease: "none", scrollTrigger: { trigger: root.current, start: "center bottom", end: "bottom bottom", scrub: true } },
-        );
       });
       return () => mm.revert();
     },
@@ -69,9 +63,9 @@ export default function Footer() {
         <span>{site.copyright}</span>
       </div>
 
-      <p aria-hidden="true" className="f-word mt-5 translate-y-[12%] text-center font-serif text-[27vw] italic leading-[.78] tracking-[-.02em]">
-        {site.shortName}
-      </p>
+      {/* The lockup, bone on the dark footer. */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- static SVG logo */}
+      <img src="/brand/fresca-lockup-bone.svg" alt="Fresca Interior Design" width={320} height={122} className="f-lockup mb-14 mt-16 block h-auto w-[min(320px,70vw)]" />
     </footer>
   );
 }

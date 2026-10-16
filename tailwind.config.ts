@@ -21,7 +21,7 @@ const config: Config = {
         "on-dark": "#CFC9BC",
         ochre: "#C9A86A", // drawing annotations only (dimensions, callouts), never actions
         error: "#E9B4A2",
-        terracotta: "#A9502F",
+        terracotta: "#B5593A",
       },
       fontFamily: {
         serif: ["var(--serif)"],

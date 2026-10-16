@@ -46,7 +46,7 @@ function WallPiece({ item }: { item: WallItem }) {
             <br />
             <a
               href={item.link.href}
-              className="mt-[18px] inline-flex text-[11px] uppercase tracking-[.2em] text-terracotta underline underline-offset-[6px] hover:text-[#8f4227]"
+              className="mt-[18px] inline-flex text-[11px] uppercase tracking-[.2em] text-terracotta underline underline-offset-[6px] hover:text-[#9c4a2f]"
             >
               {item.link.label}
             </a>

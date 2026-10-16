@@ -10,13 +10,12 @@
   --line: rgba(29, 28, 26, 0.14);
   --navy: #2b3a55;
   --on-dark: #cfc9bc;
-  --terracotta: #a9502f;
+  --terracotta: #b5593a; /* the logo dot, exactly */
   --serif: var(--font-instrument), Georgia, serif;
   --mono: var(--font-plex-mono), ui-monospace, monospace;
   --sans: var(--font-hanken), system-ui, sans-serif;
   --pad: clamp(16px, 2.2vw, 32px);
-  /* Whole pixels where supported, so the nav wordmark (and the opening's FLIP
-     onto it) lands on the pixel grid. */
+  /* Whole pixels where supported, so the nav logo sits on the pixel grid. */
   --pad: round(clamp(16px, 2.2vw, 32px), 1px);
   --plaster: #efe8dc;
 }
@@ -100,7 +99,7 @@ html.lenis body {
     @apply scale-x-100;
   }
   .nav-cta {
-    @apply text-terracotta hover:text-[#8f4227];
+    @apply text-terracotta hover:text-[#9c4a2f];
   }
 
   .pill {
@@ -110,7 +109,7 @@ html.lenis body {
     @apply border border-terracotta text-terracotta hover:bg-terracotta hover:text-ground;
   }
   .pill-accent {
-    @apply bg-terracotta text-ground hover:bg-[#8f4227];
+    @apply bg-terracotta text-ground hover:bg-[#9c4a2f];
   }
 }
 
@@ -149,6 +148,19 @@ html.lenis body {
 .hero-shade-top {
   height: 16%;
   background: linear-gradient(to bottom, rgb(20 17 15 / 0.35), rgb(20 17 15 / 0));
+}
+
+/* ───────── brand: the nav logo, full above 767px, the small cut below. */
+.brand-small {
+  display: none;
+}
+@media (max-width: 767px) {
+  .brand-full {
+    display: none;
+  }
+  .brand-small {
+    display: block;
+  }
 }
 
 /* ───────── nav over the hero: bone and transparent while the hero is under it,

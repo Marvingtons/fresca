@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import { hero } from "@/content/site";
 import { preloaderStills } from "@/content/preloader";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { INTRO_KEY, markOpeningDone } from "@/lib/intro";
@@ -189,7 +188,9 @@ export default function Preloader() {
   return (
     <div ref={root} aria-hidden="true" className="preloader">
       <div className="pl-field fixed inset-0 z-[60] bg-plaster text-ink">
-        <span className="pl-label absolute inset-x-0 top-[clamp(28px,6vh,56px)] text-center text-[11px] uppercase tracking-[.36em]">{hero.preloaderLabel}</span>
+        {/* The lockup, ink on ivory, above the flashes; it fades with the counter. */}
+        {/* eslint-disable-next-line @next/next/no-img-element -- static SVG logo, part of the first painted frame */}
+        <img src="/brand/fresca-lockup-ink.svg" alt="" width={220} height={84} fetchPriority="high" className="pl-label absolute left-1/2 top-[clamp(28px,6vh,56px)] h-auto w-[220px] -translate-x-1/2 max-md:w-[180px]" />
         <span className="pl-count absolute inset-x-0 bottom-[clamp(28px,6vh,56px)] text-center font-serif text-xl tabular-nums">000</span>
       </div>
       <div className="pl-frame fixed inset-0 z-[61] overflow-hidden">

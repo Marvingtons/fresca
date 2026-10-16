@@ -1,8 +1,0 @@
-<!-- PROVISIONAL arch mark for the favicon. No crest or arch artwork was found in
-     the project; replace this file with the real arch from the crest and re-run
-     scripts/make-favicons.mjs. Ink on cream. -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" fill="#F4F2EB"/>
-  <path d="M21 51V29a11 11 0 0 1 22 0v22" fill="none" stroke="#1D1C1A" stroke-width="3.5"/>
-  <path d="M14 51h36" fill="none" stroke="#1D1C1A" stroke-width="3.5" stroke-linecap="square"/>
-</svg>
