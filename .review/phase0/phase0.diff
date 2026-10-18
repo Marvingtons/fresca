@@ -1,0 +1,684 @@
+diff --git a/.gitignore b/.gitignore
+index c2837e4..47ef26d 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -45,3 +45,4 @@ next-env.d.ts
+ /reference/upscaled-raw/
+ /reference/upscaled/
+ __pycache__/
++.review/
+diff --git a/README.md b/README.md
+index 7853c7c..47c6427 100644
+--- a/README.md
++++ b/README.md
+@@ -1,6 +1,6 @@
+ # Fresca Interior Design
+ 
+-Marketing site for Fresca, a residential interior design studio in San Diego.
++Marketing site for Fresca, a residential interior design studio in Solana Beach.
+ Next.js 14 (App Router), TypeScript, Tailwind, GSAP + ScrollTrigger, Lenis.
+ 
+ ```bash
+@@ -11,7 +11,8 @@ npm run build && npm run lint
+ 
+ ## Where things live
+ 
+-- **Copy and data:** `content/site.ts`. Every placeholder is marked `// DEMO:`.
++- **Copy and data:** `content/site.ts`. Missing content lives in
++  `content/placeholders.ts` and renders as `[PLACEHOLDER: ...]` in terracotta.
+ - **Sections:** `components/` (one file per section, in page order in `app/page.tsx`).
+ - **Design tokens:** `tailwind.config.ts` and the `:root` block in `app/globals.css`.
+ - **Animation helpers:** `lib/gsap.ts` (plugin registration), `lib/motion.ts`
+diff --git a/app/globals.css b/app/globals.css
+index 2b61ef0..23f0e0a 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -11,12 +11,25 @@
+   --line: rgba(29, 28, 26, 0.14);
+   --accent: #2b3a55;
+   --on-dark: #cfc9bc;
++  --terracotta: #a9502f;
+   --serif: var(--font-instrument), Georgia, serif;
+   --mono: var(--font-plex-mono), ui-monospace, monospace;
+   --sans: var(--font-hanken), system-ui, sans-serif;
+   --pad: clamp(16px, 2.2vw, 32px);
+ }
+ 
++/* Missing content, see content/placeholders.ts. Never final copy. */
++.placeholder {
++  color: var(--terracotta);
++  font-family: var(--mono);
++  font-size: 0.85em;
++  font-style: normal;
++  letter-spacing: 0;
++}
++footer .placeholder {
++  color: #e08a66;
++}
++
+ /* Lenis */
+ html.lenis,
+ html.lenis body {
+diff --git a/app/page.tsx b/app/page.tsx
+index 8b28f3e..0190a68 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -2,7 +2,6 @@ import AboutStack from "@/components/AboutStack";
+ import Approach from "@/components/Approach";
+ import FAQ from "@/components/FAQ";
+ import Footer from "@/components/Footer";
+-import FounderQuote from "@/components/FounderQuote";
+ import Hero from "@/components/Hero";
+ import Navigation from "@/components/Navigation";
+ import ProjectShowcase from "@/components/ProjectShowcase";
+@@ -20,7 +19,6 @@ export default function Home() {
+         <Promises />
+         <Approach />
+         <AboutStack />
+-        <FounderQuote />
+         <FAQ />
+       </main>
+       <Footer />
+diff --git a/components/AboutStack.tsx b/components/AboutStack.tsx
+index 6b05097..809ae3e 100644
+--- a/components/AboutStack.tsx
++++ b/components/AboutStack.tsx
+@@ -1,11 +1,11 @@
+ "use client";
+ 
+-import Image from "next/image";
+ import { useRef } from "react";
+ import { about } from "@/content/site";
+ import { gsap, useGSAP } from "@/lib/gsap";
+ import { MOTION, revealLines } from "@/lib/motion";
+ import Line from "./LineReveal";
++import Copy from "./Placeholder";
+ 
+ export default function AboutStack() {
+   const root = useRef<HTMLElement>(null);
+@@ -15,15 +15,6 @@ export default function AboutStack() {
+       const mm = gsap.matchMedia();
+       mm.add(MOTION, () => {
+         revealLines(root.current!);
+-        // Each card shrinks and darkens as the next one stacks over it. The darkening
+-        // is a black layer fading to .45 (the same result as filter: brightness(.55))
+-        // because animating a filter on a large photo repaints every frame.
+-        const cards = gsap.utils.toArray<HTMLElement>(".scard");
+-        cards.slice(0, -1).forEach((card, i) => {
+-          const st = { trigger: cards[i + 1], start: "top bottom", end: "top 20%", scrub: true };
+-          gsap.to(card, { scale: 0.9, ease: "none", scrollTrigger: st });
+-          gsap.fromTo(card.querySelector(".scard-dim"), { opacity: 0 }, { opacity: 0.45, ease: "none", scrollTrigger: st });
+-        });
+       });
+       return () => mm.revert();
+     },
+@@ -31,9 +22,9 @@ export default function AboutStack() {
+   );
+ 
+   return (
+-    <section ref={root} id="about-us" className="flex flex-wrap gap-x-16 gap-y-12 px-pad pb-10 pt-[clamp(96px,14vh,160px)]">
++    <section ref={root} id="about-us" className="flex flex-wrap gap-x-16 gap-y-12 px-pad py-[clamp(96px,14vh,160px)]">
+       <div className="min-w-0 flex-[1_1_340px]">
+-        <div className="sticky top-[16vh]">
++        <div>
+           <p className="cap mb-5 text-muted">{about.eyebrow}</p>
+           <h2 className="mb-7 font-serif text-[clamp(48px,6vw,104px)] font-normal leading-[.95]">
+             <Line>{about.heading[0]}</Line>
+@@ -41,31 +32,15 @@ export default function AboutStack() {
+               <em>{about.heading[1]}</em>
+             </Line>
+           </h2>
+-          <p className="mb-7 max-w-[420px] text-body">{about.text}</p>
++          <p className="mb-4 max-w-[560px] text-body">{about.text}</p>
++          <p className="mb-7 max-w-[560px] text-body">
++            <Copy text={about.bio} />
++          </p>
+           <a className="pill pill-line" href={about.link.href}>
+             {about.link.label}
+           </a>
+         </div>
+       </div>
+-
+-      <div className="min-w-0 flex-[1.3_1_480px] pb-[10vh]">
+-        {about.stats.map((stat, i) => (
+-          <div
+-            key={stat.label}
+-            style={{ top: `calc(14vh + ${i * 22}px)` }}
+-            className="scard sticky isolate mb-[6vh] h-[68vh] min-h-[420px] origin-top overflow-hidden rounded-lg text-white will-change-transform"
+-          >
+-            <Image src={stat.image.src} alt={stat.image.alt} fill quality={85} sizes="(min-width: 861px) 55vw, 100vw" className="object-cover" />
+-            <div className="absolute inset-0 bg-[rgba(16,15,13,.36)]" />
+-            <div className="cap absolute inset-x-7 top-6 z-[2] flex justify-between">
+-              <span>{stat.label}</span>
+-              <span>{String(i + 1).padStart(2, "0")}</span>
+-            </div>
+-            <span className="absolute bottom-3 left-6 z-[2] font-serif text-[clamp(110px,14vw,220px)] leading-[.9]">{stat.value}</span>
+-            <div aria-hidden="true" className="scard-dim pointer-events-none absolute inset-0 z-[3] bg-black opacity-0" />
+-          </div>
+-        ))}
+-      </div>
+     </section>
+   );
+ }
+diff --git a/components/FAQ.tsx b/components/FAQ.tsx
+index ff12bef..c6bebda 100644
+--- a/components/FAQ.tsx
++++ b/components/FAQ.tsx
+@@ -2,6 +2,7 @@
+ 
+ import { useRef, type SyntheticEvent } from "react";
+ import { faq } from "@/content/site";
++import Copy from "./Placeholder";
+ 
+ export default function FAQ() {
+   const list = useRef<HTMLDivElement>(null);
+@@ -34,7 +35,9 @@ export default function FAQ() {
+               </span>
+             </summary>
+             <div className="overflow-hidden">
+-              <p className="mb-[26px] max-w-[640px] text-body">{item.a}</p>
++              <p className="mb-[26px] max-w-[640px] text-body">
++                <Copy text={item.a} />
++              </p>
+             </div>
+           </details>
+         ))}
+diff --git a/components/Footer.tsx b/components/Footer.tsx
+index 231f379..c324bbc 100644
+--- a/components/Footer.tsx
++++ b/components/Footer.tsx
+@@ -6,6 +6,7 @@ import { gsap, useGSAP } from "@/lib/gsap";
+ import { MOTION, revealLines } from "@/lib/motion";
+ import ContactForm from "./ContactForm";
+ import Line from "./LineReveal";
++import Copy from "./Placeholder";
+ 
+ export default function Footer() {
+   const root = useRef<HTMLElement>(null);
+@@ -41,6 +42,9 @@ export default function Footer() {
+             </Line>
+           </h2>
+           <p className="max-w-[420px] text-on-dark">{contact.text}</p>
++          <p className="mt-3 max-w-[420px] text-on-dark">
++            <Copy text={contact.responseTime} />
++          </p>
+         </div>
+         <ContactForm />
+       </div>
+@@ -52,18 +56,15 @@ export default function Footer() {
+               {l.label}
+             </a>
+           ))}
+-          <a href={site.instagram.href} className={link}>
+-            {site.instagram.handle}
+-          </a>
++          <span className="py-2">
++            <Copy text={site.instagram.handle} />
++          </span>
+         </nav>
+         <span>
+-          <a href={site.phone.href} className={link}>
+-            {site.phone.label}
+-          </a>
++          {/* Plain text until the real numbers arrive; restore tel: and mailto: links then. */}
++          <Copy text={site.phone.label} />
+           {" · "}
+-          <a href={`mailto:${site.email}`} className={link}>
+-            {site.email}
+-          </a>
++          <Copy text={site.email} />
+         </span>
+         <span>{site.copyright}</span>
+       </div>
+diff --git a/components/FounderQuote.tsx b/components/FounderQuote.tsx
+deleted file mode 100644
+index 41a6be9..0000000
+--- a/components/FounderQuote.tsx
++++ /dev/null
+@@ -1,52 +0,0 @@
+-"use client";
+-
+-import { useRef } from "react";
+-import { founder, quote } from "@/content/site";
+-import { gsap, useGSAP } from "@/lib/gsap";
+-import { MOTION } from "@/lib/motion";
+-
+-export default function FounderQuote() {
+-  const root = useRef<HTMLElement>(null);
+-
+-  useGSAP(
+-    () => {
+-      const mm = gsap.matchMedia();
+-      mm.add(MOTION, () => {
+-        // Words light up one by one with scroll.
+-        gsap.fromTo(
+-          ".w",
+-          { opacity: 0.14 },
+-          { opacity: 1, stagger: 0.08, ease: "none", scrollTrigger: { trigger: root.current, start: "top 70%", end: "bottom 60%", scrub: true } },
+-        );
+-      });
+-      return () => mm.revert();
+-    },
+-    { scope: root },
+-  );
+-
+-  const words = quote.text.split(" ");
+-
+-  return (
+-    <section
+-      ref={root}
+-      aria-label="From the founder"
+-      className="flex flex-col items-center px-pad py-[clamp(96px,16vh,180px)] text-center"
+-    >
+-      <div aria-hidden="true" className="mb-10 grid h-24 w-24 place-items-center rounded-full bg-accent font-serif text-[40px] italic text-ground">
+-        {founder.initials}
+-      </div>
+-      <blockquote className="max-w-[1100px] font-serif text-[clamp(36px,4.6vw,76px)] leading-[1.04]">
+-        {words.map((word, i) => (
+-          <span key={i}>
+-            <span className="w">{word}</span>
+-            {i < words.length - 1 && " "}
+-          </span>
+-        ))}
+-      </blockquote>
+-      <div className="mt-9">
+-        <b className="block font-semibold">{founder.name}</b>
+-        <span className="text-sm text-muted">{founder.role}</span>
+-      </div>
+-    </section>
+-  );
+-}
+diff --git a/components/Navigation.tsx b/components/Navigation.tsx
+index 145b02c..7a20f61 100644
+--- a/components/Navigation.tsx
++++ b/components/Navigation.tsx
+@@ -5,6 +5,7 @@ import { cta, navLinks, site } from "@/content/site";
+ import { gsap, useGSAP } from "@/lib/gsap";
+ import { prefersReducedMotion } from "@/lib/motion";
+ import { useSmoothScroll } from "./SmoothScroll";
++import Copy from "./Placeholder";
+ 
+ function Wordmark({ label }: { label?: string }) {
+   return (
+@@ -115,12 +116,12 @@ export default function Navigation() {
+         </nav>
+         <div className="flex flex-wrap justify-between gap-4 text-sm text-on-dark">
+           <span>{site.location}</span>
+-          <a className="no-underline" href={site.phone.href}>
+-            {site.phone.label}
+-          </a>
+-          <a className="no-underline" href={`mailto:${site.email}`}>
+-            {site.email}
+-          </a>
++          <span>
++            <Copy text={site.phone.label} />
++          </span>
++          <span>
++            <Copy text={site.email} />
++          </span>
+         </div>
+       </div>
+     </>
+diff --git a/components/Placeholder.tsx b/components/Placeholder.tsx
+new file mode 100644
+index 0000000..0149ac0
+--- /dev/null
++++ b/components/Placeholder.tsx
+@@ -0,0 +1,23 @@
++import { Fragment } from "react";
++
++const TOKEN = /(\[PLACEHOLDER:[^\]]*\])/;
++
++/**
++ * Renders copy, showing any `[PLACEHOLDER: ...]` inside it in terracotta so
++ * missing content cannot pass for final.
++ */
++export default function Copy({ text }: { text: string }) {
++  return (
++    <>
++      {text.split(TOKEN).map((part, i) =>
++        TOKEN.test(part) ? (
++          <span key={i} className="placeholder">
++            {part}
++          </span>
++        ) : (
++          <Fragment key={i}>{part}</Fragment>
++        ),
++      )}
++    </>
++  );
++}
+diff --git a/components/ProjectShowcase.tsx b/components/ProjectShowcase.tsx
+index 8a8e285..7ebe778 100644
+--- a/components/ProjectShowcase.tsx
++++ b/components/ProjectShowcase.tsx
+@@ -6,7 +6,7 @@ import { showcase } from "@/content/site";
+ import { gsap, useGSAP } from "@/lib/gsap";
+ import { MOTION, prefersReducedMotion } from "@/lib/motion";
+ 
+-const { projects, labels } = showcase;
++const { projects } = showcase;
+ const pad2 = (n: number) => String(n).padStart(2, "0");
+ 
+ function Arrow({ dir, onClick }: { dir: "prev" | "next"; onClick: () => void }) {
+@@ -95,7 +95,7 @@ export default function ProjectShowcase() {
+         gsap.fromTo(titleRef.current, { yPercent: 110 }, { yPercent: 0, duration: 0.8, ease: "power3.out" });
+       },
+     });
+-    gsap.fromTo(".sc-stats dd", { opacity: 1 }, { opacity: 0, duration: 0.3, yoyo: true, repeat: 1, repeatDelay: 0.25 });
++    gsap.fromTo(".sc-room", { opacity: 1 }, { opacity: 0, duration: 0.3, yoyo: true, repeat: 1, repeatDelay: 0.25 });
+   });
+ 
+   const p = projects[shown];
+@@ -150,23 +150,7 @@ export default function ProjectShowcase() {
+                   {p.title}
+                 </h3>
+               </div>
+-              <dl className="sc-stats sc-fade mt-6 flex flex-wrap gap-x-11 gap-y-5">
+-                {(
+-                  [
+-                    [labels.weeks, p.weeks, "weeks"],
+-                    [labels.area, p.area, "sq ft"],
+-                    [labels.city, p.city, null],
+-                  ] as const
+-                ).map(([dt, value, unit]) => (
+-                  <div key={dt} className="min-w-[96px]">
+-                    <dt className="text-[10px] uppercase tracking-[.22em] text-on-dark">{dt}</dt>
+-                    <dd className="mt-1.5 font-serif text-[30px] leading-none">
+-                      {value}
+-                      {unit && <small className="ml-1 font-sans text-[13px]">{unit}</small>}
+-                    </dd>
+-                  </div>
+-                ))}
+-              </dl>
++              <p className="sc-room sc-fade mt-5 text-[10px] uppercase tracking-[.22em] text-on-dark">{p.room}</p>
+             </div>
+             <div className="sc-fade flex items-center gap-2.5">
+               <Arrow dir="prev" onClick={() => go(-1)} />
+diff --git a/components/StudioWall.tsx b/components/StudioWall.tsx
+index 3e66fbc..834fd3c 100644
+--- a/components/StudioWall.tsx
++++ b/components/StudioWall.tsx
+@@ -109,7 +109,7 @@ function WallPiece({ item }: { item: WallItem }) {
+         <span>{item.no}</span>
+         <b className="font-medium text-ink">{item.title}</b>
+         <span className="xy col-start-3 row-start-1 font-mono text-[9px] tracking-[.04em] text-ink/45">{coord(item.x, item.y)}</span>
+-        <span className="col-start-2">{item.city}</span>
++        <span className="col-start-2">{item.room}</span>
+       </span>
+     </a>
+   );
+diff --git a/content/placeholders.ts b/content/placeholders.ts
+new file mode 100644
+index 0000000..733e8dd
+--- /dev/null
++++ b/content/placeholders.ts
+@@ -0,0 +1,21 @@
++/**
++ * Every slot on the site that needs content we do not have yet.
++ *
++ * Each value renders literally as `[PLACEHOLDER: ...]` in terracotta (see
++ * components/Placeholder.tsx) so it cannot be mistaken for final copy. This file
++ * is the list of questions still owed to Karen. When an answer arrives, replace
++ * the placeholder at its use site with the real copy and delete the entry here.
++ */
++
++const ph = (what: string) => `[PLACEHOLDER: ${what}]`;
++
++export const placeholders = {
++  phone: ph("studio phone number"),
++  email: ph("studio email address"),
++  instagram: ph("Instagram handle, if any"),
++  aboutBio: ph("a few sentences from Karen about her background and how she works"),
++  responseTime: ph("how quickly Karen replies to inquiries"),
++  faqPricing: ph("how design work is priced"),
++  faqTimeline: ph("typical design and construction timelines for a kitchen or bath"),
++  faqContractors: ph("whether Karen recommends contractors, and how"),
++} as const;
+diff --git a/content/site.ts b/content/site.ts
+index 59bb88d..b53ecdc 100644
+--- a/content/site.ts
++++ b/content/site.ts
+@@ -1,7 +1,10 @@
+ /**
+  * All copy and data for the Fresca homepage. Edit text here, not in components.
+  *
+- * Anything marked `// DEMO:` is a placeholder until the client sends real info.
++ * Known facts: the designer is Karen Onofrey; the studio is Fresca Interior
++ * Design, LLC, Solana Beach, incorporated November 2025. Nothing else about her,
++ * her clients or her projects is known, so do not add facts here. Missing
++ * content goes in content/placeholders.ts and renders as [PLACEHOLDER: ...].
+  *
+  * IMAGE MAP (original client photo number → public/images/ file)
+  * Generated by scripts/prepare-images.mjs. Photos come from the upscaled
+@@ -25,6 +28,8 @@
+  *                                          44 → sectional-living-room.jpg
+  */
+ 
++import { placeholders } from "./placeholders";
++
+ const img = (name: string) => `/images/${name}.jpg`;
+ 
+ export type Photo = { src: string; alt: string };
+@@ -34,22 +39,21 @@ export type Photo = { src: string; alt: string };
+ export const site = {
+   name: "Fresca Interior Design",
+   shortName: "Fresca",
+-  url: "https://frescainteriordesign.com", // DEMO: confirm the production domain (or set NEXT_PUBLIC_SITE_URL)
+-  title: "Fresca Interior Design | San Diego",
++  url: "https://frescainteriordesign.com", // Unconfirmed: set NEXT_PUBLIC_SITE_URL to the real domain
++  title: "Fresca Interior Design | Solana Beach",
+   description:
+-    "Fresca is a residential interior design studio in San Diego designing kitchens, bathrooms and whole homes from the floor plan up.",
++    "Fresca is a residential interior design studio in Solana Beach designing kitchens, bathrooms and whole homes from the floor plan up.",
+   ogImage: { url: img("og-image"), width: 1200, height: 629, alt: "White shaker kitchen with a black range hood and marble island" },
+-  location: "San Diego, California",
+-  phone: { label: "(858) 555-0142", href: "tel:+18585550142" }, // DEMO: placeholder phone number
+-  email: "hello@frescainteriordesign.com", // DEMO: placeholder email
+-  instagram: { handle: "@frescainteriordesign", href: "#contact" }, // DEMO: placeholder handle; point href at the real profile
+-  copyright: "© 2026 Fresca Interior Design",
++  location: "Solana Beach, California",
++  /** Phone, email and Instagram render as text (no link) while they are placeholders. */
++  phone: { label: placeholders.phone, href: "" },
++  email: placeholders.email,
++  instagram: { handle: placeholders.instagram, href: "" },
++  copyright: "© 2026 Fresca Interior Design, LLC",
+ };
+ 
+ export const founder = {
+-  name: "Elena Marquez", // DEMO: placeholder founder name
+-  initials: "EM", // DEMO: derived from the placeholder name
+-  role: "Founder & principal designer",
++  name: "Karen Onofrey",
+ };
+ const firstName = founder.name.split(" ")[0];
+ 
+@@ -76,7 +80,7 @@ export const cta = { href: "#contact", label: "Book a consultation" };
+ // ───────── hero
+ 
+ export const hero = {
+-  eyebrow: "Residential interiors · San Diego",
++  eyebrow: "Residential interiors · Solana Beach",
+   lines: ["Interiors that", "feel fresh."], // second line is italic
+   text: "Kitchens, bathrooms and whole homes, designed from the floor plan up.",
+   introLabel: "Fresca · Interior Design",
+@@ -110,7 +114,7 @@ type WallPlate = {
+   kind: "plate";
+   no: string;
+   title: string;
+-  city: string; // DEMO: project cities are placeholders
++  room: string;
+   src: string;
+   ratio: string;
+   x: string;
+@@ -145,49 +149,49 @@ export const studio = {
+   items: [
+     { kind: "word", text: "A fresh", x: "3%", y: "11%", speed: 0.55 },
+     {
+-      kind: "plate", no: "Pl. 01", title: "Black-Hood Kitchen", city: "Rancho Bernardo",
++      kind: "plate", no: "Pl. 01", title: "Black-Hood Kitchen", room: "Kitchen",
+       src: img("black-hood-kitchen-island"), ratio: "4/5", x: "42%", y: "7%", w: "21%", speed: 1.25,
+       dim: { dir: "h", label: "2.5 COL · 4 : 5" },
+       // maxLen keeps the label clear of "A fresh" below ~1440px wide.
+       callout: { side: "l", px: "50%", py: "26%", len: "260px", maxLen: "calc(29vw - 150px)", text: "Glass pendants ×3" },
+     },
+     {
+-      kind: "plate", no: "Pl. 02", title: "Blush Guest Bedroom", city: "Poway",
++      kind: "plate", no: "Pl. 02", title: "Blush Guest Bedroom", room: "Bedroom",
+       src: img("blush-guest-bedroom"), ratio: "3/4", x: "79%", y: "17%", w: "13%", speed: 1.9, right: true,
+     },
+     { kind: "word", text: "home,", x: "62%", y: "35%", speed: 0.85, right: true },
+     {
+-      kind: "plate", no: "Pl. 03", title: "Navy Double Vanity", city: "Carmel Valley",
++      kind: "plate", no: "Pl. 03", title: "Navy Double Vanity", room: "Bath",
+       src: img("navy-double-vanity"), ratio: "3/4", x: "7%", y: "35%", w: "15%", speed: 1.45,
+       dim: { dir: "v", side: "l", label: "3 : 4" },
+     },
+     {
+       kind: "text",
+-      text: "Fresca is a residential design studio in San Diego. We design kitchens, baths and whole homes around how you actually live in them.",
++      text: "Fresca is a residential design studio in Solana Beach. We design kitchens, baths and whole homes around how you actually live in them.",
+       x: "30%",
+       y: "45%",
+       speed: 1,
+       maxWidth: "min(330px, calc(31% - 20px))", // plate 4 starts at 61%
+     },
+     {
+-      kind: "plate", no: "Pl. 04", title: "Two-Story Living Room", city: "Carmel Valley",
++      kind: "plate", no: "Pl. 04", title: "Two-Story Living Room", room: "Living room",
+       src: img("two-story-living-room"), ratio: "4/5", x: "61%", y: "50%", w: "25%", speed: 1.05, right: true,
+       dim: { dir: "h", label: "3 COL · 4 : 5" },
+       callout: { side: "r", px: "80%", py: "84%", len: "110px", text: "Linen sectional" },
+     },
+     { kind: "word", text: "considered.", italic: true, x: "2%", y: "61%", speed: 0.7 },
+     {
+-      kind: "plate", no: "Pl. 05", title: "Orb Pendant Kitchen", city: "Poway",
++      kind: "plate", no: "Pl. 05", title: "Orb Pendant Kitchen", room: "Kitchen",
+       src: img("blue-gray-island-kitchen"), ratio: "1/1", x: "47%", y: "74%", w: "13%", speed: 1.8,
+       callout: { side: "l", px: "45%", py: "70%", len: "165px", text: "Blue-gray island" },
+     },
+     {
+-      kind: "plate", no: "Pl. 06", title: "Walnut Guest Bath", city: "Encinitas",
++      kind: "plate", no: "Pl. 06", title: "Walnut Guest Bath", room: "Bath",
+       src: img("walnut-guest-bath"), ratio: "3/4", x: "86%", y: "77%", w: "11%", speed: 1.65, right: true,
+       dim: { dir: "v", side: "l", label: "3 : 4" },
+     },
+     {
+-      kind: "plate", no: "Pl. 07", title: "Bay Window Dining", city: "Rancho Bernardo",
++      kind: "plate", no: "Pl. 07", title: "Bay Window Dining", room: "Dining room",
+       src: img("bay-window-dining"), ratio: "1/1", x: "12%", y: "83%", w: "17%", speed: 1.3,
+       dim: { dir: "h", label: "2 COL · 1 : 1" },
+     },
+@@ -209,36 +213,27 @@ export const showcase = {
+   eyebrow: "(02) Selected work",
+   projects: [
+     {
+-      title: "Coastal Blue Family Room",
+-      weeks: "8", // DEMO: timeline placeholder
+-      area: "510", // DEMO: square footage placeholder
+-      city: "Carmel Valley", // DEMO: city placeholder
++      title: "Blue Family Room",
++      room: "Family room",
+       image: { src: img("mosaic-fireplace-family-room"), alt: "Family room with mosaic fireplace and blue art" },
+     },
+     {
+       title: "Cognac & Linen Living Room",
+-      weeks: "10", // DEMO: timeline placeholder
+-      area: "640", // DEMO: square footage placeholder
+-      city: "Encinitas", // DEMO: city placeholder
++      room: "Living room",
+       image: { src: img("cognac-living-room"), alt: "Vaulted living room with cognac leather sofas and woven chairs" },
+     },
+     {
+-      title: "Hillside Gloss Kitchen",
+-      weeks: "14", // DEMO: timeline placeholder
+-      area: "420", // DEMO: square footage placeholder
+-      city: "Poway", // DEMO: city placeholder
++      title: "Gloss Kitchen",
++      room: "Kitchen",
+       image: { src: img("gloss-kitchen"), alt: "Modern kitchen with white gloss cabinets and charcoal counters" },
+     },
+     {
+-      title: "Reclaimed Wood Primary Suite",
+-      weeks: "12", // DEMO: timeline placeholder
+-      area: "380", // DEMO: square footage placeholder
+-      city: "Rancho Bernardo", // DEMO: city placeholder
++      title: "Reclaimed Wood Bedroom",
++      room: "Bedroom",
+       image: { src: img("reclaimed-wood-bedroom"), alt: "Bedroom with reclaimed wood wall and tufted headboard" },
+     },
+   ],
+-  labels: { weeks: "Completed in", area: "Area", city: "Location" },
+-  projectLink: { href: "#work", label: "View project" }, // DEMO: no project pages yet
++  projectLink: { href: "#work", label: "View project" }, // no project pages yet
+ };
+ 
+ // ───────── promises (working with us)
+@@ -323,20 +318,9 @@ export const approach = {
+ export const about = {
+   eyebrow: "(05) About us",
+   heading: ["About", "Fresca."],
+-  text: `Founded by designer ${founder.name}, Fresca works with homeowners across North County and the coast. We take on a small number of projects at a time so each one gets full attention.`,
++  text: `Fresca Interior Design is the studio of designer ${founder.name}, based in Solana Beach.`,
++  bio: placeholders.aboutBio,
+   link: { href: "#work", label: "View projects" },
+-  stats: [
+-    { label: "Years designing homes", value: "12", image: { src: img("iron-bed-bedroom"), alt: "Bedroom with iron bed and floral bedding" } }, // DEMO: stat placeholder
+-    { label: "Rooms designed", value: "140+", image: { src: img("sectional-living-room"), alt: "Living room with sectional and tall windows" } }, // DEMO: stat placeholder
+-    { label: "Neighborhoods served", value: "9", image: { src: img("hammered-sink-bath"), alt: "Bathroom with hammered sinks and lantern sconce" } }, // DEMO: stat placeholder
+-    { label: "Clients who came back", value: "1 in 3", image: { src: img("bay-window-sitting-room"), alt: "Sitting room with bay windows and fireplace" } }, // DEMO: stat placeholder
+-  ],
+-};
+-
+-// ───────── founder quote
+-
+-export const quote = {
+-  text: "“If a room needs explaining, it isn’t finished yet.”",
+ };
+ 
+ // ───────── FAQ
+@@ -351,15 +335,15 @@ export const faq = {
+     },
+     {
+       q: "Do you manage the remodel, or only the design?",
+-      a: "We design and document the project, then work alongside your contractor through construction. If you don’t have a contractor yet, we can recommend ones we have worked with before.",
++      a: `We design and document the project, then work alongside your contractor through construction. ${placeholders.faqContractors}`,
+     },
+     {
+       q: "How is a project priced?",
+-      a: "Design is billed as a flat fee based on the size and scope of the project, which we set after the first consultation. Construction and furnishings are paid directly to your contractor and vendors.",
++      a: placeholders.faqPricing,
+     },
+     {
+       q: "How long does a kitchen or bathroom take?",
+-      a: "Design usually takes four to eight weeks. Construction depends on the contractor and materials, but most kitchens take two to four months and most bathrooms six to ten weeks.",
++      a: placeholders.faqTimeline,
+     },
+     {
+       q: "Do you take on single rooms?",
+@@ -373,10 +357,11 @@ export const faq = {
+ export const contact = {
+   eyebrow: "(07) Get in touch",
+   heading: ["Let's talk about", "your home."], // second line is italic
+-  text: `Tell us which rooms you're thinking about and roughly when. ${firstName} replies personally within two business days.`,
++  text: `Tell us which rooms you're thinking about and roughly when. ${firstName} replies personally.`,
++  responseTime: placeholders.responseTime,
+   fields: { name: "Name", email: "Email", message: "About your project" },
+   submit: "Send inquiry",
+   sending: "Sending…",
+-  thanks: "Thank you. We’ll be in touch within two business days.",
++  thanks: "Thank you. We’ll be in touch soon.",
+   error: "Something went wrong sending your message. Please try again, or email us directly.",
+ };
+diff --git a/tailwind.config.ts b/tailwind.config.ts
+index ac0a7d1..ecef153 100644
+--- a/tailwind.config.ts
++++ b/tailwind.config.ts
+@@ -19,6 +19,7 @@ const config: Config = {
+         gold: "#C9A86A",
+         panel: "#141311",
+         error: "#E9B4A2",
++        terracotta: "#A9502F",
+       },
+       fontFamily: {
+         serif: ["var(--serif)"],

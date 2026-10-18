@@ -1,0 +1,6 @@
+1440×900 @ 4x CPU
+  step 1 (letters rise): 64 frames in 1067ms → 60.0 fps; slowest 16.8ms; frames >25ms: 0; long tasks overlapping: 0
+  step 5 (travel + veil): 62 frames in 1033ms → 60.0 fps; slowest 16.8ms; frames >25ms: 0; long tasks overlapping: 0
+390×844 @ 4x CPU
+  step 1 (letters rise): 64 frames in 1067ms → 60.0 fps; slowest 16.8ms; frames >25ms: 0; long tasks overlapping: 0
+  step 5 (travel + veil): 62 frames in 1033ms → 60.0 fps; slowest 16.8ms; frames >25ms: 0; long tasks overlapping: 0

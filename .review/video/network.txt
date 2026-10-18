@@ -1,0 +1,43 @@
+
+chrome-1440: {"currentSrc":"fresca-hero-1080.webm","paused":false,"t":5.01,"opacity":"1","muted":true,"mutedAttr":true,"autoplay":true,"readyState":4,"av1":"probably"}
+  network (r2.dev):
+   GET fresca-hero-poster.webp
+   GET fresca-hero-1080.webm [Range bytes=0-]
+      ← 200 fresca-hero-poster.webp image/webp
+      ← 206 fresca-hero-1080.webm video/webm
+  scroll past hero: {"y":2200,"paused":true,"t":5.21} → 1.5s later {"paused":true,"t":5.21}; back to top 1.5s later: {"paused":false,"t":6.71}
+  tab hidden → paused=true; visible again → paused=false
+
+chrome-1180: {"currentSrc":"fresca-hero-1080.webm","paused":false,"t":5.01,"opacity":"1","muted":true,"mutedAttr":true,"autoplay":true,"readyState":4,"av1":"probably"}
+  network (r2.dev):
+   GET fresca-hero-poster.webp
+   GET fresca-hero-1080.webm [Range bytes=0-]
+      ← 200 fresca-hero-poster.webp image/webp
+      ← 206 fresca-hero-1080.webm video/webm
+
+chrome-390: {"currentSrc":"fresca-hero-720.mp4","paused":false,"t":5.01,"opacity":"1","muted":true,"mutedAttr":true,"autoplay":true,"readyState":4,"av1":"probably"}
+  network (r2.dev):
+   GET fresca-hero-poster.webp
+   GET fresca-hero-720.mp4 [Range bytes=0-]
+      ← 200 fresca-hero-poster.webp image/webp
+      ← 206 fresca-hero-720.mp4 video/mp4
+
+webkit-desktop-1440: {"currentSrc":"fresca-hero-1080.webm","paused":false,"t":4.75,"opacity":"1","muted":true,"mutedAttr":true,"autoplay":true,"readyState":4,"av1":"probably"}
+  network (r2.dev):
+   GET fresca-hero-poster.webp
+      ← 200 fresca-hero-poster.webp image/webp
+   GET fresca-hero-1080.webm
+      ← 200 fresca-hero-1080.webm video/webm
+
+webkit-iphone-390: {"currentSrc":"fresca-hero-720.mp4","paused":false,"t":5,"opacity":"1","muted":true,"mutedAttr":true,"autoplay":true,"readyState":4,"av1":"probably"}
+  network (r2.dev):
+   GET fresca-hero-poster.webp
+   GET fresca-hero-720.mp4 [Range bytes=0-1]
+      ← 200 fresca-hero-poster.webp image/webp
+      ← 206 fresca-hero-720.mp4 video/mp4
+   GET fresca-hero-720.mp4 [Range bytes=0-1549840]
+
+chrome-reduced-motion-1440: {"video":"none (poster only)","poster":"fresca-hero-poster.webp"}
+  network (r2.dev):
+   GET fresca-hero-poster.webp
+      ← 200 fresca-hero-poster.webp image/webp

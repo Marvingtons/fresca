@@ -1,0 +1,556 @@
+diff --git a/app/globals.css b/app/globals.css
+index 08dec73..c17ba4e 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -110,33 +110,31 @@ html.lenis body {
+   }
+ }
+ 
+-/* ───────── opening: pre-paint state, set by the inline script in <head>
++/* ───────── preloader: pre-paint state, set by the inline script in <head>
+    (lib/intro.ts). Without these classes everything renders final.
+-   html.intro: first visit per session. The cream veil (inside the header)
+-   covers the laid-out page and the nav wordmark sits centered on it at 1.6x.
+-   The translate uses the wordmark's own box (50%), so it stays centered when
+-   the web font swaps in; 16px is the header's top padding. */
+-.intro-veil {
+-  display: none;
+-}
++   html.intro: first visit per session. The first painted frame is the label,
++   the 000 counter and the first thumbnail; the header and the hero frame wait. */
+ html.intro {
+   overflow: hidden;
+ }
+-html.intro .intro-veil {
+-  display: block;
++body.scroll-lock {
++  overflow: hidden;
+ }
+-html.intro .site-header .wordmark {
+-  transform: translate(calc(50vw - var(--pad) - 50%), calc(50svh - 16px - 50%)) scale(1.6);
++html.intro .site-header,
++html.intro .hero-media {
++  opacity: 0;
++  visibility: hidden;
+ }
+-html.intro .nav-rest {
++html.intro .intro-frame:not(:first-child) {
+   opacity: 0;
+   visibility: hidden;
+ }
+-body.scroll-lock {
+-  overflow: hidden;
++html:not(.intro) .intro-ui {
++  display: none;
+ }
+-/* html.hero-in: every visit with motion. The hero waits in its entrance state. */
+-html.hero-in .hero-final {
++/* html.hero-in: every visit with motion. The hero waits in its entrance state
++   (the photo only scales on visits without the preloader). */
++html.hero-in:not(.intro) .hero-final {
+   transform: scale(1.03);
+ }
+ html.hero-in .hero-ln > span {
+@@ -147,11 +145,6 @@ html.hero-in .hero-fade {
+   visibility: hidden;
+   transform: translateY(14px);
+ }
+-@media (prefers-reduced-motion: reduce) {
+-  .intro-veil {
+-    display: none !important;
+-  }
+-}
+ 
+ /* ───────── studio wall annotations (v6): 12-col grid, ruler, dimension
+    lines and callouts. Ported verbatim from reference/fresca-v6-source.html. */
+diff --git a/components/Hero.tsx b/components/Hero.tsx
+index 04ecd2b..80eaa50 100644
+--- a/components/Hero.tsx
++++ b/components/Hero.tsx
+@@ -3,33 +3,146 @@
+ import Image from "next/image";
+ import { useRef } from "react";
+ import { cta, hero } from "@/content/site";
+-import { gsap, useGSAP } from "@/lib/gsap";
+-import { registerHeroReveal } from "@/lib/intro";
++import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
++import { INTRO_KEY } from "@/lib/intro";
+ import { MOTION } from "@/lib/motion";
+ import Line from "./LineReveal";
++import { useSmoothScroll } from "./SmoothScroll";
++
++/** The hero image's `sizes`. The preloader's last thumbnail uses the same value,
++ *  so both load the same file and the handoff swaps identical pixels. */
++const HERO_SIZES = "(min-width: 861px) min(944px, 52vw), 100vw";
++
++/** Resolves when web fonts are ready, or after 1.5s so a slow font never blocks the page. */
++const fontsReady = () => Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => window.setTimeout(r, 1500))]);
+ 
+ export default function Hero() {
+   const root = useRef<HTMLElement>(null);
++  const thumbRef = useRef<HTMLDivElement>(null);
++  const countRef = useRef<HTMLSpanElement>(null);
++  const { start } = useSmoothScroll();
+ 
+-  // The hero's entrance: the photo settles from 1.03 and the headline rises.
+-  // The opening sequence (components/Navigation.tsx) places it on its own
+-  // timeline, after the veil on a first visit and straight away otherwise.
+   useGSAP(
+     () => {
+       const mm = gsap.matchMedia();
+-      mm.add(MOTION, () =>
+-        registerHeroReveal(() => {
+-          const el = root.current;
+-          if (!el) return null;
+-          const tl = gsap.timeline();
+-          const photo = el.querySelector(".hero-final");
+-          if (photo) tl.fromTo(photo, { scale: 1.03 }, { scale: 1, duration: 1, ease: "power2.out", clearProps: "transform" }, 0);
++      mm.add(MOTION, () => {
++        const html = document.documentElement;
++        if (!html.classList.contains("hero-in")) return; // client-side return: render final
++        window.__introTakenOver = true;
++        const preloader = html.classList.contains("intro");
++        const el = root.current!;
++        const media = el.querySelector<HTMLElement>(".hero-media")!;
++        const photo = el.querySelector(".hero-final");
++        const lines = el.querySelectorAll(".hero-ln > span");
++        const fades = el.querySelectorAll(".hero-fade");
++        const header = document.querySelector(".site-header");
++        if (preloader) {
++          window.scrollTo(0, 0);
++          document.body.classList.add("scroll-lock");
++        }
++
++        let tl: gsap.core.Timeline | null = null;
++        let done = false;
++        const finish = () => {
++          if (done) return;
++          done = true;
++          window.removeEventListener("keydown", onKey);
++          if (preloader) {
++            try {
++              sessionStorage.setItem(INTRO_KEY, "1");
++            } catch {}
++            gsap.set([media, header, thumbRef.current], { clearProps: "all" });
++            document.body.classList.remove("scroll-lock");
++            start();
++          }
++          html.classList.remove("intro", "hero-in");
++          ScrollTrigger.refresh();
++        };
++        const onKey = (e: KeyboardEvent) => {
++          if (e.key !== "Escape") return;
++          if (tl) tl.progress(1);
++          else finish();
++        };
++        window.addEventListener("keydown", onKey);
++
++        let cancelled = false;
++        // The headline must not reveal on fallback metrics, so nothing starts before fonts.
++        fontsReady().then(() => {
++          if (cancelled || done) return;
++          tl = gsap.timeline({ onComplete: finish });
+           // y: 0 replaces the pre-paint translateY(110%), which GSAP would otherwise read as a px offset.
+-          tl.fromTo(el.querySelectorAll(".hero-ln > span"), { y: 0, yPercent: 110 }, { y: 0, yPercent: 0, duration: 0.65, stagger: 0.06, ease: "power3.out" }, 0.3);
+-          tl.fromTo(el.querySelectorAll(".hero-fade"), { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.05, ease: "power2.out" }, 0.5);
+-          return tl;
+-        }),
+-      );
++          const rise = { y: 0, yPercent: 0, duration: 0.4, stagger: 0.035, ease: "power3.out" };
++          const fadeIn = { autoAlpha: 1, y: 0, duration: 0.35, stagger: 0.04, ease: "power2.out" };
++
++          if (!preloader) {
++            // Later visits this session: no preloader, just the hero entrance.
++            if (photo) tl.fromTo(photo, { scale: 1.03 }, { scale: 1, duration: 1, ease: "power2.out", clearProps: "transform" }, 0);
++            tl.fromTo(lines, { y: 0, yPercent: 110 }, { ...rise, duration: 0.65, stagger: 0.06 }, 0.3);
++            tl.fromTo(fades, { autoAlpha: 0, y: 14 }, { ...fadeIn, duration: 0.5 }, 0.5);
++            return;
++          }
++
++          // Preloader (2.2s): the counter eases 000 → 100 while kept photos cycle in the
++          // thumbnail, ~0.3s each, ending on the hero photo. Then the thumbnail expands
++          // into the hero frame and hands off to the real hero image.
++          const thumb = thumbRef.current!;
++          const frames = thumb.querySelectorAll<HTMLElement>(".intro-frame");
++          const counter = { v: 0 };
++          tl.to(
++            counter,
++            {
++              v: 100,
++              duration: 1.45,
++              ease: "power2.inOut",
++              onUpdate: () => {
++                if (countRef.current) countRef.current.textContent = String(Math.round(counter.v)).padStart(3, "0");
++              },
++            },
++            0,
++          );
++          frames.forEach((frame, i) => {
++            if (i) tl!.set(frame, { autoAlpha: 1 }, 0.3 * i);
++          });
++
++          // FLIP. Last: the hero frame's real box. First: the thumbnail as it sits now.
++          // The thumbnail takes the hero frame's box and is transformed back down to
++          // where it was (no visible change), so the expand animates the transform to
++          // identity and ends exactly on the hero frame. Same 4:3 ratio, so the scale
++          // is uniform and the crop never changes.
++          const first = thumb.getBoundingClientRect();
++          const last = media.getBoundingClientRect();
++          const scale = first.width / last.width;
++          gsap.set(thumb, {
++            left: last.left,
++            top: last.top,
++            width: last.width,
++            height: last.height,
++            xPercent: 0,
++            yPercent: 0,
++            x: first.left - last.left,
++            y: first.top - last.top,
++            scale,
++            transformOrigin: "0 0",
++            borderRadius: 3 / scale,
++            autoRound: false, // sub-pixel box, so it lands exactly on the hero frame
++          });
++
++          tl.to(".intro-text", { autoAlpha: 0, duration: 0.3, ease: "power1.out" }, 1.45)
++            .to(thumb, { x: 0, y: 0, scale: 1, borderRadius: 3, duration: 0.6, ease: "power3.inOut" }, 1.45)
++            // Handoff: identical box, image file and crop, so the swap is invisible.
++            .set(media, { autoAlpha: 1 }, 2.05)
++            .set(thumb, { autoAlpha: 0 }, 2.05)
++            .fromTo(lines, { y: 0, yPercent: 110 }, rise, 1.7)
++            .fromTo(fades, { autoAlpha: 0, y: 14 }, { ...fadeIn, duration: 0.32, stagger: 0.03 }, 1.8)
++            .to(header, { autoAlpha: 1, duration: 0.35, ease: "power1.out" }, 1.85);
++        });
++
++        return () => {
++          cancelled = true;
++          tl?.kill();
++          window.removeEventListener("keydown", onKey);
++        };
++      });
+       return () => mm.revert();
+     },
+     { scope: root },
+@@ -54,18 +167,35 @@ export default function Hero() {
+ 
+         {/* Contained 4:3 frame. Never wider than 944 CSS px (the original photo's
+             width) so the enhanced file is never stretched, and short enough to
+-            sit inside the first screen. A future video goes here: show its poster
+-            during the opening and start it from onVeilGone() in lib/intro.ts. */}
++            sit inside the first screen. */}
+         <div className="hero-media relative aspect-[4/3] w-[min(944px,52vw,calc((100svh-220px)*4/3))] overflow-hidden rounded-[3px] max-md:w-full">
+-          <Image
+-            src={hero.image.src}
+-            alt={hero.image.alt}
+-            fill
+-            priority
+-            sizes="(min-width: 861px) min(944px, 52vw), 100vw"
+-            quality={85}
+-            className="hero-final object-cover"
+-          />
++          <Image src={hero.image.src} alt={hero.image.alt} fill priority sizes={HERO_SIZES} quality={85} className="hero-final object-cover" />
++        </div>
++      </div>
++
++      {/* Preloader, server-rendered so the label, counter and first thumbnail are the
++          first painted frame. Shown only under html.intro. */}
++      <div aria-hidden="true" className="intro-ui pointer-events-none fixed inset-0 z-[45] text-ink">
++        <div className="intro-text absolute inset-0 flex flex-col items-center justify-between pb-[18vh] pt-[24vh]">
++          <span className="cap">{hero.introLabel}</span>
++          <span ref={countRef} className="font-serif text-xl tabular-nums">
++            000
++          </span>
++        </div>
++        <div
++          ref={thumbRef}
++          className="intro-thumb fixed left-1/2 top-1/2 aspect-[4/3] w-[clamp(140px,17vw,260px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[3px]"
++        >
++          {[...hero.cycle, hero.image.src].map((src, i, all) => {
++            const isHero = i === all.length - 1;
++            return (
++              <div key={src} className="intro-frame absolute inset-0">
++                {/* Earlier frames only ever show at thumbnail size. The last is the hero
++                    photo at the hero's own sizes, so it lands as the same pixels. */}
++                <Image src={src} alt="" fill priority={i === 0 || isHero} sizes={isHero ? HERO_SIZES : "260px"} quality={85} className="object-cover" />
++              </div>
++            );
++          })}
+         </div>
+       </div>
+ 
+diff --git a/components/Navigation.tsx b/components/Navigation.tsx
+index fb07bf9..5eeb0f3 100644
+--- a/components/Navigation.tsx
++++ b/components/Navigation.tsx
+@@ -1,27 +1,20 @@
+ "use client";
+ 
+-import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
++import { useCallback, useEffect, useRef, useState } from "react";
+ import { cta, navLinks, site } from "@/content/site";
+-import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+-import { buildHeroReveal, INTRO_KEY, notifyVeilGone } from "@/lib/intro";
++import { gsap, useGSAP } from "@/lib/gsap";
+ import { prefersReducedMotion } from "@/lib/motion";
+ import { useSmoothScroll } from "./SmoothScroll";
+ import Copy from "./Placeholder";
+ 
+-const Wordmark = forwardRef<HTMLAnchorElement, { label?: string; className?: string }>(function Wordmark({ label, className = "" }, ref) {
++function Wordmark({ label }: { label?: string }) {
+   return (
+-    <a ref={ref} href="#top" aria-label={label} className={`flex flex-col leading-none no-underline ${className}`}>
+-      {/* elementtiming: lets the browser report when the wordmark first paints. */}
+-      <b className="font-serif text-[32px] font-normal italic" {...{ elementtiming: "wordmark" }}>
+-        Fresca
+-      </b>{" "}
++    <a href="#top" aria-label={label} className="flex flex-col leading-none no-underline">
++      <b className="font-serif text-[32px] font-normal italic">Fresca</b>{" "}
+       <span className="mt-[3px] text-[9px] uppercase tracking-[.36em]">Interior Design</span>
+     </a>
+   );
+-});
+-
+-/** Resolves when web fonts are ready, or after 1.5s so a slow font never blocks the page. */
+-const fontsReady = () => Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => window.setTimeout(r, 1500))]);
++}
+ 
+ export default function Navigation() {
+   const [open, setOpen] = useState(false);
+@@ -31,95 +24,6 @@ export default function Navigation() {
+   const { stop, start } = useSmoothScroll();
+   const { contextSafe } = useGSAP({ scope: menuRef });
+   const [scrolled, setScrolled] = useState(false);
+-  const wordmarkRef = useRef<HTMLAnchorElement>(null);
+-  const veilRef = useRef<HTMLDivElement>(null);
+-  const restRef = useRef<HTMLDivElement>(null);
+-
+-  // Opening sequence. html.intro (first visit per session, set before first
+-  // paint by lib/intro.ts) has the cream veil over the laid-out page and this
+-  // wordmark centered on it at 1.6x. After a 0.5s hold the wordmark travels to
+-  // its place in the bar (FLIP), the veil fades, the hero entrance plays
+-  // beneath it, and the rest of the bar fades in last: ~1.8s from first paint.
+-  // html.hero-in alone (later visits): just the hero entrance. Reduced motion:
+-  // neither class, so everything is final on first paint.
+-  useGSAP(() => {
+-    const html = document.documentElement;
+-    if (!html.classList.contains("hero-in")) {
+-      // Client-side return to the page: no veil, the hero entrance still plays.
+-      if (!prefersReducedMotion()) buildHeroReveal()?.play();
+-      return;
+-    }
+-    window.__introTakenOver = true;
+-    const veiled = html.classList.contains("intro");
+-    if (veiled) document.body.classList.add("scroll-lock");
+-
+-    let master: gsap.core.Timeline | null = null;
+-    let done = false;
+-    const finish = () => {
+-      if (done) return;
+-      done = true;
+-      window.removeEventListener("keydown", onKey);
+-      if (veiled) {
+-        try {
+-          sessionStorage.setItem(INTRO_KEY, "1");
+-        } catch {}
+-        gsap.set([wordmarkRef.current, veilRef.current, restRef.current], { clearProps: "all" });
+-        document.body.classList.remove("scroll-lock");
+-        start();
+-      }
+-      html.classList.remove("intro", "hero-in");
+-      ScrollTrigger.refresh();
+-    };
+-    const onKey = (e: KeyboardEvent) => {
+-      if (e.key !== "Escape") return;
+-      if (master) master.progress(1);
+-      else finish();
+-    };
+-    window.addEventListener("keydown", onKey);
+-
+-    let cancelled = false;
+-    // The headline must not reveal on fallback metrics, so nothing starts before fonts.
+-    fontsReady().then(() => {
+-      if (cancelled || done) return;
+-      master = gsap.timeline({ onComplete: finish });
+-      const hero = buildHeroReveal();
+-
+-      if (!veiled) {
+-        if (hero) master.add(hero, 0);
+-        master.add(notifyVeilGone, 0);
+-        return;
+-      }
+-
+-      // FLIP: First is the wordmark as CSS centers it on the veil; Last is its
+-      // place in the bar. Animate the inverse back to identity.
+-      const wm = wordmarkRef.current!;
+-      const first = wm.getBoundingClientRect();
+-      wm.style.transform = "none";
+-      const last = wm.getBoundingClientRect();
+-      wm.style.transform = "";
+-      gsap.set(wm, {
+-        x: first.left + first.width / 2 - (last.left + last.width / 2),
+-        y: first.top + first.height / 2 - (last.top + last.height / 2),
+-        scale: first.width / last.width,
+-        transformOrigin: "50% 50%",
+-      });
+-
+-      // Hold until 0.5s after first paint (less whatever loading already used).
+-      const t = Math.max(0, 0.5 - (performance.now() - (window.__introT0 ?? 0)) / 1000);
+-      master
+-        .to(wm, { x: 0, y: 0, scale: 1, duration: 0.8, ease: "power3.inOut" }, t)
+-        .to(veilRef.current, { autoAlpha: 0, duration: 0.7, ease: "power1.inOut" }, t + 0.15)
+-        .add(notifyVeilGone, t + 0.85)
+-        .fromTo(restRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, ease: "power1.out" }, t + 1);
+-      if (hero) master.add(hero, t + 0.15);
+-    });
+-
+-    return () => {
+-      cancelled = true;
+-      master?.kill();
+-      window.removeEventListener("keydown", onKey);
+-    };
+-  }, []);
+ 
+   useEffect(() => {
+     const onScroll = () => setScrolled(window.scrollY > 8);
+@@ -173,33 +77,28 @@ export default function Navigation() {
+         data-scrolled={scrolled || undefined}
+         className="site-header fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-6 border-b border-transparent bg-ground px-pad py-4 text-ink transition-colors duration-300 data-[scrolled]:border-line"
+       >
+-        {/* Opening veil: server-rendered, shown only under html.intro. The header is
+-            its own stacking context, so the wordmark can sit above it. */}
+-        <div ref={veilRef} aria-hidden="true" className="intro-veil pointer-events-none fixed inset-0 bg-ground" />
+-        <Wordmark ref={wordmarkRef} label="Fresca Interior Design, home" className="wordmark relative z-[1]" />
+-        <div ref={restRef} className="nav-rest flex items-center">
+-          <nav aria-label="Main" className="flex items-center gap-[clamp(20px,2.6vw,40px)] max-md:hidden">
+-            {navLinks.map((link) => (
+-              <a key={link.href} href={link.href} className="nav-link text-sm">
+-                {link.label}
+-              </a>
+-            ))}
+-            <a href={cta.href} className="nav-cta text-sm">
+-              {cta.label}
++        <Wordmark label="Fresca Interior Design, home" />
++        <nav aria-label="Main" className="flex items-center gap-[clamp(20px,2.6vw,40px)] max-md:hidden">
++          {navLinks.map((link) => (
++            <a key={link.href} href={link.href} className="nav-link text-sm">
++              {link.label}
+             </a>
+-          </nav>
+-          <button
+-            ref={menuBtnRef}
+-            type="button"
+-            className="hbtn md:hidden"
+-            aria-expanded={open}
+-            aria-controls="menu"
+-            onClick={openMenu}
+-          >
+-            <i aria-hidden="true" className="block h-px w-4 -translate-y-0.5 bg-current shadow-[0_5px_0_currentColor]" />
+-            Menu
+-          </button>
+-        </div>
++          ))}
++          <a href={cta.href} className="nav-cta text-sm">
++            {cta.label}
++          </a>
++        </nav>
++        <button
++          ref={menuBtnRef}
++          type="button"
++          className="hbtn md:hidden"
++          aria-expanded={open}
++          aria-controls="menu"
++          onClick={openMenu}
++        >
++          <i aria-hidden="true" className="block h-px w-4 -translate-y-0.5 bg-current shadow-[0_5px_0_currentColor]" />
++          Menu
++        </button>
+       </header>
+ 
+       <div
+diff --git a/content/site.ts b/content/site.ts
+index e586edf..c3f2a1f 100644
+--- a/content/site.ts
++++ b/content/site.ts
+@@ -80,6 +80,9 @@ export const cta = { href: "#contact", label: "Book a consultation" };
+ export const hero = {
+   lines: ["Kitchens, baths,", "and whole homes,", "designed from", "the plan up."], // last line is italic
+   text: "A residential design studio in Solana Beach.",
++  introLabel: "Fresca · Interior Design",
++  /** Preloader thumbnails, ~0.3s each, kept photos only; the hero photo always comes last. */
++  cycle: [img("walnut-island-kitchen"), img("cognac-living-room"), img("orb-chandelier-dining"), img("navy-chair-great-room")],
+   image: {
+     src: img("black-hood-kitchen"),
+     alt: "White shaker kitchen with a black range hood, marble island and three glass pendants",
+diff --git a/lib/intro.ts b/lib/intro.ts
+index ef4d73e..25e8943 100644
+--- a/lib/intro.ts
++++ b/lib/intro.ts
+@@ -1,20 +1,18 @@
+-/** sessionStorage key: the opening (veil + wordmark travel) has played in this tab session. */
++/** sessionStorage key: the preloader has played in this tab session. */
+ export const INTRO_KEY = "fresca-intro-played";
+ 
+ /**
+  * Runs before first paint (inlined in <head>). With motion allowed it adds:
+  * - `hero-in` on every visit: the hero starts in its pre-entrance state;
+- * - `intro` on the first visit per session: the veil covers the page and the
+- *   nav wordmark sits centered on it, from the very first painted frame.
+- * It also stamps `__introT0` (the opening's time zero, just before first paint)
+- * and, if the page script never takes over, drops both classes after 6s so a
+- * failed load still shows the page.
++ * - `intro` on the first visit per session: the preloader (label, 000 counter,
++ *   first thumbnail) is what the first painted frame shows.
++ * If the page script never takes over, both classes drop after 6s so a failed
++ * load still shows the page.
+  */
+-export const introScript = `try{var d=document.documentElement;window.__introT0=performance.now();if(!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('hero-in');if(!sessionStorage.getItem('${INTRO_KEY}'))d.classList.add('intro');setTimeout(function(){if(!window.__introTakenOver)d.classList.remove('intro','hero-in')},6000)}}catch(e){}`;
++export const introScript = `try{var d=document.documentElement;if(!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('hero-in');if(!sessionStorage.getItem('${INTRO_KEY}'))d.classList.add('intro');setTimeout(function(){if(!window.__introTakenOver)d.classList.remove('intro','hero-in')},6000)}}catch(e){}`;
+ 
+ declare global {
+   interface Window {
+-    __introT0?: number;
+     __introTakenOver?: boolean;
+   }
+ }
+@@ -22,41 +20,3 @@ declare global {
+ export function introIsPlaying() {
+   return typeof document !== "undefined" && document.documentElement.classList.contains("intro");
+ }
+-
+-// ───────── hooks between the opening (Navigation) and the page beneath it.
+-// The opening never looks inside the hero: the hero registers its own entrance,
+-// and the opening places it on its timeline if one is registered.
+-
+-type Reveal = () => gsap.core.Timeline | null;
+-let heroReveal: Reveal | null = null;
+-
+-/** The hero's entrance (scale, headline rise). Returns an unregister function. */
+-export function registerHeroReveal(build: Reveal) {
+-  heroReveal = build;
+-  return () => {
+-    if (heroReveal === build) heroReveal = null;
+-  };
+-}
+-
+-export function buildHeroReveal() {
+-  return heroReveal?.() ?? null;
+-}
+-
+-const veilGoneListeners = new Set<() => void>();
+-
+-/**
+- * Called once the veil has fully faded (or right away on visits without the
+- * veil). Unused for now: when the hero holds a video, it shows the poster during
+- * the opening and calls `video.play()` from here, so playback starts on the
+- * frame the veil is gone. Returns an unsubscribe function.
+- */
+-export function onVeilGone(listener: () => void) {
+-  veilGoneListeners.add(listener);
+-  return () => {
+-    veilGoneListeners.delete(listener);
+-  };
+-}
+-
+-export function notifyVeilGone() {
+-  veilGoneListeners.forEach((listener) => listener());
+-}

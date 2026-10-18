@@ -1,0 +1,6 @@
+1440 run 1: flashes 60.0 fps over 2350ms (slowest 16.8ms, >25ms: 0, long tasks inside: 0) | expand 60.0 fps over 1100ms (slowest 16.8ms, >25ms: 0, long tasks inside: 0) | counter→swap 3433ms
+1440 run 2: flashes 60.0 fps over 2350ms (slowest 16.8ms, >25ms: 0, long tasks inside: 0) | expand 60.0 fps over 1100ms (slowest 16.8ms, >25ms: 0, long tasks inside: 0) | counter→swap 3433ms
+1440 run 3: flashes 60.0 fps over 2350ms (slowest 16.8ms, >25ms: 0, long tasks inside: 0) | expand 60.0 fps over 1100ms (slowest 16.8ms, >25ms: 0, long tasks inside: 0) | counter→swap 3433ms
+390 run 1: flashes 60.0 fps over 2350ms (slowest 16.8ms, >25ms: 0, long tasks inside: 0) | expand 60.0 fps over 1100ms (slowest 16.8ms, >25ms: 0, long tasks inside: 0) | counter→swap 3433ms
+390 run 2: flashes 60.0 fps over 2350ms (slowest 16.8ms, >25ms: 0, long tasks inside: 0) | expand 60.0 fps over 1100ms (slowest 16.8ms, >25ms: 0, long tasks inside: 0) | counter→swap 3433ms
+390 run 3: flashes 60.0 fps over 2367ms (slowest 16.8ms, >25ms: 0, long tasks inside: 0) | expand 60.0 fps over 1083ms (slowest 16.8ms, >25ms: 0, long tasks inside: 0) | counter→swap 3433ms

@@ -1,0 +1,250 @@
+diff --git a/components/Hero.tsx b/components/Hero.tsx
+index 0bf41d1..8b0fe23 100644
+--- a/components/Hero.tsx
++++ b/components/Hero.tsx
+@@ -1,161 +1,126 @@
+ "use client";
+ 
+ import Image from "next/image";
+-import { useEffect, useRef, useState } from "react";
+-import { hero } from "@/content/site";
++import { useRef } from "react";
++import { cta, hero, site } from "@/content/site";
+ import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+ import { INTRO_KEY, introIsPlaying } from "@/lib/intro";
+ import { MOTION } from "@/lib/motion";
+ import Line from "./LineReveal";
+ import { useSmoothScroll } from "./SmoothScroll";
+ 
++/** Intro thumbnail width: the hero frame starts at this size, centered, then expands. */
++const THUMB_WIDTH = "clamp(140px, 17vw, 260px)";
++
+ export default function Hero() {
+   const root = useRef<HTMLElement>(null);
+-  const countRef = useRef<HTMLSpanElement>(null);
++  const thumbRef = useRef<HTMLDivElement>(null);
+   const { start } = useSmoothScroll();
+-  // Intro frames 2-5 are added after hydration (only when the intro plays), so
+-  // they download after first paint instead of competing with it. They're not
+-  // shown until 0.33s into the intro; if one is late, the previous frame stays.
+-  const [laterFrames, setLaterFrames] = useState(false);
+-  useEffect(() => {
+-    if (introIsPlaying()) setLaterFrames(true);
+-  }, []);
+ 
+   useGSAP(
+     () => {
+-      if (introIsPlaying() && !laterFrames) return; // build the intro once every frame is in the DOM
+       const mm = gsap.matchMedia();
+       mm.add(MOTION, () => {
+-        // Intro: photos cycle in a small frame while the counter runs, then it opens to full screen.
++        // Intro (1.2s): wordmark fades in, a thumbnail of the hero photo appears,
++        // then expands into the contained hero frame (FLIP: the frame itself is scaled
++        // down to the thumbnail and animated back to identity, so the thumbnail is
++        // always the final crop) and the headline arrives as it lands.
+         if (introIsPlaying()) {
+           window.scrollTo(0, 0);
+           const html = document.documentElement;
+           const header = document.querySelector(".site-header");
+-          const imgs = gsap.utils.toArray<HTMLElement>(".hero-media img");
+-          const counter = { v: 0 };
++          const media = root.current!.querySelector<HTMLElement>(".hero-media")!;
++
++          // First/Last: the frame's final box and the thumbnail box, centered in the viewport.
++          const last = media.getBoundingClientRect();
++          const thumbW = thumbRef.current!.getBoundingClientRect().width;
++          const scale = thumbW / last.width;
++          const first = {
++            x: innerWidth / 2 - (last.left + last.width / 2),
++            y: innerHeight / 2 - (last.top + last.height / 2),
++          };
+ 
+-          // Take over from the pre-paint CSS (html.intro) with matching inline states.
+-          gsap.set(".hero-media", { clipPath: "inset(37% 41.5% 37% 41.5% round 3px)" });
+-          gsap.set(imgs, { autoAlpha: 0 });
+-          gsap.set(imgs[0], { autoAlpha: 1 });
++          gsap.set(media, { x: first.x, y: first.y, scale, transformOrigin: "50% 50%", borderRadius: 3 / scale, autoAlpha: 0 });
+           gsap.set(".hero-ln > span", { y: 0, yPercent: 110 });
+           gsap.set(".hero-fade", { autoAlpha: 0, y: 14 });
+-          gsap.set(".hero-shade", { opacity: 0 });
+           gsap.set(header, { autoAlpha: 0 });
+ 
+-          const intro = gsap.timeline({ defaults: { ease: "power3.inOut" } });
+-          intro.to(
+-            counter,
+-            {
+-              v: 100,
+-              duration: 2,
+-              ease: "power1.inOut",
+-              onUpdate: () => {
+-                if (countRef.current) countRef.current.textContent = String(Math.round(counter.v)).padStart(3, "0");
+-              },
+-            },
+-            0,
+-          );
+-          imgs.forEach((img, i) => {
+-            if (i) intro.set(img, { autoAlpha: 1 }, 0.33 * i);
+-          });
++          const finish = () => {
++            try {
++              sessionStorage.setItem(INTRO_KEY, "1");
++            } catch {}
++            html.classList.remove("intro");
++            window.removeEventListener("keydown", onKey);
++            start();
++          };
++          const intro = gsap.timeline({ onComplete: () => ScrollTrigger.refresh() });
++          const onKey = (e: KeyboardEvent) => {
++            if (e.key === "Escape") intro.progress(1);
++          };
++          window.addEventListener("keydown", onKey);
++
+           intro
+-            .to(".intro-ui", { autoAlpha: 0, duration: 0.4, ease: "power1.out" }, 2.05)
+-            // Explicit start shape: the browser shortens the computed inset() to two
+-            // values, which would make the frame open from the bottom-left corner.
+-            .fromTo(
+-              ".hero-media",
+-              { clipPath: "inset(37% 41.5% 37% 41.5% round 3px)" },
+-              { clipPath: "inset(0% 0% 0% 0% round 0px)", duration: 1.5 },
+-              2.1,
+-            )
+-            .fromTo(".hero-final", { scale: 1.35 }, { scale: 1.06, duration: 1.9, ease: "power3.out" }, 2.1)
+-            .to(".hero-shade", { opacity: 1, duration: 1, ease: "power1.out" }, 2.6)
+-            .to(".hero-ln > span", { yPercent: 0, duration: 1.2, stagger: 0.1, ease: "power4.out" }, 2.95)
+-            .to(".hero-fade", { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.08, ease: "power2.out" }, 3.2)
+-            .to(header, { autoAlpha: 1, duration: 0.8, ease: "power1.out" }, 3.2)
+-            .add(() => {
+-              try {
+-                sessionStorage.setItem(INTRO_KEY, "1");
+-              } catch {}
+-              html.classList.remove("intro");
+-              start();
+-            }, 3.4)
+-            // Recalculate triggers once everything has settled, not mid-animation.
+-            .eventCallback("onComplete", () => ScrollTrigger.refresh());
++            .fromTo(".intro-mark", { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.3, ease: "power2.out" }, 0)
++            .to(media, { autoAlpha: 1, duration: 0.2, ease: "power1.out" }, 0.15)
++            .to(media, { x: 0, y: 0, scale: 1, borderRadius: 3, duration: 0.7, ease: "power3.inOut" }, 0.35)
++            .fromTo(".hero-final", { scale: 1.08 }, { scale: 1, duration: 0.85, ease: "power3.out", clearProps: "transform" }, 0.35)
++            .to(".intro-mark", { autoAlpha: 0, duration: 0.2, ease: "power1.in" }, 0.4)
++            .to(".hero-ln > span", { yPercent: 0, duration: 0.4, stagger: 0.035, ease: "power3.out" }, 0.7)
++            .to(".hero-fade", { autoAlpha: 1, y: 0, duration: 0.35, stagger: 0.04, ease: "power2.out" }, 0.8)
++            .to(header, { autoAlpha: 1, duration: 0.35, ease: "power1.out" }, 0.85)
++            .set(media, { clearProps: "transform,borderRadius" }, 1.2)
++            .add(finish, 1.2);
+         }
+-
+-        // Hero parallax: the photo sinks while the text rises and fades.
+-        gsap.to(".hero-final", {
+-          yPercent: 14,
+-          ease: "none",
+-          scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: true },
+-        });
+-        gsap.to(".hero-content", {
+-          yPercent: -40,
+-          opacity: 0,
+-          ease: "none",
+-          scrollTrigger: { trigger: root.current, start: "top top", end: "70% top", scrub: true },
+-        });
+       });
+       return () => mm.revert();
+     },
+-    { scope: root, dependencies: [laterFrames] },
++    { scope: root },
+   );
+ 
+   return (
+-    <section ref={root} id="top" className="relative h-svh min-h-[560px] overflow-hidden bg-ground">
+-      <div className="hero-media absolute inset-0 overflow-hidden will-change-[clip-path]">
+-        {/* Intro-only photos: display:none (and so never loaded) once the intro has played. */}
+-        {hero.cycle.map((src, i) => (
+-          <div key={src} className="hero-cycle absolute inset-0">
+-            {/* Each frame is a full-size photo clipped to the small intro window, so it
+-                needs full-width resolution. The first one paints before hydration and is
+-                the page's LCP, so it is preloaded (repeat visits skip the intro but are
+-                in the same session, so it's cached). */}
+-            {(i === 0 || laterFrames) && (
+-              <Image src={src} alt="" fill priority={i === 0} sizes="100vw" quality={85} className="object-cover" />
+-            )}
+-          </div>
+-        ))}
+-        <Image
+-          src={hero.image.src}
+-          alt={hero.image.alt}
+-          fill
+-          priority
+-          sizes="100vw"
+-          quality={85}
+-          className="hero-final scale-[1.06] object-cover object-[40%_50%]"
+-        />
+-        <div className="hero-shade absolute inset-0 bg-[rgba(18,17,15,.38)]" />
+-      </div>
++    <section ref={root} id="top" className="relative flex min-h-svh items-center bg-ground px-[clamp(16px,6vw,120px)] pb-20 pt-[clamp(104px,14vh,140px)]">
++      <div className="mx-auto grid w-full max-w-[1280px] items-center gap-x-[clamp(32px,5vw,80px)] gap-y-9 md:grid-cols-[minmax(0,1fr)_auto]">
++        <div className="hero-content text-ink">
++          <h1 className="font-serif text-[clamp(42px,4.3vw,72px)] font-normal leading-[.98] tracking-[-.015em]">
++            {hero.lines.map((line, i) => (
++              <Line key={line} reveal={false} className="hero-ln">
++                {i === hero.lines.length - 1 ? <em>{line}</em> : line}
++              </Line>
++            ))}
++          </h1>
++          <p className="hero-fade mt-6 max-w-[420px] text-base text-body">{hero.text}</p>
++          <a className="pill pill-accent hero-fade mt-8" href={cta.href}>
++            {cta.label}
++          </a>
++        </div>
+ 
+-      <div
+-        aria-hidden="true"
+-        className="intro-ui pointer-events-none absolute inset-0 flex flex-col items-center justify-between pb-[18vh] pt-[24vh] text-ink"
+-      >
+-        <span className="cap">{hero.introLabel}</span>
+-        <span ref={countRef} className="font-serif text-xl tabular-nums">
+-          000
+-        </span>
++        {/* Contained 4:3 frame. Never wider than 944 CSS px (the original photo's
++            width) so the enhanced file is never stretched, and short enough to
++            sit inside the first screen. */}
++        <div className="hero-media relative aspect-[4/3] w-[min(944px,52vw,calc((100svh-220px)*4/3))] overflow-hidden rounded-[3px] max-md:w-full">
++          <Image
++            src={hero.image.src}
++            alt={hero.image.alt}
++            fill
++            priority
++            sizes="(min-width: 861px) min(944px, 52vw), 100vw"
++            quality={85}
++            className="hero-final object-cover"
++          />
++        </div>
+       </div>
+ 
+-      <div className="hero-content absolute inset-x-0 bottom-0 flex flex-col items-center px-pad pb-[9vh] text-center text-white">
+-        {/* The spec's `.hero-content p` rule outranks `.cap` here: 16px, white/86. */}
+-        <p className="cap hero-fade mb-5 max-w-[420px] !text-base text-white/[.86]">{hero.eyebrow}</p>
+-        <h1 className="font-serif text-[clamp(52px,7.4vw,124px)] font-normal leading-[.95] tracking-[-.015em]">
+-          <Line reveal={false} className="hero-ln">
+-            {hero.lines[0]}
+-          </Line>
+-          <Line reveal={false} className="hero-ln">
+-            <em>{hero.lines[1]}</em>
+-          </Line>
+-        </h1>
+-        <p className="hero-fade mt-[22px] max-w-[420px] text-base text-white/[.86]">{hero.text}</p>
++      {/* Intro only: the wordmark, and an invisible box that sets the thumbnail size. */}
++      <div aria-hidden="true" className="intro-ui pointer-events-none absolute inset-0 grid place-items-center text-ink">
++        <span className="intro-mark mb-[clamp(150px,22vw,260px)] flex flex-col items-center leading-none">
++          <b className="font-serif text-[40px] font-normal italic">{site.shortName}</b>
++          <span className="mt-1 text-[10px] uppercase tracking-[.36em]">Interior Design</span>
++        </span>
++        <div ref={thumbRef} className="invisible absolute" style={{ width: THUMB_WIDTH }} />
+       </div>
+ 
+-      <div aria-hidden="true" className="cap hero-fade absolute bottom-7 left-pad flex items-center gap-3 text-white">
+-        <i className="relative block h-9 w-px overflow-hidden bg-white/40 after:absolute after:left-0 after:top-[-100%] after:h-full after:w-px after:animate-cue after:bg-white after:content-['']" />
++      <div aria-hidden="true" className="cap hero-fade absolute bottom-7 left-pad flex items-center gap-3 text-muted max-md:hidden">
++        <i className="relative block h-9 w-px overflow-hidden bg-ink/20 after:absolute after:left-0 after:top-[-100%] after:h-full after:w-px after:animate-cue after:bg-ink after:content-['']" />
+         Scroll
+       </div>
+     </section>

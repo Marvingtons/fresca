@@ -1,0 +1,15 @@
+
+1440 @1x  expand frames: 66; full-bleed frames before swap: 7
+  last 3 frames of the expand (mean Δ): 0.031, 0.006, 0.001
+  SWAP FRAME (still 07 → poster) at 3.550s: mean Δ 0.1517, max Δ 9
+  after swap (poster → poster): mean Δ 0.0000, 0.0000, 0.0000, 0.0000, 0.0000
+
+1440 @2x  expand frames: 67; full-bleed frames before swap: 6
+  last 3 frames of the expand (mean Δ): 0.048, 0.015, 0.003
+  SWAP FRAME (still 07 → poster) at 3.550s: mean Δ 0.1142, max Δ 12
+  after swap (poster → poster): mean Δ 0.0000, 0.0000, 0.0000, 0.0000, 0.0000
+
+390 @3x  expand frames: 63; full-bleed frames before swap: 10
+  last 3 frames of the expand (mean Δ): 0.046, 0.018, 0.005
+  SWAP FRAME (still 07 → poster) at 3.550s: mean Δ 0.3535, max Δ 92
+  after swap (poster → poster): mean Δ 0.0000, 0.0000, 0.0000, 0.0000, 0.0000

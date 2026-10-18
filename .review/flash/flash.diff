@@ -1,0 +1,913 @@
+diff --git a/app/globals.css b/app/globals.css
+index d1f015b..46f351b 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -15,6 +15,10 @@
+   --mono: var(--font-plex-mono), ui-monospace, monospace;
+   --sans: var(--font-hanken), system-ui, sans-serif;
+   --pad: clamp(16px, 2.2vw, 32px);
++  /* Whole pixels where supported, so the nav wordmark (and the opening's FLIP
++     onto it) lands on the pixel grid. */
++  --pad: round(clamp(16px, 2.2vw, 32px), 1px);
++  --plaster: #efe8dc;
+ }
+ 
+ /* Missing content, see content/placeholders.ts. Never final copy. */
+@@ -110,19 +114,37 @@ html.lenis body {
+   }
+ }
+ 
+-/* ───────── hero. Film over its poster, centered crops. Exactly two shades,
+-   warm near-black (#14110F): a bottom one, strongest under the copy at the
+-   bottom left (radial) over a weaker even layer, gone by 45% of the hero; a top
+-   one for the nav, gone by 16%. The middle of the frame has no overlay. */
++/* ───────── hero. Film over its poster, centered crops. One warm near-black
++   (#14110F) shade at the bottom for the caption, gone by 22% of the hero, and
++   a thin one at the top for the nav. The middle of the frame has no overlay. */
+ .hero-poster,
+ .hero-video {
+   object-position: 50% 50%;
+ }
+ .hero-shade-bottom {
+-  height: 45%;
+-  background:
+-    radial-gradient(ellipse 90% 100% at 0% 100%, rgb(20 17 15 / 0.62), rgb(20 17 15 / 0) 100%),
+-    linear-gradient(to top, rgb(20 17 15 / 0.3), rgb(20 17 15 / 0));
++  height: 22%;
++  background: linear-gradient(to top, rgb(20 17 15 / 0.45), rgb(20 17 15 / 0));
++}
++/* Hero CTA: a text link; its 1px underline draws in on hover. */
++.hero-cta {
++  position: relative;
++  text-decoration: none;
++}
++.hero-cta::after {
++  content: "";
++  position: absolute;
++  left: 0;
++  right: 0;
++  bottom: -3px;
++  height: 1px;
++  background: currentColor;
++  transform: scaleX(0);
++  transform-origin: left;
++  transition: transform 0.35s cubic-bezier(0.76, 0, 0.24, 1);
++}
++.hero-cta:hover::after,
++.hero-cta:focus-visible::after {
++  transform: scaleX(1);
+ }
+ .hero-shade-top {
+   height: 16%;
+@@ -143,61 +165,48 @@ html:not(.past-hero) .site-header .nav-cta {
+   color: var(--ground);
+ }
+ 
+-/* ───────── opening: pre-paint state, set by the inline script in <head>
++/* ───────── preloader: pre-paint state, set by the inline script in <head>
+    (lib/intro.ts) on the first visit per session. Without html.intro the page
+-   renders final. The navy veil covers the laid-out hero (poster showing, no
+-   video yet) with a copy of the nav wordmark centered at 3.2x. Moving elements
+-   carry will-change only while html.intro is set. */
++   renders final. The ivory field and the framed still cover the laid-out hero
++   (poster showing, no film yet); still 01 is sized by an inline script before
++   first paint. will-change applies only while html.intro is set. */
+ html.intro {
+   overflow: hidden;
+ }
+ body.scroll-lock {
+   overflow: hidden;
+ }
+-.intro-veil,
+-.intro-copy {
++.preloader {
+   display: none;
+ }
+-html.intro .intro-veil {
++html.intro .preloader {
+   display: block;
+ }
+-html.intro .intro-copy {
+-  display: flex;
+-  /* The nav wordmark's slot (header gutter, 16px top padding), moved to the
+-     viewport center and scaled; the script FLIPs it back onto the real one. */
+-  left: var(--pad);
+-  top: 16px;
+-  transform: translate(calc(50vw - var(--pad) - 50%), calc(50svh - 16px - 50%)) scale(3.2);
+-  will-change: transform;
+-}
+-/* At 3.2x the wordmark is ~387px wide: on phones it would touch the edges. */
+-@media (max-width: 480px) {
+-  html.intro .intro-copy {
+-    transform: translate(calc(50vw - var(--pad) - 50%), calc(50svh - 16px - 50%)) scale(2.6);
+-  }
+-}
+-html.intro .site-header .wordmark,
+-html.intro .site-header nav a,
+-html.intro .site-header .hbtn {
+-  opacity: 0;
++.pl-frame {
++  transform-origin: 50% 50%;
+ }
+-html.intro .hero-ln,
+-html.intro .hero-sub,
+-html.intro .hero-btn {
+-  opacity: 0;
+-  transform: translateY(16px);
+-  will-change: transform, opacity;
++.pl-still {
++  position: absolute;
++  left: 50%;
++  top: 50%;
++  max-width: none;
++  transform-origin: 50% 50%;
+ }
+-html.intro .hero-poster {
+-  transform: scale(1.04);
++html.intro .pl-frame,
++html.intro .pl-still {
+   will-change: transform;
+ }
+-html.intro .intro-veil {
+-  will-change: opacity;
++/* The shades wait too: still 07 has none, so the swap to the poster is exact. */
++html.intro .site-header,
++html.intro .hero-shade-top,
++html.intro .hero-shade-bottom,
++html.intro .hero-caption,
++html.intro .hero-cta {
++  opacity: 0;
++  visibility: hidden;
+ }
+ @media (prefers-reduced-motion: reduce) {
+-  .intro-veil,
+-  .intro-copy {
++  .preloader {
+     display: none !important;
+   }
+ }
+diff --git a/app/page.tsx b/app/page.tsx
+index 0190a68..236ca81 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
+ import Hero from "@/components/Hero";
+ import Navigation from "@/components/Navigation";
+ import ProjectShowcase from "@/components/ProjectShowcase";
++import Statement from "@/components/Statement";
+ import Promises from "@/components/Promises";
+ import StudioWall from "@/components/StudioWall";
+ 
+@@ -14,6 +15,7 @@ export default function Home() {
+       <Navigation />
+       <main>
+         <Hero />
++        <Statement />
+         <StudioWall />
+         <ProjectShowcase />
+         <Promises />
+diff --git a/components/Hero.tsx b/components/Hero.tsx
+index b03cd21..11ce581 100644
+--- a/components/Hero.tsx
++++ b/components/Hero.tsx
+@@ -1,37 +1,96 @@
+ "use client";
+ 
+-import { useRef } from "react";
++import { useCallback, useEffect, useRef, useState } from "react";
+ import { cta, hero } from "@/content/site";
+ import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+-import { INTRO_KEY, markOpeningDone } from "@/lib/intro";
+ import { heroMedia } from "@/lib/media/hero";
+-import { MOTION } from "@/lib/motion";
++import { MOTION, prefersReducedMotion } from "@/lib/motion";
+ import HeroMedia from "./HeroMedia";
+-import { useSmoothScroll } from "./SmoothScroll";
++import Preloader from "./Preloader";
+ 
+-/** Resolves when web fonts are ready, or after 1.5s so a slow font never blocks the page. */
+-const fontsReady = () => Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => window.setTimeout(r, 1500))]);
++const sceneAt = (t: number) => {
++  let i = 0;
++  hero.scenes.forEach((s, n) => {
++    if (t >= s.from) i = n;
++  });
++  return i;
++};
++
++/**
++ * The room name for the current shot, synced to the film's currentTime with a
++ * requestVideoFrameCallback loop (timeupdate where that is missing). Labels
++ * crossfade over 300ms with a 4px slide. Static text under reduced motion.
++ */
++function SceneLabel({ video }: { video: HTMLVideoElement | null }) {
++  const a = useRef<HTMLSpanElement>(null);
++  const b = useRef<HTMLSpanElement>(null);
++  const [reduced, setReduced] = useState(false);
++  useEffect(() => setReduced(prefersReducedMotion()), []);
++
++  useEffect(() => {
++    if (!video) return;
++    let front = a.current!;
++    let back = b.current!;
++    let current = sceneAt(video.currentTime);
++    front.textContent = hero.scenes[current].label;
++    const change = (i: number) => {
++      current = i;
++      back.textContent = hero.scenes[i].label;
++      gsap.killTweensOf([front, back]);
++      gsap.to(front, { opacity: 0, y: -4, duration: 0.3, ease: "power1.inOut" });
++      gsap.fromTo(back, { opacity: 0, y: 4 }, { opacity: 1, y: 0, duration: 0.3, ease: "power1.inOut" });
++      [front, back] = [back, front];
++    };
++    const check = () => {
++      const i = sceneAt(video.currentTime);
++      if (i !== current) change(i);
++    };
++    let handle = 0;
++    let stopped = false;
++    // TypeScript's DOM types treat rVFC as always present; Firefox before 132 lacks it.
++    if (typeof video.requestVideoFrameCallback === "function") {
++      const loop = () => {
++        if (stopped) return;
++        check();
++        handle = video.requestVideoFrameCallback(loop);
++      };
++      handle = video.requestVideoFrameCallback(loop);
++      return () => {
++        stopped = true;
++        video.cancelVideoFrameCallback(handle);
++      };
++    }
++    video.addEventListener("timeupdate", check);
++    return () => video.removeEventListener("timeupdate", check);
++  }, [video]);
++
++  if (reduced) return <span className="block">{hero.staticScene}</span>;
++  return (
++    <span className="relative block">
++      <span ref={a} className="block">
++        {hero.scenes[0].label}
++      </span>
++      <span ref={b} className="absolute inset-x-0 top-0 block opacity-0" />
++    </span>
++  );
++}
+ 
+ export default function Hero() {
+   const root = useRef<HTMLElement>(null);
+-  const copyRef = useRef<HTMLDivElement>(null);
+-  const veilRef = useRef<HTMLDivElement>(null);
+-  const { start } = useSmoothScroll();
++  const [video, setVideo] = useState<HTMLVideoElement | null>(null);
++  const onVideo = useCallback((v: HTMLVideoElement | null) => setVideo(v), []);
+ 
+   useGSAP(
+     () => {
+       const html = document.documentElement;
+       const heroEl = root.current!;
+-
+-      // Nav colour, on every visit and under reduced motion too: bone over the
+-      // hero, ink once it has scrolled out (html.past-hero).
++      // Nav colour, on every visit: bone over the hero, ink once it has scrolled out.
+       const pastHero = ScrollTrigger.create({
+         trigger: heroEl,
+         start: "bottom top+=76",
+         end: "max",
+         onToggle: (self) => html.classList.toggle("past-hero", self.isActive),
+       });
+-
+       const mm = gsap.matchMedia();
+       // Scroll: the media moves up at 0.85x scroll speed.
+       mm.add(MOTION, () => {
+@@ -41,88 +100,6 @@ export default function Hero() {
+           scrollTrigger: { trigger: heroEl, start: "top top", end: "bottom top", scrub: true, invalidateOnRefresh: true },
+         });
+       });
+-
+-      // Opening (first visit per session, html.intro). Transforms and opacity only.
+-      // A navy veil with the wordmark centered at ~3.2x; after a 0.6s hold the
+-      // wordmark travels into the nav slot (FLIP onto the real nav wordmark, then a
+-      // same-frame swap) while the veil fades and the poster settles; the copy rises
+-      // in; the film starts only once everything has finished. Under 2s.
+-      mm.add(MOTION, () => {
+-        if (!html.classList.contains("intro")) return;
+-        window.__introTakenOver = true;
+-        window.scrollTo(0, 0);
+-        document.body.classList.add("scroll-lock");
+-        const copy = copyRef.current!;
+-        const veil = veilRef.current!;
+-        const navMark = document.querySelector<HTMLElement>(".site-header .wordmark")!;
+-        const navRest = document.querySelectorAll(".site-header nav a, .site-header .hbtn");
+-        const poster = heroEl.querySelector(".hero-poster");
+-        const lines = heroEl.querySelectorAll(".hero-ln");
+-        const moving = [copy, veil, navMark, poster, ...Array.from(lines), ".hero-sub", ".hero-btn", ...Array.from(navRest)];
+-
+-        let tl: gsap.core.Timeline | null = null;
+-        let done = false;
+-        const finish = () => {
+-          if (done) return;
+-          done = true;
+-          window.removeEventListener("keydown", onKey);
+-          try {
+-            sessionStorage.setItem(INTRO_KEY, "1");
+-          } catch {}
+-          gsap.set(moving, { clearProps: "all" });
+-          html.classList.remove("intro"); // also drops the will-change hints
+-          document.body.classList.remove("scroll-lock");
+-          start();
+-          ScrollTrigger.refresh();
+-          markOpeningDone(); // the film may load and play now
+-        };
+-        const onKey = (e: KeyboardEvent) => {
+-          if (e.key !== "Escape") return;
+-          if (tl) tl.progress(1);
+-          else finish();
+-        };
+-        window.addEventListener("keydown", onKey);
+-
+-        let cancelled = false;
+-        fontsReady().then(() => {
+-          if (cancelled || done) return;
+-
+-          // FLIP. First: the copy as CSS shows it, centered at 3.2x. Last: the real
+-          // nav wordmark. Both measured against the copy's untransformed box.
+-          const first = copy.getBoundingClientRect();
+-          copy.style.transform = "none";
+-          const box = copy.getBoundingClientRect();
+-          copy.style.transform = "";
+-          const last = navMark.getBoundingClientRect();
+-          gsap.set(copy, {
+-            transformOrigin: "0 0",
+-            x: first.left - box.left,
+-            y: first.top - box.top,
+-            scale: first.width / box.width,
+-            autoRound: false,
+-          });
+-
+-          const T = 0.6; // hold after fonts are ready
+-          const rise = { y: 0, opacity: 1, ease: "power3.out" };
+-          tl = gsap.timeline({ onComplete: finish });
+-          tl.to(copy, { x: last.left - box.left, y: last.top - box.top, scale: last.width / box.width, duration: 1, ease: "power3.inOut", autoRound: false }, T)
+-            // Same-frame swap: the copy now sits exactly on the nav wordmark.
+-            .set(copy, { opacity: 0 }, T + 1)
+-            .set(navMark, { opacity: 1 }, T + 1)
+-            .to(veil, { opacity: 0, duration: 0.8, ease: "power1.inOut" }, T + 0.15)
+-            .fromTo(poster, { scale: 1.04 }, { scale: 1, duration: 1.2, ease: "power2.out" }, T)
+-            .fromTo(lines, { y: 16, opacity: 0 }, { ...rise, duration: 0.5, stagger: 0.08 }, T + 0.5)
+-            .fromTo(".hero-sub", { y: 16, opacity: 0 }, { ...rise, duration: 0.45 }, T + 0.7)
+-            .fromTo(".hero-btn", { y: 16, opacity: 0 }, { ...rise, duration: 0.45 }, T + 0.8)
+-            .fromTo(navRest, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power1.out" }, T + 0.9);
+-        });
+-
+-        return () => {
+-          cancelled = true;
+-          tl?.kill();
+-          window.removeEventListener("keydown", onKey);
+-        };
+-      });
+       return () => {
+         mm.revert();
+         pastHero.kill();
+@@ -132,37 +109,30 @@ export default function Hero() {
+   );
+ 
+   return (
+-    <section ref={root} id="top" className="relative h-svh min-h-[520px] overflow-hidden bg-[#14110f] text-ground">
++    <section ref={root} id="top" aria-label="Fresca Interior Design" className="relative h-svh min-h-[520px] overflow-hidden bg-[#14110f] text-ground">
+       {/* Media: full bleed, cover, parallax on this wrapper. */}
+       <div className="hero-media absolute inset-0">
+-        <HeroMedia media={heroMedia} alt={hero.mediaAlt} />
++        <HeroMedia media={heroMedia} alt={hero.mediaAlt} onVideo={onVideo} />
+       </div>
+-      {/* Exactly two shades, warm near-black. The middle of the frame has none. */}
++      {/* One shade at the bottom for the caption, the thin one at the top for the
++          nav. Nothing in the middle of the frame. */}
+       <div aria-hidden="true" className="hero-shade-top pointer-events-none absolute inset-x-0 top-0" />
+       <div aria-hidden="true" className="hero-shade-bottom pointer-events-none absolute inset-x-0 bottom-0" />
+ 
+-      {/* Copy: bottom left inside the gutter, 9vh above the bottom edge. */}
+-      <div className="absolute inset-x-pad bottom-[9vh]">
+-        <h1 className="font-serif text-[clamp(40px,5.2vw,84px)] font-normal leading-[.98] tracking-[-.015em]">
+-          {hero.lines.map((line, i) => (
+-            <span key={line} className="hero-ln block">
+-              {i === hero.lines.length - 1 ? <em>{line}</em> : line}
+-            </span>
+-          ))}
+-        </h1>
+-        <p className="hero-sub mt-5 max-w-[440px] text-base">{hero.text}</p>
+-        <a className="hero-btn pill pill-accent mt-8" href={cta.href}>
+-          {cta.label}
++      {/* Caption and CTA: 40px above the bottom edge, in the gutter, on one baseline. */}
++      <div className="absolute inset-x-pad bottom-10 flex items-end justify-between gap-6">
++        <div className="hero-caption min-w-0">
++          <span className="mb-2 block text-[10px] uppercase tracking-[.3em] opacity-70">
++            <SceneLabel video={video} />
++          </span>
++          <p className="text-[15px] leading-[1.35] tracking-[.02em]">{hero.caption}</p>
++        </div>
++        <a href={cta.href} className="hero-cta shrink-0 text-[15px] leading-[1.35] tracking-[.02em]">
++          {cta.label} <span aria-hidden="true">→</span>
+         </a>
+       </div>
+ 
+-      {/* Opening veil and its centered wordmark: server-rendered, shown only under
+-          html.intro. The copy has the nav wordmark's exact markup and box. */}
+-      <div ref={veilRef} aria-hidden="true" className="intro-veil fixed inset-0 z-[60] bg-navy" />
+-      <div ref={copyRef} aria-hidden="true" className="intro-copy fixed z-[61] flex-col leading-none text-ground">
+-        <b className="font-serif text-[32px] font-normal italic">Fresca</b>
+-        <span className="mt-[3px] text-[9px] uppercase tracking-[.36em]">Interior Design</span>
+-      </div>
++      <Preloader />
+     </section>
+   );
+ }
+diff --git a/components/HeroMedia.tsx b/components/HeroMedia.tsx
+index 74a3ed5..db25be4 100644
+--- a/components/HeroMedia.tsx
++++ b/components/HeroMedia.tsx
+@@ -21,7 +21,7 @@ const AV1 = 'video/webm; codecs="av01.0.08M.10"';
+  * - Fades in over 400ms on `playing`, so poster → film is invisible.
+  * The file is a seamless loop: plain `loop`, no restart or `ended` handling.
+  */
+-export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt: string }) {
++export default function HeroMedia({ media, alt, onVideo }: { media: HeroMediaSources; alt: string; onVideo?: (video: HTMLVideoElement | null) => void }) {
+   const videoRef = useRef<HTMLVideoElement>(null);
+   const [src, setSrc] = useState<string | null>(null);
+   const [playing, setPlaying] = useState(false);
+@@ -43,6 +43,7 @@ export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt
+   useEffect(() => {
+     const video = videoRef.current;
+     if (!src || !video) return;
++    onVideo?.(video);
+     // React does not reliably reflect `muted` to the DOM, and iOS will not
+     // autoplay without it: set the property and the attribute ourselves.
+     video.muted = true;
+@@ -71,8 +72,9 @@ export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt
+       io.disconnect();
+       video.removeEventListener("playing", onPlaying);
+       document.removeEventListener("visibilitychange", sync);
++      onVideo?.(null);
+     };
+-  }, [src]);
++  }, [src, onVideo]);
+ 
+   return (
+     <>
+diff --git a/components/Navigation.tsx b/components/Navigation.tsx
+index 1d23a76..6395053 100644
+--- a/components/Navigation.tsx
++++ b/components/Navigation.tsx
+@@ -10,8 +10,9 @@ import Copy from "./Placeholder";
+ function Wordmark({ label, className = "" }: { label?: string; className?: string }) {
+   return (
+     <a href="#top" aria-label={label} className={`flex flex-col leading-none no-underline ${className}`}>
+-      <b className="font-serif text-[32px] font-normal italic">Fresca</b>{" "}
+-      <span className="mt-[3px] text-[9px] uppercase tracking-[.36em]">Interior Design</span>
++      {/* The opening's signed word FLIPs onto this element (components/Hero.tsx). */}
++      <b className="wordmark-word font-serif text-[32px] font-normal italic [text-rendering:geometricPrecision]">Fresca</b>{" "}
++      <span className="wordmark-caps mt-[3px] text-[9px] uppercase tracking-[.36em]">Interior Design</span>
+     </a>
+   );
+ }
+diff --git a/components/Preloader.tsx b/components/Preloader.tsx
+new file mode 100644
+index 0000000..6253604
+--- /dev/null
++++ b/components/Preloader.tsx
+@@ -0,0 +1,206 @@
++"use client";
++
++import { useRef } from "react";
++import { hero } from "@/content/site";
++import { preloaderStills } from "@/content/preloader";
++import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
++import { INTRO_KEY, markOpeningDone } from "@/lib/intro";
++import { MOTION } from "@/lib/motion";
++import { useSmoothScroll } from "./SmoothScroll";
++
++/** Hold per still, in seconds, 01 → 06 (pacing accelerates); 07 holds while the counter finishes. */
++const HOLDS = [0.52, 0.42, 0.34, 0.28, 0.24, 0.22];
++const LAST_HOLD = 0.45;
++
++type Still = { w: number; h: number };
++
++/**
++ * Frame geometry. The frame is a viewport-sized wrapper scaled non-uniformly to
++ * (fw, fh); each still is drawn at its own "cover the viewport" size, centred,
++ * and counter-scaled so it is never distorted and always covers the frame.
++ * At the end of the expand both scales are exactly 1, so the last still is drawn
++ * exactly as the hero poster's object-fit: cover. Self-contained so it can also
++ * run inline before first paint (see BEFORE_PAINT).
++ */
++function geometry(vw: number, vh: number, stills: Still[]) {
++  const phone = vw <= 480;
++  const boxW = phone ? vw * 0.72 : Math.min(vw * 0.34, 520);
++  const boxH = phone ? vh * 0.36 : Math.min(vh * 0.42, 440);
++  return stills.map((s) => {
++    const c = Math.max(vw / s.w, vh / s.h);
++    const fit = Math.min(boxW / s.w, boxH / s.h);
++    return { cw: s.w * c, ch: s.h * c, fw: s.w * fit, fh: s.h * fit };
++  });
++}
++
++/** Applies the frame size (fw, fh) and the current still's counter-scale. Transforms only. */
++function apply(frame: HTMLElement, img: HTMLElement, vw: number, vh: number, g: { cw: number; ch: number }, fw: number, fh: number) {
++  const sx = fw / vw;
++  const sy = fh / vh;
++  const m = Math.max(fw / g.cw, fh / g.ch); // the still covers the frame
++  frame.style.transform = `scale(${sx}, ${sy})`;
++  img.style.transform = `scale(${m / sx}, ${m / sy})`;
++}
++
++// Runs inline right after the markup, before first paint: sizes every still and
++// shows still 01 in its frame, so the first painted frame is final.
++const BEFORE_PAINT = `try{(function(){var geometry=${geometry.toString()};var apply=${apply.toString()};var vw=innerWidth,vh=innerHeight;var g=geometry(vw,vh,${JSON.stringify(preloaderStills.map(({ w, h }) => ({ w, h })))});var f=document.querySelector('.pl-frame');var imgs=f.querySelectorAll('img');imgs.forEach(function(el,i){el.style.width=g[i].cw+'px';el.style.height=g[i].ch+'px';el.style.marginLeft=-g[i].cw/2+'px';el.style.marginTop=-g[i].ch/2+'px'});apply(f,imgs[0],vw,vh,g[0],g[0].fw,g[0].fh)})()}catch(e){}`;
++
++/** Resolves when web fonts are ready, or after 1.5s so a slow font never blocks the page. */
++const fontsReady = () => Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => window.setTimeout(r, 1500))]);
++
++/** Resolves once two consecutive frames run under 20ms (the page may still be hydrating), or after `cap` ms. */
++const quietFrames = (cap = 800) =>
++  new Promise<void>((resolve) => {
++    const t0 = performance.now();
++    let last = t0;
++    let calm = 0;
++    const tick = (now: number) => {
++      calm = now - last < 20 ? calm + 1 : 0;
++      last = now;
++      if (calm >= 2 || now - t0 > cap) resolve();
++      else requestAnimationFrame(tick);
++    };
++    requestAnimationFrame(tick);
++  });
++
++/**
++ * The image-flash preloader (first visit per session, html.intro). An ivory
++ * field with the label and a 000 → 100 counter; the stills cut in hard inside
++ * one frame that resizes to each image; the last still (the film's first frame)
++ * expands into the full-bleed hero (FLIP onto the real poster) and swaps to it
++ * in the same frame. Then the nav, then the caption and the CTA. Transforms and
++ * opacity only. The film is not created until the swap.
++ */
++export default function Preloader() {
++  const root = useRef<HTMLDivElement>(null);
++  const { start } = useSmoothScroll();
++
++  useGSAP(
++    () => {
++      const mm = gsap.matchMedia();
++      mm.add(MOTION, () => {
++        const html = document.documentElement;
++        if (!html.classList.contains("intro")) return;
++        window.__introTakenOver = true;
++        window.scrollTo(0, 0);
++        document.body.classList.add("scroll-lock");
++
++        const el = root.current!;
++        const field = el.querySelector<HTMLElement>(".pl-field")!;
++        const frame = el.querySelector<HTMLElement>(".pl-frame")!;
++        const imgs = Array.from(frame.querySelectorAll<HTMLImageElement>("img"));
++        const counter = el.querySelector<HTMLElement>(".pl-count")!;
++        const fades = el.querySelectorAll(".pl-label, .pl-count");
++        const poster = document.querySelector<HTMLImageElement>(".hero-poster")!;
++        const header = document.querySelector(".site-header");
++        const shades = document.querySelectorAll(".hero-shade-top, .hero-shade-bottom");
++        const caption = document.querySelectorAll(".hero-caption");
++        const cta = document.querySelectorAll(".hero-cta");
++
++        let tl: gsap.core.Timeline | null = null;
++        let done = false;
++        const finish = () => {
++          if (done) return;
++          done = true;
++          window.removeEventListener("keydown", onKey);
++          try {
++            sessionStorage.setItem(INTRO_KEY, "1");
++          } catch {}
++          gsap.set([header, shades, caption, cta], { clearProps: "all" });
++          html.classList.remove("intro"); // hides the preloader, drops will-change
++          document.body.classList.remove("scroll-lock");
++          start();
++          ScrollTrigger.refresh();
++        };
++        const onKey = (e: KeyboardEvent) => {
++          if (e.key !== "Escape") return;
++          if (tl) tl.progress(1);
++          else {
++            markOpeningDone();
++            finish();
++          }
++        };
++        window.addEventListener("keydown", onKey);
++
++        let cancelled = false;
++        // Every still decoded before anything moves, so nothing pops in mid-flash.
++        Promise.all([fontsReady(), ...imgs.map((img) => img.decode().catch(() => {}))])
++          .then(() => quietFrames())
++          .then(() => {
++            if (cancelled || done) return;
++            const vw = innerWidth;
++            const vh = innerHeight;
++            const g = geometry(vw, vh, preloaderStills);
++            // FLIP target: the real poster's box (the full-bleed hero at scroll 0).
++            const target = poster.getBoundingClientRect();
++            const last = imgs.length - 1;
++            const size = { fw: g[0].fw, fh: g[0].fh };
++            let shown = 0;
++            const draw = () => apply(frame, imgs[shown], vw, vh, g[shown], size.fw, size.fh);
++            const show = (i: number) => {
++              imgs[shown].style.opacity = "0";
++              shown = i;
++              imgs[i].style.opacity = "1";
++              draw();
++            };
++
++            tl = gsap.timeline({ onComplete: finish });
++            // Flashes: hard cuts; the frame eases to each still's size.
++            let t = HOLDS[0];
++            for (let i = 1; i <= last; i++) {
++              tl.add(() => show(i), t);
++              tl.to(size, { fw: g[i].fw, fh: g[i].fh, duration: Math.min(0.2, (HOLDS[i] ?? LAST_HOLD) * 0.6), ease: "power2.out", onUpdate: draw }, t);
++              t += HOLDS[i] ?? LAST_HOLD;
++            }
++            // Counter: eases with the pacing to ~85 as still 06 ends, then 100.
++            const count = { v: 0 };
++            const paint = () => (counter.textContent = String(Math.round(count.v)).padStart(3, "0"));
++            const flashEnd = HOLDS.reduce((a, b) => a + b, 0);
++            tl.to(count, { v: 85, duration: flashEnd, ease: "power1.in", onUpdate: paint }, 0).to(count, { v: 100, duration: LAST_HOLD, ease: "power2.out", onUpdate: paint }, flashEnd);
++
++            // Expand: the frame grows onto the poster's box.
++            const T = flashEnd + LAST_HOLD;
++            tl.to(fades, { opacity: 0, duration: 0.25, ease: "power1.out" }, T)
++              .to(size, { fw: target.width, fh: target.height, duration: 1.1, ease: "power3.inOut", onUpdate: draw }, T)
++              // Same-frame swap to the poster (identical pixels), then the film.
++              .add(() => {
++                field.style.opacity = "0";
++                frame.style.opacity = "0";
++                markOpeningDone();
++              }, T + 1.1)
++              .fromTo(shades, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: "power1.inOut" }, T + 1.1)
++              .fromTo(header, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, ease: "power1.out" }, T + 1.1)
++              .fromTo(caption, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, T + 1.3)
++              .fromTo(cta, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, T + 1.4);
++          });
++
++        return () => {
++          cancelled = true;
++          tl?.kill();
++          window.removeEventListener("keydown", onKey);
++        };
++      });
++      return () => mm.revert();
++    },
++    { scope: root },
++  );
++
++  return (
++    <div ref={root} aria-hidden="true" className="preloader">
++      <div className="pl-field fixed inset-0 z-[60] bg-plaster text-ink">
++        <span className="pl-label absolute inset-x-0 top-[clamp(28px,6vh,56px)] text-center text-[11px] uppercase tracking-[.36em]">{hero.preloaderLabel}</span>
++        <span className="pl-count absolute inset-x-0 bottom-[clamp(28px,6vh,56px)] text-center font-serif text-xl tabular-nums">000</span>
++      </div>
++      <div className="pl-frame fixed inset-0 z-[61] overflow-hidden">
++        {preloaderStills.map((s, i) => (
++          // eslint-disable-next-line @next/next/no-img-element -- plain img: sized before first paint, decoded up front
++          <img key={s.src} src={s.src} alt="" width={s.w} height={s.h} decoding="sync" fetchPriority={i === 0 || i === preloaderStills.length - 1 ? "high" : "auto"} className="pl-still" style={{ opacity: i === 0 ? 1 : 0 }} />
++        ))}
++      </div>
++      {/* Server and client stringify the helpers from different bundles; the
++          script has already run by hydration, so its text never matters. */}
++      <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: BEFORE_PAINT }} />
++    </div>
++  );
++}
+diff --git a/components/Statement.tsx b/components/Statement.tsx
+new file mode 100644
+index 0000000..ad51cf9
+--- /dev/null
++++ b/components/Statement.tsx
+@@ -0,0 +1,38 @@
++"use client";
++
++import { useRef } from "react";
++import { cta, hero } from "@/content/site";
++import { gsap, useGSAP } from "@/lib/gsap";
++import { MOTION, revealLines } from "@/lib/motion";
++import Line from "./LineReveal";
++
++/** The page's main statement, first section under the film. Lines rise from their masks on scroll. */
++export default function Statement() {
++  const root = useRef<HTMLElement>(null);
++
++  useGSAP(
++    () => {
++      const mm = gsap.matchMedia();
++      mm.add(MOTION, () => {
++        revealLines(root.current!);
++        gsap.from(".st-fade", { opacity: 0, y: 14, duration: 0.9, stagger: 0.1, ease: "power2.out", scrollTrigger: { trigger: root.current, start: "top 70%" } });
++      });
++      return () => mm.revert();
++    },
++    { scope: root },
++  );
++
++  return (
++    <section ref={root} className="bg-ground px-pad py-[clamp(96px,16vh,180px)] text-ink">
++      <h1 className="font-serif text-[clamp(40px,5.2vw,84px)] font-normal leading-[.98] tracking-[-.015em]">
++        {hero.lines.map((line, i) => (
++          <Line key={line}>{i === hero.lines.length - 1 ? <em>{line}</em> : line}</Line>
++        ))}
++      </h1>
++      <p className="st-fade mt-6 max-w-[440px] text-base text-body">{hero.text}</p>
++      <a className="st-fade pill pill-accent mt-8" href={cta.href}>
++        {cta.label}
++      </a>
++    </section>
++  );
++}
+diff --git a/content/preloader.ts b/content/preloader.ts
+new file mode 100644
+index 0000000..9831392
+--- /dev/null
++++ b/content/preloader.ts
+@@ -0,0 +1,40 @@
++// Generated by scripts/make-preloader.mjs. Do not edit by hand.
++// Preloader stills in play order; the last one is the hero film's first frame.
++
++export const preloaderStills: { src: string; w: number; h: number }[] = [
++  {
++    "src": "/preloader/01.webp",
++    "w": 560,
++    "h": 376
++  },
++  {
++    "src": "/preloader/02.webp",
++    "w": 418,
++    "h": 560
++  },
++  {
++    "src": "/preloader/03.webp",
++    "w": 560,
++    "h": 560
++  },
++  {
++    "src": "/preloader/04.webp",
++    "w": 420,
++    "h": 560
++  },
++  {
++    "src": "/preloader/05.webp",
++    "w": 560,
++    "h": 418
++  },
++  {
++    "src": "/preloader/06.webp",
++    "w": 448,
++    "h": 560
++  },
++  {
++    "src": "/preloader/07.webp",
++    "w": 1920,
++    "h": 1080
++  }
++];
+diff --git a/content/site.ts b/content/site.ts
+index bf7df81..6e11ae7 100644
+--- a/content/site.ts
++++ b/content/site.ts
+@@ -80,7 +80,22 @@ export const cta = { href: "#contact", label: "Book a consultation" };
+ export const hero = {
+   lines: ["Designed from", "the plan up."], // second line is italic
+   text: "Kitchens, baths, and whole homes in Solana Beach.",
+-  /** Hero film and poster URLs live in lib/media/hero.ts. */
++  /** Over the film, bottom left. */
++  caption: "Kitchens, baths, and whole homes. Solana Beach.",
++  /** Scene labels, synced to the film. `from` = the shot's first frame (24fps cuts,
++   *  measured by stepping frames). The film dissolves back into shot 01 as it loops. */
++  scenes: [
++    { from: 0, label: "01 / 06 · Kitchen" },
++    { from: 1.042, label: "02 / 06 · Kitchen" },
++    { from: 3.333, label: "03 / 06 · Bath" },
++    { from: 5.0, label: "04 / 06 · Primary bath" },
++    { from: 6.875, label: "05 / 06 · Family room" },
++    { from: 8.792, label: "06 / 06 · Primary bedroom" },
++  ],
++  /** Shown instead of the scene labels under reduced motion (no film). */
++  staticScene: "Kitchens, baths, whole homes",
++  preloaderLabel: "Fresca · Interior Design",
++
+   mediaAlt: "A walk through kitchens, a bath, a living room and a bedroom designed by the studio",
+ };
+ 
+diff --git a/lib/intro.ts b/lib/intro.ts
+index f00b9eb..7d1e424 100644
+--- a/lib/intro.ts
++++ b/lib/intro.ts
+@@ -3,9 +3,10 @@ export const INTRO_KEY = "fresca-intro-played";
+ 
+ /**
+  * Runs before first paint (inlined in <head>). With motion allowed, on the
+- * first visit per session, it adds `intro`: the navy field and the centered
+- * wordmark are the first painted frame. If the page script never takes over,
+- * the class drops after 6s so a failed load still shows the page.
++ * first visit per session, it adds `intro`: the preloader (ivory field, label,
++ * 000 counter and the first still) is the first painted frame. If the page
++ * script never takes over, the class drops after 6s so a failed load still
++ * shows the page.
+  */
+ export const introScript = `try{var d=document.documentElement;if(!matchMedia('(prefers-reduced-motion: reduce)').matches){if(!sessionStorage.getItem('${INTRO_KEY}')){d.classList.add('intro');setTimeout(function(){if(!window.__introTakenOver)d.classList.remove('intro')},6000)}}}catch(e){}`;
+ 
+diff --git a/public/preloader/01.webp b/public/preloader/01.webp
+new file mode 100644
+index 0000000..a783ef0
+Binary files /dev/null and b/public/preloader/01.webp differ
+diff --git a/public/preloader/02.webp b/public/preloader/02.webp
+new file mode 100644
+index 0000000..7529eee
+Binary files /dev/null and b/public/preloader/02.webp differ
+diff --git a/public/preloader/03.webp b/public/preloader/03.webp
+new file mode 100644
+index 0000000..e5c003e
+Binary files /dev/null and b/public/preloader/03.webp differ
+diff --git a/public/preloader/04.webp b/public/preloader/04.webp
+new file mode 100644
+index 0000000..80bbd03
+Binary files /dev/null and b/public/preloader/04.webp differ
+diff --git a/public/preloader/05.webp b/public/preloader/05.webp
+new file mode 100644
+index 0000000..e9af324
+Binary files /dev/null and b/public/preloader/05.webp differ
+diff --git a/public/preloader/06.webp b/public/preloader/06.webp
+new file mode 100644
+index 0000000..4534cda
+Binary files /dev/null and b/public/preloader/06.webp differ
+diff --git a/public/preloader/07.webp b/public/preloader/07.webp
+new file mode 100644
+index 0000000..69f2597
+Binary files /dev/null and b/public/preloader/07.webp differ
+diff --git a/scripts/make-preloader.mjs b/scripts/make-preloader.mjs
+new file mode 100644
+index 0000000..5e60a83
+--- /dev/null
++++ b/scripts/make-preloader.mjs
+@@ -0,0 +1,47 @@
++// Indexes the preloader stills in public/preloader/ (filename order) and writes
++// content/preloader.ts with each image's size, so the first flash can be server
++// rendered at the right aspect ratio. The LAST image must be the hero film's
++// first frame: it expands into the hero poster.
++//
++//   node scripts/make-preloader.mjs              index whatever is in the folder
++//   node scripts/make-preloader.mjs --standins   first write stand-ins: six kept
++//                                                photos + the film's poster as 07
++import { readdirSync, writeFileSync, copyFileSync, statSync, rmSync } from "node:fs";
++import sharp from "sharp";
++
++const DIR = "public/preloader";
++
++if (process.argv.includes("--standins")) {
++  // STAND-INS until the real stills arrive. Mixed ratios on purpose.
++  for (const f of readdirSync(DIR)) rmSync(`${DIR}/${f}`);
++  // [photo, crop ratio w/h or null for its own]
++  const picks = [["black-hood-kitchen-island", null], ["blush-guest-bedroom", null], ["orb-chandelier-dining", 1], ["navy-double-vanity", null], ["cognac-living-room", null], ["walnut-guest-bath", 0.8]];
++  for (const [i, [name, ratio]] of picks.entries()) {
++    const img = sharp(`public/images/${name}.jpg`);
++    const m = await img.metadata();
++    const r = ratio ?? m.width / m.height; // one resize: sharp applies only the last
++    const [w, h] = r >= 1 ? [560, Math.round(560 / r)] : [Math.round(560 * r), 560];
++    await img.resize(w, h, { fit: "cover" }).webp({ quality: 70 }).toFile(`${DIR}/${String(i + 1).padStart(2, "0")}.webp`);
++  }
++  const poster = process.argv[process.argv.indexOf("--standins") + 1];
++  if (!poster || poster.startsWith("--")) throw new Error("--standins needs the path to the film's poster webp as the next argument");
++  copyFileSync(poster, `${DIR}/07.webp`); // byte-identical to the hero poster, so the handoff is pixel-exact
++}
++
++const files = readdirSync(DIR).filter((f) => /\.(webp|jpe?g|png|avif)$/i.test(f)).sort();
++const items = [];
++let bytes = 0;
++for (const f of files) {
++  const m = await sharp(`${DIR}/${f}`).metadata();
++  bytes += statSync(`${DIR}/${f}`).size;
++  items.push({ src: `/preloader/${f}`, w: m.width, h: m.height });
++}
++writeFileSync(
++  "content/preloader.ts",
++  `// Generated by scripts/make-preloader.mjs. Do not edit by hand.
++// Preloader stills in play order; the last one is the hero film's first frame.
++
++export const preloaderStills: { src: string; w: number; h: number }[] = ${JSON.stringify(items, null, 2)};
++`,
++);
++console.log(`${items.length} stills, ${(bytes / 1024).toFixed(0)} KB:`, items.map((i) => `${i.src.split("/").pop()} ${i.w}×${i.h}`).join(", "));
+diff --git a/tailwind.config.ts b/tailwind.config.ts
+index 333b5df..c920474 100644
+--- a/tailwind.config.ts
++++ b/tailwind.config.ts
+@@ -11,6 +11,7 @@ const config: Config = {
+         // Two fields only: cream (everything) and navy (Approach and the Contact
+         // footer). Terracotta is the single action color in both.
+         ground: "#F4F2EB",
++        plaster: "#EFE8DC", // opening veil only: warm ivory
+         navy: "#2B3A55",
+         ink: "#1D1C1A",
+         body: "#4A4740",

@@ -1,0 +1,507 @@
+diff --git a/app/globals.css b/app/globals.css
+index 2b61ef0..ca9f4f0 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -11,12 +11,26 @@
+   --line: rgba(29, 28, 26, 0.14);
+   --accent: #2b3a55;
+   --on-dark: #cfc9bc;
++  --terracotta: #a9502f;
+   --serif: var(--font-instrument), Georgia, serif;
+   --mono: var(--font-plex-mono), ui-monospace, monospace;
+   --sans: var(--font-hanken), system-ui, sans-serif;
+   --pad: clamp(16px, 2.2vw, 32px);
+ }
+ 
++/* Missing content, see content/placeholders.ts. Never final copy. */
++.placeholder {
++  color: var(--terracotta);
++  font-family: var(--mono);
++  font-size: 0.85em;
++  font-style: normal;
++  letter-spacing: 0;
++}
++footer .placeholder,
++#menu .placeholder {
++  color: #e08a66;
++}
++
+ /* Lenis */
+ html.lenis,
+ html.lenis body {
+@@ -62,6 +76,27 @@ html.lenis body {
+     @apply inline-flex min-h-[44px] cursor-pointer items-center gap-2.5 rounded-full border border-current bg-transparent px-5 text-xs uppercase tracking-[.18em] no-underline;
+   }
+ 
++  /* Header text links: ink, underline drawn in on hover. The CTA is the
++     terracotta action color, underlined at rest. */
++  .nav-link,
++  .nav-cta {
++    @apply relative py-2 no-underline;
++  }
++  .nav-link::after,
++  .nav-cta::after {
++    @apply absolute inset-x-0 bottom-1 h-px origin-left bg-current content-[''];
++  }
++  .nav-link::after {
++    @apply scale-x-0 transition-transform duration-300 ease-curtain;
++  }
++  .nav-link:hover::after,
++  .nav-link:focus-visible::after {
++    @apply scale-x-100;
++  }
++  .nav-cta {
++    @apply text-terracotta hover:text-[#8f4227];
++  }
++
+   .pill {
+     @apply inline-flex min-h-[48px] items-center rounded-full px-6 text-xs uppercase tracking-[.18em] no-underline transition-colors duration-300;
+   }
+@@ -71,6 +106,9 @@ html.lenis body {
+   .pill-line {
+     @apply border border-current hover:bg-ink hover:text-ground;
+   }
++  .pill-accent {
++    @apply bg-terracotta text-ground hover:bg-[#8f4227];
++  }
+   .pill-dark {
+     @apply bg-ink text-ground hover:bg-[#38352f];
+   }
+@@ -86,22 +124,9 @@ html.intro .site-header {
+   visibility: hidden;
+ }
+ html.intro .hero-media {
+-  clip-path: inset(37% 41.5% 37% 41.5% round 3px);
+-}
+-html.intro .hero-media img {
+   opacity: 0;
+   visibility: hidden;
+ }
+-html.intro .hero-media .hero-cycle:first-child img {
+-  opacity: 1;
+-  visibility: visible;
+-}
+-html.intro .hero-final {
+-  transform: scale(1.35);
+-}
+-html.intro .hero-shade {
+-  opacity: 0;
+-}
+ html.intro .hero-ln > span {
+   transform: translateY(110%);
+ }
+@@ -110,8 +135,10 @@ html.intro .hero-fade {
+   visibility: hidden;
+   transform: translateY(14px);
+ }
+-html:not(.intro) .intro-ui,
+-html:not(.intro) .hero-cycle {
++html.intro .intro-mark {
++  opacity: 0;
++}
++html:not(.intro) .intro-ui {
+   display: none;
+ }
+ 
+diff --git a/assets/source/arch-mark.svg b/assets/source/arch-mark.svg
+new file mode 100644
+index 0000000..cc96345
+--- /dev/null
++++ b/assets/source/arch-mark.svg
+@@ -0,0 +1,8 @@
++<!-- PROVISIONAL arch mark for the favicon. No crest or arch artwork was found in
++     the project; replace this file with the real arch from the crest and re-run
++     scripts/make-favicons.mjs. Ink on cream. -->
++<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
++  <rect width="64" height="64" fill="#F4F2EB"/>
++  <path d="M21 51V29a11 11 0 0 1 22 0v22" fill="none" stroke="#1D1C1A" stroke-width="3.5"/>
++  <path d="M14 51h36" fill="none" stroke="#1D1C1A" stroke-width="3.5" stroke-linecap="square"/>
++</svg>
+diff --git a/components/Navigation.tsx b/components/Navigation.tsx
+index 145b02c..78390de 100644
+--- a/components/Navigation.tsx
++++ b/components/Navigation.tsx
+@@ -5,6 +5,7 @@ import { cta, navLinks, site } from "@/content/site";
+ import { gsap, useGSAP } from "@/lib/gsap";
+ import { prefersReducedMotion } from "@/lib/motion";
+ import { useSmoothScroll } from "./SmoothScroll";
++import Copy from "./Placeholder";
+ 
+ function Wordmark({ label }: { label?: string }) {
+   return (
+@@ -22,6 +23,14 @@ export default function Navigation() {
+   const closeBtnRef = useRef<HTMLButtonElement>(null);
+   const { stop, start } = useSmoothScroll();
+   const { contextSafe } = useGSAP({ scope: menuRef });
++  const [scrolled, setScrolled] = useState(false);
++
++  useEffect(() => {
++    const onScroll = () => setScrolled(window.scrollY > 8);
++    onScroll();
++    window.addEventListener("scroll", onScroll, { passive: true });
++    return () => window.removeEventListener("scroll", onScroll);
++  }, []);
+ 
+   const animateLinks = contextSafe(() => {
+     if (prefersReducedMotion()) return;
+@@ -62,25 +71,34 @@ export default function Navigation() {
+ 
+   return (
+     <>
+-      {/* Difference blend keeps the header legible on any background. */}
+-      <header className="site-header pointer-events-none fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-4 px-pad py-5 text-white mix-blend-difference [&>*]:pointer-events-auto">
++      {/* Solid cream bar: readable at the top of the page and over the dark sections.
++          A hairline appears once the page has scrolled. */}
++      <header
++        data-scrolled={scrolled || undefined}
++        className="site-header fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-6 border-b border-transparent bg-ground px-pad py-4 text-ink transition-colors duration-300 data-[scrolled]:border-line"
++      >
+         <Wordmark label="Fresca Interior Design, home" />
+-        <div className="flex items-center gap-2.5">
+-          <button
+-            ref={menuBtnRef}
+-            type="button"
+-            className="hbtn"
+-            aria-expanded={open}
+-            aria-controls="menu"
+-            onClick={openMenu}
+-          >
+-            <i aria-hidden="true" className="block h-px w-4 -translate-y-0.5 bg-current shadow-[0_5px_0_currentColor]" />
+-            Menu
+-          </button>
+-          <a className="hbtn max-md:hidden" href={cta.href}>
++        <nav aria-label="Main" className="flex items-center gap-[clamp(20px,2.6vw,40px)] max-md:hidden">
++          {navLinks.map((link) => (
++            <a key={link.href} href={link.href} className="nav-link text-sm">
++              {link.label}
++            </a>
++          ))}
++          <a href={cta.href} className="nav-cta text-sm">
+             {cta.label}
+           </a>
+-        </div>
++        </nav>
++        <button
++          ref={menuBtnRef}
++          type="button"
++          className="hbtn md:hidden"
++          aria-expanded={open}
++          aria-controls="menu"
++          onClick={openMenu}
++        >
++          <i aria-hidden="true" className="block h-px w-4 -translate-y-0.5 bg-current shadow-[0_5px_0_currentColor]" />
++          Menu
++        </button>
+       </header>
+ 
+       <div
+@@ -99,7 +117,7 @@ export default function Navigation() {
+             Close
+           </button>
+         </div>
+-        <nav aria-label="Main" className="flex flex-1 flex-col justify-center gap-1 py-10">
++        <nav aria-label="Menu" className="flex flex-1 flex-col justify-center gap-1 py-10">
+           {navLinks.map((link, i) => (
+             <span key={link.href} className="ln">
+               <a
+@@ -115,12 +133,12 @@ export default function Navigation() {
+         </nav>
+         <div className="flex flex-wrap justify-between gap-4 text-sm text-on-dark">
+           <span>{site.location}</span>
+-          <a className="no-underline" href={site.phone.href}>
+-            {site.phone.label}
+-          </a>
+-          <a className="no-underline" href={`mailto:${site.email}`}>
+-            {site.email}
+-          </a>
++          <span>
++            <Copy text={site.phone.label} />
++          </span>
++          <span>
++            <Copy text={site.email} />
++          </span>
+         </div>
+       </div>
+     </>
+diff --git a/content/site.ts b/content/site.ts
+index 59bb88d..e586edf 100644
+--- a/content/site.ts
++++ b/content/site.ts
+@@ -1,7 +1,10 @@
+ /**
+  * All copy and data for the Fresca homepage. Edit text here, not in components.
+  *
+- * Anything marked `// DEMO:` is a placeholder until the client sends real info.
++ * Known facts: the designer is Karen Onofrey; the studio is Fresca Interior
++ * Design, LLC, Solana Beach, incorporated November 2025. Nothing else about her,
++ * her clients or her projects is known, so do not add facts here. Missing
++ * content goes in content/placeholders.ts and renders as [PLACEHOLDER: ...].
+  *
+  * IMAGE MAP (original client photo number → public/images/ file)
+  * Generated by scripts/prepare-images.mjs. Photos come from the upscaled
+@@ -25,6 +28,8 @@
+  *                                          44 → sectional-living-room.jpg
+  */
+ 
++import { placeholders } from "./placeholders";
++
+ const img = (name: string) => `/images/${name}.jpg`;
+ 
+ export type Photo = { src: string; alt: string };
+@@ -34,33 +39,30 @@ export type Photo = { src: string; alt: string };
+ export const site = {
+   name: "Fresca Interior Design",
+   shortName: "Fresca",
+-  url: "https://frescainteriordesign.com", // DEMO: confirm the production domain (or set NEXT_PUBLIC_SITE_URL)
+-  title: "Fresca Interior Design | San Diego",
++  url: "https://frescainteriordesign.com", // Unconfirmed: set NEXT_PUBLIC_SITE_URL to the real domain
++  title: "Fresca Interior Design | Solana Beach",
+   description:
+-    "Fresca is a residential interior design studio in San Diego designing kitchens, bathrooms and whole homes from the floor plan up.",
++    "Fresca is a residential interior design studio in Solana Beach designing kitchens, bathrooms and whole homes from the floor plan up.",
+   ogImage: { url: img("og-image"), width: 1200, height: 629, alt: "White shaker kitchen with a black range hood and marble island" },
+-  location: "San Diego, California",
+-  phone: { label: "(858) 555-0142", href: "tel:+18585550142" }, // DEMO: placeholder phone number
+-  email: "hello@frescainteriordesign.com", // DEMO: placeholder email
+-  instagram: { handle: "@frescainteriordesign", href: "#contact" }, // DEMO: placeholder handle; point href at the real profile
+-  copyright: "© 2026 Fresca Interior Design",
++  location: "Solana Beach, California",
++  /** Phone, email and Instagram render as text (no link) while they are placeholders. */
++  phone: { label: placeholders.phone, href: "" },
++  email: placeholders.email,
++  instagram: { handle: placeholders.instagram, href: "" },
++  copyright: "© 2026 Fresca Interior Design, LLC",
+ };
+ 
+ export const founder = {
+-  name: "Elena Marquez", // DEMO: placeholder founder name
+-  initials: "EM", // DEMO: derived from the placeholder name
+-  role: "Founder & principal designer",
++  name: "Karen Onofrey",
+ };
+ const firstName = founder.name.split(" ")[0];
+ 
+ // ───────── navigation
+ 
+ export const navLinks = [
++  { href: "#work", label: "Work" },
+   { href: "#about", label: "Studio" },
+-  { href: "#work", label: "Projects" },
+-  { href: "#process", label: "Process" },
+-  { href: "#about-us", label: "About" },
+-  { href: "#faq", label: "FAQ" },
++  { href: "#approach", label: "Approach" },
+   { href: "#contact", label: "Contact" },
+ ];
+ 
+@@ -76,18 +78,8 @@ export const cta = { href: "#contact", label: "Book a consultation" };
+ // ───────── hero
+ 
+ export const hero = {
+-  eyebrow: "Residential interiors · San Diego",
+-  lines: ["Interiors that", "feel fresh."], // second line is italic
+-  text: "Kitchens, bathrooms and whole homes, designed from the floor plan up.",
+-  introLabel: "Fresca · Interior Design",
+-  /** Photos that flash in the small frame during the intro, in order. */
+-  cycle: [
+-    img("walnut-island-kitchen"),
+-    img("cognac-living-room"),
+-    img("black-hex-shower"),
+-    img("orb-chandelier-dining"),
+-    img("navy-chair-great-room"),
+-  ],
++  lines: ["Kitchens, baths,", "and whole homes,", "designed from", "the plan up."], // last line is italic
++  text: "A residential design studio in Solana Beach.",
+   image: {
+     src: img("black-hood-kitchen"),
+     alt: "White shaker kitchen with a black range hood, marble island and three glass pendants",
+@@ -110,7 +102,7 @@ type WallPlate = {
+   kind: "plate";
+   no: string;
+   title: string;
+-  city: string; // DEMO: project cities are placeholders
++  room: string;
+   src: string;
+   ratio: string;
+   x: string;
+@@ -145,49 +137,49 @@ export const studio = {
+   items: [
+     { kind: "word", text: "A fresh", x: "3%", y: "11%", speed: 0.55 },
+     {
+-      kind: "plate", no: "Pl. 01", title: "Black-Hood Kitchen", city: "Rancho Bernardo",
++      kind: "plate", no: "Pl. 01", title: "Black-Hood Kitchen", room: "Kitchen",
+       src: img("black-hood-kitchen-island"), ratio: "4/5", x: "42%", y: "7%", w: "21%", speed: 1.25,
+       dim: { dir: "h", label: "2.5 COL · 4 : 5" },
+       // maxLen keeps the label clear of "A fresh" below ~1440px wide.
+       callout: { side: "l", px: "50%", py: "26%", len: "260px", maxLen: "calc(29vw - 150px)", text: "Glass pendants ×3" },
+     },
+     {
+-      kind: "plate", no: "Pl. 02", title: "Blush Guest Bedroom", city: "Poway",
++      kind: "plate", no: "Pl. 02", title: "Blush Guest Bedroom", room: "Bedroom",
+       src: img("blush-guest-bedroom"), ratio: "3/4", x: "79%", y: "17%", w: "13%", speed: 1.9, right: true,
+     },
+     { kind: "word", text: "home,", x: "62%", y: "35%", speed: 0.85, right: true },
+     {
+-      kind: "plate", no: "Pl. 03", title: "Navy Double Vanity", city: "Carmel Valley",
++      kind: "plate", no: "Pl. 03", title: "Navy Double Vanity", room: "Bath",
+       src: img("navy-double-vanity"), ratio: "3/4", x: "7%", y: "35%", w: "15%", speed: 1.45,
+       dim: { dir: "v", side: "l", label: "3 : 4" },
+     },
+     {
+       kind: "text",
+-      text: "Fresca is a residential design studio in San Diego. We design kitchens, baths and whole homes around how you actually live in them.",
++      text: "Fresca is a residential design studio in Solana Beach. We design kitchens, baths and whole homes around how you actually live in them.",
+       x: "30%",
+       y: "45%",
+       speed: 1,
+       maxWidth: "min(330px, calc(31% - 20px))", // plate 4 starts at 61%
+     },
+     {
+-      kind: "plate", no: "Pl. 04", title: "Two-Story Living Room", city: "Carmel Valley",
++      kind: "plate", no: "Pl. 04", title: "Two-Story Living Room", room: "Living room",
+       src: img("two-story-living-room"), ratio: "4/5", x: "61%", y: "50%", w: "25%", speed: 1.05, right: true,
+       dim: { dir: "h", label: "3 COL · 4 : 5" },
+       callout: { side: "r", px: "80%", py: "84%", len: "110px", text: "Linen sectional" },
+     },
+     { kind: "word", text: "considered.", italic: true, x: "2%", y: "61%", speed: 0.7 },
+     {
+-      kind: "plate", no: "Pl. 05", title: "Orb Pendant Kitchen", city: "Poway",
++      kind: "plate", no: "Pl. 05", title: "Orb Pendant Kitchen", room: "Kitchen",
+       src: img("blue-gray-island-kitchen"), ratio: "1/1", x: "47%", y: "74%", w: "13%", speed: 1.8,
+       callout: { side: "l", px: "45%", py: "70%", len: "165px", text: "Blue-gray island" },
+     },
+     {
+-      kind: "plate", no: "Pl. 06", title: "Walnut Guest Bath", city: "Encinitas",
++      kind: "plate", no: "Pl. 06", title: "Walnut Guest Bath", room: "Bath",
+       src: img("walnut-guest-bath"), ratio: "3/4", x: "86%", y: "77%", w: "11%", speed: 1.65, right: true,
+       dim: { dir: "v", side: "l", label: "3 : 4" },
+     },
+     {
+-      kind: "plate", no: "Pl. 07", title: "Bay Window Dining", city: "Rancho Bernardo",
++      kind: "plate", no: "Pl. 07", title: "Bay Window Dining", room: "Dining room",
+       src: img("bay-window-dining"), ratio: "1/1", x: "12%", y: "83%", w: "17%", speed: 1.3,
+       dim: { dir: "h", label: "2 COL · 1 : 1" },
+     },
+@@ -209,36 +201,27 @@ export const showcase = {
+   eyebrow: "(02) Selected work",
+   projects: [
+     {
+-      title: "Coastal Blue Family Room",
+-      weeks: "8", // DEMO: timeline placeholder
+-      area: "510", // DEMO: square footage placeholder
+-      city: "Carmel Valley", // DEMO: city placeholder
++      title: "Blue Family Room",
++      room: "Family room",
+       image: { src: img("mosaic-fireplace-family-room"), alt: "Family room with mosaic fireplace and blue art" },
+     },
+     {
+       title: "Cognac & Linen Living Room",
+-      weeks: "10", // DEMO: timeline placeholder
+-      area: "640", // DEMO: square footage placeholder
+-      city: "Encinitas", // DEMO: city placeholder
++      room: "Living room",
+       image: { src: img("cognac-living-room"), alt: "Vaulted living room with cognac leather sofas and woven chairs" },
+     },
+     {
+-      title: "Hillside Gloss Kitchen",
+-      weeks: "14", // DEMO: timeline placeholder
+-      area: "420", // DEMO: square footage placeholder
+-      city: "Poway", // DEMO: city placeholder
++      title: "Gloss Kitchen",
++      room: "Kitchen",
+       image: { src: img("gloss-kitchen"), alt: "Modern kitchen with white gloss cabinets and charcoal counters" },
+     },
+     {
+-      title: "Reclaimed Wood Primary Suite",
+-      weeks: "12", // DEMO: timeline placeholder
+-      area: "380", // DEMO: square footage placeholder
+-      city: "Rancho Bernardo", // DEMO: city placeholder
++      title: "Reclaimed Wood Bedroom",
++      room: "Bedroom",
+       image: { src: img("reclaimed-wood-bedroom"), alt: "Bedroom with reclaimed wood wall and tufted headboard" },
+     },
+   ],
+-  labels: { weeks: "Completed in", area: "Area", city: "Location" },
+-  projectLink: { href: "#work", label: "View project" }, // DEMO: no project pages yet
++  projectLink: { href: "#work", label: "View project" }, // no project pages yet
+ };
+ 
+ // ───────── promises (working with us)
+@@ -323,20 +306,9 @@ export const approach = {
+ export const about = {
+   eyebrow: "(05) About us",
+   heading: ["About", "Fresca."],
+-  text: `Founded by designer ${founder.name}, Fresca works with homeowners across North County and the coast. We take on a small number of projects at a time so each one gets full attention.`,
++  text: `Fresca Interior Design is the studio of designer ${founder.name}, based in Solana Beach.`,
++  bio: placeholders.aboutBio,
+   link: { href: "#work", label: "View projects" },
+-  stats: [
+-    { label: "Years designing homes", value: "12", image: { src: img("iron-bed-bedroom"), alt: "Bedroom with iron bed and floral bedding" } }, // DEMO: stat placeholder
+-    { label: "Rooms designed", value: "140+", image: { src: img("sectional-living-room"), alt: "Living room with sectional and tall windows" } }, // DEMO: stat placeholder
+-    { label: "Neighborhoods served", value: "9", image: { src: img("hammered-sink-bath"), alt: "Bathroom with hammered sinks and lantern sconce" } }, // DEMO: stat placeholder
+-    { label: "Clients who came back", value: "1 in 3", image: { src: img("bay-window-sitting-room"), alt: "Sitting room with bay windows and fireplace" } }, // DEMO: stat placeholder
+-  ],
+-};
+-
+-// ───────── founder quote
+-
+-export const quote = {
+-  text: "“If a room needs explaining, it isn’t finished yet.”",
+ };
+ 
+ // ───────── FAQ
+@@ -351,15 +323,15 @@ export const faq = {
+     },
+     {
+       q: "Do you manage the remodel, or only the design?",
+-      a: "We design and document the project, then work alongside your contractor through construction. If you don’t have a contractor yet, we can recommend ones we have worked with before.",
++      a: `We design and document the project, then work alongside your contractor through construction. ${placeholders.faqContractors}`,
+     },
+     {
+       q: "How is a project priced?",
+-      a: "Design is billed as a flat fee based on the size and scope of the project, which we set after the first consultation. Construction and furnishings are paid directly to your contractor and vendors.",
++      a: placeholders.faqPricing,
+     },
+     {
+       q: "How long does a kitchen or bathroom take?",
+-      a: "Design usually takes four to eight weeks. Construction depends on the contractor and materials, but most kitchens take two to four months and most bathrooms six to ten weeks.",
++      a: placeholders.faqTimeline,
+     },
+     {
+       q: "Do you take on single rooms?",
+@@ -373,10 +345,11 @@ export const faq = {
+ export const contact = {
+   eyebrow: "(07) Get in touch",
+   heading: ["Let's talk about", "your home."], // second line is italic
+-  text: `Tell us which rooms you're thinking about and roughly when. ${firstName} replies personally within two business days.`,
++  text: `Tell us which rooms you're thinking about and roughly when. ${firstName} replies personally.`,
++  responseTime: placeholders.responseTime,
+   fields: { name: "Name", email: "Email", message: "About your project" },
+   submit: "Send inquiry",
+   sending: "Sending…",
+-  thanks: "Thank you. We’ll be in touch within two business days.",
++  thanks: "Thank you. We’ll be in touch soon.",
+   error: "Something went wrong sending your message. Please try again, or email us directly.",
+ };
+diff --git a/scripts/make-favicons.mjs b/scripts/make-favicons.mjs
+new file mode 100644
+index 0000000..83fc5cc
+--- /dev/null
++++ b/scripts/make-favicons.mjs
+@@ -0,0 +1,16 @@
++// Renders the arch mark (assets/source/arch-mark.svg) to the favicon sizes Next
++// serves from app/: icon.png (32×32) and apple-icon.png (180×180).
++// Run: node scripts/make-favicons.mjs
++import { fileURLToPath } from "node:url";
++import sharp from "sharp";
++
++const src = fileURLToPath(new URL("../assets/source/arch-mark.svg", import.meta.url));
++const sizes = [
++  ["app/icon.png", 32],
++  ["app/apple-icon.png", 180],
++];
++
++for (const [out, size] of sizes) {
++  await sharp(src, { density: (72 * size) / 64 }).resize(size, size).png().toFile(out);
++  console.log(`${out} ${size}×${size}`);
++}

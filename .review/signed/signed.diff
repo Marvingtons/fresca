@@ -1,0 +1,603 @@
+diff --git a/app/globals.css b/app/globals.css
+index d1f015b..0e314bf 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -15,6 +15,10 @@
+   --mono: var(--font-plex-mono), ui-monospace, monospace;
+   --sans: var(--font-hanken), system-ui, sans-serif;
+   --pad: clamp(16px, 2.2vw, 32px);
++  /* Whole pixels where supported, so the nav wordmark (and the opening's FLIP
++     onto it) lands on the pixel grid. */
++  --pad: round(clamp(16px, 2.2vw, 32px), 1px);
++  --plaster: #efe8dc;
+ }
+ 
+ /* Missing content, see content/placeholders.ts. Never final copy. */
+@@ -144,60 +148,142 @@ html:not(.past-hero) .site-header .nav-cta {
+ }
+ 
+ /* ───────── opening: pre-paint state, set by the inline script in <head>
+-   (lib/intro.ts) on the first visit per session. Without html.intro the page
+-   renders final. The navy veil covers the laid-out hero (poster showing, no
+-   video yet) with a copy of the nav wordmark centered at 3.2x. Moving elements
+-   carry will-change only while html.intro is set. */
++   (lib/intro.ts). Without these classes the page renders final.
++   html.hero-in (every visit with motion): the hero copy waits to rise in.
++   html.intro (first visit per session): the ivory veil covers the laid-out hero
++   (poster showing, no video), and the name waits to be signed on it.
++   will-change applies only while the classes are set. */
+ html.intro {
+   overflow: hidden;
+ }
+ body.scroll-lock {
+   overflow: hidden;
+ }
++.hero-mask {
++  /* Room for ascenders and the italic overhang inside the mask; cancelled by the
++     negative margins so the layout is unchanged. */
++  overflow: hidden;
++  padding: 0.12em 0.1em 0.08em;
++  margin: -0.12em -0.1em -0.08em;
++}
++html.hero-in .hero-ln {
++  transform: translateY(105%);
++  will-change: transform;
++}
++html.hero-in .hero-sub,
++html.hero-in .hero-btn {
++  opacity: 0;
++  transform: translateY(12px);
++  will-change: transform, opacity;
++}
++html.hero-in .site-header nav a,
++html.hero-in .site-header .hbtn {
++  opacity: 0;
++}
++
+ .intro-veil,
+-.intro-copy {
++.intro-sig {
+   display: none;
+ }
++html.intro .intro-veil,
++html.intro .intro-sig {
++  display: block;
++}
+ html.intro .intro-veil {
++  /* Extends below the viewport so its 2vh upward drift never uncovers an edge. */
++  bottom: -4vh;
++  will-change: transform, opacity;
++}
++.intro-sig {
++  position: fixed;
++  inset: 0;
++  z-index: 61;
++  pointer-events: none;
++  color: var(--ink);
++}
++/* The word: the nav wordmark's font, size and weight, centred and drawn at 3x
++   (2.6x on phones). Its box masks the letters so they rise from behind it. */
++.sig-word {
++  position: absolute;
++  left: 50%;
++  top: 50%;
+   display: block;
++  overflow: hidden;
++  /* Whole-pixel padding, so the moving layer sits on the pixel grid and its
++     glyphs rasterize on the same rows as the nav wordmark's at the swap. */
++  padding: 5px 10px 3px;
++  font-size: 32px;
++  font-weight: 400;
++  line-height: 1;
++  white-space: nowrap;
++  text-rendering: geometricPrecision;
++  transform: translate(-50%, calc(-50% - 22px)) scale(3);
++  will-change: transform;
+ }
+-html.intro .intro-copy {
+-  display: flex;
+-  /* The nav wordmark's slot (header gutter, 16px top padding), moved to the
+-     viewport center and scaled; the script FLIPs it back onto the real one. */
+-  left: var(--pad);
+-  top: 16px;
+-  transform: translate(calc(50vw - var(--pad) - 50%), calc(50svh - 16px - 50%)) scale(3.2);
++@media (max-width: 480px) {
++  .sig-word {
++    transform: translate(-50%, calc(-50% - 18px)) scale(2.6);
++  }
++}
++.sig-run {
++  display: inline-block;
++}
++.sig-l {
++  display: inline-block;
++}
++.sig-bone {
++  position: absolute;
++  left: 10px;
++  top: 5px;
++  color: var(--ground);
++  opacity: 0;
++}
++html.intro .sig-ink .sig-l {
++  transform: translateY(105%);
+   will-change: transform;
+ }
+-/* At 3.2x the wordmark is ~387px wide: on phones it would touch the edges. */
++.sig-under {
++  position: absolute;
++  left: 50%;
++  top: calc(50% + 34px);
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  transform: translateX(-50%);
++}
+ @media (max-width: 480px) {
+-  html.intro .intro-copy {
+-    transform: translate(calc(50vw - var(--pad) - 50%), calc(50svh - 16px - 50%)) scale(2.6);
++  .sig-under {
++    top: calc(50% + 28px);
+   }
+ }
+-html.intro .site-header .wordmark,
+-html.intro .site-header nav a,
+-html.intro .site-header .hbtn {
++.sig-line {
++  display: block;
++  width: 260px;
++  height: 1px;
++  background: var(--terracotta);
++  transform: scaleX(0);
++  transform-origin: left;
++}
++.sig-caps {
++  margin-top: 16px;
++  font-size: 11px;
++  letter-spacing: 0.36em;
++  margin-right: -0.36em; /* the tracking's trailing space, so the caps centre */
++  text-transform: uppercase;
+   opacity: 0;
++  transform: translateY(6px);
+ }
+-html.intro .hero-ln,
+-html.intro .hero-sub,
+-html.intro .hero-btn {
++html.intro .site-header .wordmark-word,
++html.intro .site-header .wordmark-caps {
+   opacity: 0;
+-  transform: translateY(16px);
+-  will-change: transform, opacity;
+ }
+ html.intro .hero-poster {
+-  transform: scale(1.04);
++  transform: scale(1.03);
+   will-change: transform;
+ }
+-html.intro .intro-veil {
+-  will-change: opacity;
+-}
+ @media (prefers-reduced-motion: reduce) {
+   .intro-veil,
+-  .intro-copy {
++  .intro-sig {
+     display: none !important;
+   }
+ }
+diff --git a/components/Hero.tsx b/components/Hero.tsx
+index b03cd21..62076b7 100644
+--- a/components/Hero.tsx
++++ b/components/Hero.tsx
+@@ -9,12 +9,62 @@ import { MOTION } from "@/lib/motion";
+ import HeroMedia from "./HeroMedia";
+ import { useSmoothScroll } from "./SmoothScroll";
+ 
++const WORD = "Fresca";
++/** Step 1: each letter starts this far out from the word's centre (px) and settles to 0. */
++const SPREAD = [-6, -4, -2, 2, 4, 6];
++
+ /** Resolves when web fonts are ready, or after 1.5s so a slow font never blocks the page. */
+ const fontsReady = () => Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => window.setTimeout(r, 1500))]);
+ 
++/**
++ * Resolves once the main thread is quiet: two consecutive frames under 20ms
++ * (the rest of the page may still be hydrating when the hero is), or after
++ * `cap` ms. Starting the opening mid-hydration let a long task stall the rise.
++ */
++const quietFrames = (cap = 800) =>
++  new Promise<void>((resolve) => {
++    const t0 = performance.now();
++    let last = t0;
++    let calm = 0;
++    const tick = (now: number) => {
++      calm = now - last < 20 ? calm + 1 : 0;
++      last = now;
++      if (calm >= 2 || now - t0 > cap) resolve();
++      else requestAnimationFrame(tick);
++    };
++    requestAnimationFrame(tick);
++  });
++
++/**
++ * Kerning. Letters are inline-blocks (so they can move), which drops the font's
++ * pair kerning. Measure where each letter sits in the nav wordmark's plain text
++ * run and give each span the margin that reproduces it, so the centred word is
++ * set exactly like the nav one and the swap is invisible. Static, set once.
++ */
++function kernLike(run: HTMLElement, reference: HTMLElement) {
++  const text = reference.firstChild;
++  if (!text) return;
++  const range = document.createRange();
++  const lefts = Array.from({ length: WORD.length }, (_, i) => {
++    range.setStart(text, i);
++    range.setEnd(text, i + 1);
++    return range.getBoundingClientRect().left;
++  });
++  // The text's own end, not the element's box (the nav <b> is stretched to the
++  // width of the caps beneath it).
++  range.setStart(text, 0);
++  range.setEnd(text, WORD.length);
++  const end = range.getBoundingClientRect().right;
++  run.querySelectorAll<HTMLElement>(".sig-l").forEach((span, i) => {
++    span.style.marginRight = "0px";
++    const advance = (i < lefts.length - 1 ? lefts[i + 1] : end) - lefts[i];
++    span.style.marginRight = `${advance - span.getBoundingClientRect().width}px`;
++  });
++}
++
+ export default function Hero() {
+   const root = useRef<HTMLElement>(null);
+-  const copyRef = useRef<HTMLDivElement>(null);
++  const sigRef = useRef<HTMLDivElement>(null);
+   const veilRef = useRef<HTMLDivElement>(null);
+   const { start } = useSmoothScroll();
+ 
+@@ -38,27 +88,36 @@ export default function Hero() {
+         gsap.to(".hero-media", {
+           y: () => heroEl.offsetHeight * 0.15,
+           ease: "none",
+-          scrollTrigger: { trigger: heroEl, start: "top top", end: "bottom top", scrub: true, invalidateOnRefresh: true },
++          scrollTrigger: {
++            trigger: heroEl,
++            start: "top top",
++            end: "bottom top",
++            scrub: true,
++            invalidateOnRefresh: true,
++          },
+         });
+       });
+ 
+-      // Opening (first visit per session, html.intro). Transforms and opacity only.
+-      // A navy veil with the wordmark centered at ~3.2x; after a 0.6s hold the
+-      // wordmark travels into the nav slot (FLIP onto the real nav wordmark, then a
+-      // same-frame swap) while the veil fades and the poster settles; the copy rises
+-      // in; the film starts only once everything has finished. Under 2s.
+       mm.add(MOTION, () => {
+-        if (!html.classList.contains("intro")) return;
++        if (!html.classList.contains("hero-in")) return; // client-side return: render final
+         window.__introTakenOver = true;
+-        window.scrollTo(0, 0);
+-        document.body.classList.add("scroll-lock");
+-        const copy = copyRef.current!;
++        const signing = html.classList.contains("intro"); // first visit this session
++        const lines = heroEl.querySelectorAll(".hero-ln");
++        const sub = heroEl.querySelector(".hero-sub");
++        const btn = heroEl.querySelector(".hero-btn");
++        // The nav's "Interior Design" caps only arrive with the signing.
++        const navRest = document.querySelectorAll(
++          html.classList.contains("intro") ? ".site-header nav a, .site-header .hbtn, .site-header .wordmark-caps" : ".site-header nav a, .site-header .hbtn",
++        );
++        const sig = sigRef.current!;
+         const veil = veilRef.current!;
+-        const navMark = document.querySelector<HTMLElement>(".site-header .wordmark")!;
+-        const navRest = document.querySelectorAll(".site-header nav a, .site-header .hbtn");
++        const word = sig.querySelector<HTMLElement>(".sig-word")!;
++        const navWord = document.querySelector<HTMLElement>(".site-header .wordmark-word")!;
+         const poster = heroEl.querySelector(".hero-poster");
+-        const lines = heroEl.querySelectorAll(".hero-ln");
+-        const moving = [copy, veil, navMark, poster, ...Array.from(lines), ".hero-sub", ".hero-btn", ...Array.from(navRest)];
++        if (signing) {
++          window.scrollTo(0, 0);
++          document.body.classList.add("scroll-lock");
++        }
+ 
+         let tl: gsap.core.Timeline | null = null;
+         let done = false;
+@@ -66,13 +125,17 @@ export default function Hero() {
+           if (done) return;
+           done = true;
+           window.removeEventListener("keydown", onKey);
+-          try {
+-            sessionStorage.setItem(INTRO_KEY, "1");
+-          } catch {}
+-          gsap.set(moving, { clearProps: "all" });
+-          html.classList.remove("intro"); // also drops the will-change hints
+-          document.body.classList.remove("scroll-lock");
+-          start();
++          if (signing) {
++            try {
++              sessionStorage.setItem(INTRO_KEY, "1");
++            } catch {}
++            document.body.classList.remove("scroll-lock");
++            start();
++          }
++          gsap.set([word, veil, poster, navWord, sig.querySelectorAll(".sig-l, .sig-line, .sig-caps, .sig-bone"), lines, sub, btn, navRest], {
++            clearProps: "all",
++          });
++          html.classList.remove("intro", "hero-in"); // also drops every will-change hint
+           ScrollTrigger.refresh();
+           markOpeningDone(); // the film may load and play now
+         };
+@@ -84,38 +147,129 @@ export default function Hero() {
+         window.addEventListener("keydown", onKey);
+ 
+         let cancelled = false;
+-        fontsReady().then(() => {
+-          if (cancelled || done) return;
+-
+-          // FLIP. First: the copy as CSS shows it, centered at 3.2x. Last: the real
+-          // nav wordmark. Both measured against the copy's untransformed box.
+-          const first = copy.getBoundingClientRect();
+-          copy.style.transform = "none";
+-          const box = copy.getBoundingClientRect();
+-          copy.style.transform = "";
+-          const last = navMark.getBoundingClientRect();
+-          gsap.set(copy, {
+-            transformOrigin: "0 0",
+-            x: first.left - box.left,
+-            y: first.top - box.top,
+-            scale: first.width / box.width,
+-            autoRound: false,
+-          });
++        fontsReady()
++          .then(() => quietFrames())
++          .then(() => {
++            if (cancelled || done) return;
++            tl = gsap.timeline({ onComplete: finish });
+ 
+-          const T = 0.6; // hold after fonts are ready
+-          const rise = { y: 0, opacity: 1, ease: "power3.out" };
+-          tl = gsap.timeline({ onComplete: finish });
+-          tl.to(copy, { x: last.left - box.left, y: last.top - box.top, scale: last.width / box.width, duration: 1, ease: "power3.inOut", autoRound: false }, T)
+-            // Same-frame swap: the copy now sits exactly on the nav wordmark.
+-            .set(copy, { opacity: 0 }, T + 1)
+-            .set(navMark, { opacity: 1 }, T + 1)
+-            .to(veil, { opacity: 0, duration: 0.8, ease: "power1.inOut" }, T + 0.15)
+-            .fromTo(poster, { scale: 1.04 }, { scale: 1, duration: 1.2, ease: "power2.out" }, T)
+-            .fromTo(lines, { y: 16, opacity: 0 }, { ...rise, duration: 0.5, stagger: 0.08 }, T + 0.5)
+-            .fromTo(".hero-sub", { y: 16, opacity: 0 }, { ...rise, duration: 0.45 }, T + 0.7)
+-            .fromTo(".hero-btn", { y: 16, opacity: 0 }, { ...rise, duration: 0.45 }, T + 0.8)
+-            .fromTo(navRest, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power1.out" }, T + 0.9);
+-        });
++            // Step 6, on every visit: headline lines rise from behind their masks,
++            // then the subline, the button and the nav links, 0.1s apart.
++            const step6 = (t: number) => {
++              tl!.fromTo(
++                lines,
++                { y: 0, yPercent: 105 },
++                {
++                  y: 0,
++                  yPercent: 0,
++                  duration: 1,
++                  stagger: 0.09,
++                  ease: "expo.out",
++                },
++                t,
++              );
++              const after = t + 0.09 * (lines.length - 1) + 0.1;
++              tl!
++                .fromTo(sub, { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, after)
++                .fromTo(btn, { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, after + 0.1)
++                .fromTo(navRest, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, after + 0.2);
++            };
++            if (!signing) {
++              step6(0);
++              return;
++            }
++
++            // ── first visit: the name is signed, then carried into the nav.
++            const letters = sig.querySelectorAll<HTMLElement>(".sig-ink .sig-l");
++            const line = sig.querySelector<HTMLElement>(".sig-line")!;
++            const caps = sig.querySelector<HTMLElement>(".sig-caps")!;
++            const bone = sig.querySelector<HTMLElement>(".sig-bone")!;
++            const inkRun = sig.querySelector<HTMLElement>(".sig-ink")!;
++
++            // FLIP. First: the run as CSS centres it (3x). Last: the nav wordmark.
++            // Transform origin 0 0 on the word; the run sits at (ox, oy) inside it.
++            // Kern at 1x, then measure the centred state with the kerning in place.
++            word.style.transform = "none";
++            sig.querySelectorAll<HTMLElement>(".sig-run").forEach((run) => kernLike(run, navWord));
++            word.style.transform = "";
++            const firstRect = inkRun.getBoundingClientRect();
++            word.style.transform = "none";
++            const box = word.getBoundingClientRect();
++            const run0 = inkRun.getBoundingClientRect();
++            word.style.transform = "";
++            const ox = run0.left - box.left;
++            const oy = run0.top - box.top;
++            const s0 = firstRect.width / run0.width;
++            // xPercent/yPercent: 0 clears the CSS centring translate, which GSAP
++            // would otherwise keep as a percentage on top of these px values.
++            gsap.set(word, {
++              transformOrigin: "0 0",
++              xPercent: 0,
++              yPercent: 0,
++              x: firstRect.left - box.left - s0 * ox,
++              y: firstRect.top - box.top - s0 * oy,
++              scale: s0,
++            });
++            const last = navWord.getBoundingClientRect(); // left and top match the text's
++            // Land on whole pixels: the end transform is whatever puts the run on the
++            // nav wordmark's rounded position (which --pad keeps on the grid anyway).
++            const endX = Math.round(last.left) - box.left - ox;
++            const endY = Math.round(last.top) - box.top - oy;
++
++            // The hairline spans the word as drawn at 3x.
++            line.style.width = `${firstRect.width}px`;
++
++            // y: 0 replaces the pre-paint translateY(105%), which GSAP would read as px.
++            gsap.set(letters, {
++              y: 0,
++              yPercent: 105,
++              x: (i) => SPREAD[i] ?? 0,
++            });
++            tl.to(
++              letters,
++              {
++                yPercent: 0,
++                x: 0,
++                duration: 1.1,
++                stagger: 0.045,
++                ease: "expo.out",
++              },
++              0,
++            )
++              .fromTo(line, { scaleX: 0 }, { scaleX: 1, duration: 0.9, ease: "power3.inOut" }, 0.7)
++              .fromTo(caps, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 1.2)
++              // 2.2s: carry the name into the nav.
++              .to([line, caps], { opacity: 0, duration: 0.3, ease: "power1.out" }, 2.2)
++              .to(
++                word,
++                {
++                  x: endX,
++                  y: endY,
++                  scale: 1,
++                  duration: 1.1,
++                  ease: "power3.inOut",
++                },
++                2.2,
++              )
++              // Ink on ivory becomes bone over the film, as the veil goes.
++              .fromTo(bone, { opacity: 0 }, { opacity: 1, duration: 0.9, ease: "power1.inOut" }, 2.35)
++              .fromTo(
++                veil,
++                { opacity: 1, y: 0 },
++                {
++                  opacity: 0,
++                  y: () => -0.02 * innerHeight,
++                  duration: 0.9,
++                  ease: "power2.inOut",
++                },
++                2.35,
++              )
++              .fromTo(poster, { scale: 1.03 }, { scale: 1, duration: 1.4, ease: "power2.out" }, 2.2)
++              // Same-frame swap: the copy sits exactly on the nav wordmark.
++              .set(sig, { opacity: 0 }, 3.3)
++              .set(navWord, { opacity: 1 }, 3.3);
++            step6(2.9);
++          });
+ 
+         return () => {
+           cancelled = true;
+@@ -131,6 +285,16 @@ export default function Hero() {
+     { scope: root },
+   );
+ 
++  const letters = (cls: string) => (
++    <span className={`sig-run ${cls}`}>
++      {WORD.split("").map((ch, i) => (
++        <span key={i} className="sig-l">
++          {ch}
++        </span>
++      ))}
++    </span>
++  );
++
+   return (
+     <section ref={root} id="top" className="relative h-svh min-h-[520px] overflow-hidden bg-[#14110f] text-ground">
+       {/* Media: full bleed, cover, parallax on this wrapper. */}
+@@ -141,12 +305,13 @@ export default function Hero() {
+       <div aria-hidden="true" className="hero-shade-top pointer-events-none absolute inset-x-0 top-0" />
+       <div aria-hidden="true" className="hero-shade-bottom pointer-events-none absolute inset-x-0 bottom-0" />
+ 
+-      {/* Copy: bottom left inside the gutter, 9vh above the bottom edge. */}
++      {/* Copy: bottom left inside the gutter, 9vh above the bottom edge. Each
++          headline line rises from behind its own mask. */}
+       <div className="absolute inset-x-pad bottom-[9vh]">
+         <h1 className="font-serif text-[clamp(40px,5.2vw,84px)] font-normal leading-[.98] tracking-[-.015em]">
+           {hero.lines.map((line, i) => (
+-            <span key={line} className="hero-ln block">
+-              {i === hero.lines.length - 1 ? <em>{line}</em> : line}
++            <span key={line} className="hero-mask block">
++              <span className="hero-ln block">{i === hero.lines.length - 1 ? <em>{line}</em> : line}</span>
+             </span>
+           ))}
+         </h1>
+@@ -156,12 +321,20 @@ export default function Hero() {
+         </a>
+       </div>
+ 
+-      {/* Opening veil and its centered wordmark: server-rendered, shown only under
+-          html.intro. The copy has the nav wordmark's exact markup and box. */}
+-      <div ref={veilRef} aria-hidden="true" className="intro-veil fixed inset-0 z-[60] bg-navy" />
+-      <div ref={copyRef} aria-hidden="true" className="intro-copy fixed z-[61] flex-col leading-none text-ground">
+-        <b className="font-serif text-[32px] font-normal italic">Fresca</b>
+-        <span className="mt-[3px] text-[9px] uppercase tracking-[.36em]">Interior Design</span>
++      {/* Opening, server-rendered, shown only under html.intro: the ivory veil and
++          the name signed on it. The word sits in the nav wordmark's slot and is
++          moved to the centre by CSS; the script carries it back (FLIP). Two
++          stacked runs, ink and bone, so the colour changes by opacity alone. */}
++      <div ref={veilRef} aria-hidden="true" className="intro-veil fixed inset-0 z-[60] bg-plaster" />
++      <div ref={sigRef} aria-hidden="true" className="intro-sig">
++        <span className="sig-word font-serif italic">
++          {letters("sig-ink")}
++          {letters("sig-bone")}
++        </span>
++        <span className="sig-under">
++          <span className="sig-line" />
++          <span className="sig-caps">Interior Design</span>
++        </span>
+       </div>
+     </section>
+   );
+diff --git a/components/Navigation.tsx b/components/Navigation.tsx
+index 1d23a76..6395053 100644
+--- a/components/Navigation.tsx
++++ b/components/Navigation.tsx
+@@ -10,8 +10,9 @@ import Copy from "./Placeholder";
+ function Wordmark({ label, className = "" }: { label?: string; className?: string }) {
+   return (
+     <a href="#top" aria-label={label} className={`flex flex-col leading-none no-underline ${className}`}>
+-      <b className="font-serif text-[32px] font-normal italic">Fresca</b>{" "}
+-      <span className="mt-[3px] text-[9px] uppercase tracking-[.36em]">Interior Design</span>
++      {/* The opening's signed word FLIPs onto this element (components/Hero.tsx). */}
++      <b className="wordmark-word font-serif text-[32px] font-normal italic [text-rendering:geometricPrecision]">Fresca</b>{" "}
++      <span className="wordmark-caps mt-[3px] text-[9px] uppercase tracking-[.36em]">Interior Design</span>
+     </a>
+   );
+ }
+diff --git a/lib/intro.ts b/lib/intro.ts
+index f00b9eb..b319467 100644
+--- a/lib/intro.ts
++++ b/lib/intro.ts
+@@ -2,12 +2,13 @@
+ export const INTRO_KEY = "fresca-intro-played";
+ 
+ /**
+- * Runs before first paint (inlined in <head>). With motion allowed, on the
+- * first visit per session, it adds `intro`: the navy field and the centered
+- * wordmark are the first painted frame. If the page script never takes over,
+- * the class drops after 6s so a failed load still shows the page.
++ * Runs before first paint (inlined in <head>). With motion allowed it adds
++ * `hero-in` on every visit (the hero copy waits to rise in) and, on the first
++ * visit per session, `intro`: the ivory veil and the name to be signed are the
++ * first painted frame. If the page script never takes over, both classes drop
++ * after 6s so a failed load still shows the page.
+  */
+-export const introScript = `try{var d=document.documentElement;if(!matchMedia('(prefers-reduced-motion: reduce)').matches){if(!sessionStorage.getItem('${INTRO_KEY}')){d.classList.add('intro');setTimeout(function(){if(!window.__introTakenOver)d.classList.remove('intro')},6000)}}}catch(e){}`;
++export const introScript = `try{var d=document.documentElement;if(!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('hero-in');if(!sessionStorage.getItem('${INTRO_KEY}'))d.classList.add('intro');setTimeout(function(){if(!window.__introTakenOver)d.classList.remove('intro','hero-in')},6000)}}catch(e){}`;
+ 
+ declare global {
+   interface Window {
+diff --git a/tailwind.config.ts b/tailwind.config.ts
+index 333b5df..c920474 100644
+--- a/tailwind.config.ts
++++ b/tailwind.config.ts
+@@ -11,6 +11,7 @@ const config: Config = {
+         // Two fields only: cream (everything) and navy (Approach and the Contact
+         // footer). Terracotta is the single action color in both.
+         ground: "#F4F2EB",
++        plaster: "#EFE8DC", // opening veil only: warm ivory
+         navy: "#2B3A55",
+         ink: "#1D1C1A",
+         body: "#4A4740",

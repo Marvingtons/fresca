@@ -1,0 +1,539 @@
+diff --git a/app/globals.css b/app/globals.css
+index cda04af..d1f015b 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -110,61 +110,27 @@ html.lenis body {
+   }
+ }
+ 
+-/* ───────── hero wordmark band (every visit). FRESCA in caps, cap height 11vw,
+-   letters tracked out so the F and A ink touch the gutters, baseline on the
+-   hero's bottom edge minus the gutter. Instrument Serif metrics: cap height
+-   0.72em, ascent 0.99, descent 0.31; FRESCA is 2.694em wide; F has a 0.019em
+-   left bearing and A overhangs its advance by 0.018em (both cancelled below).
+-   Line-height = ascent - descent puts the baseline on the box's bottom edge.
+-   If the word cannot fit at 11vw (narrow screens), the cap height shrinks so
+-   it keeps at least 12% of its width as tracking; it never wraps. */
+-.wm-band {
+-  container-type: inline-size;
+-}
+-.wm {
+-  --wm-fs: min(calc(11vw / 0.72), calc(100cqw / (2.693 * 1.12)));
+-  width: fit-content;
+-  margin-inline: auto;
+-  /* The box holds the whole glyph: caps rise 0.73em above the baseline (the
+-     line box is 0.68em) and R, S and C dip 0.009em below it. Cancelled by the
+-     margins, so the baseline stays on the gutter. */
+-  padding: 0.06em 0 0.02em;
+-  margin-top: -0.06em;
+-  margin-bottom: -0.02em;
+-  font-size: var(--wm-fs);
+-  line-height: 0.68;
+-  letter-spacing: calc((100cqw - 2.693 * var(--wm-fs)) / 5);
+-  white-space: nowrap;
+-  color: var(--ground);
+-}
+-.wm span:first-child {
+-  margin-left: -0.019em;
+-}
+-.wm span:last-child {
+-  letter-spacing: 0;
+-  margin-right: 0.018em;
+-}
+-/* Hero film over its poster: centered crops hold up for these shots. */
++/* ───────── hero. Film over its poster, centered crops. Exactly two shades,
++   warm near-black (#14110F): a bottom one, strongest under the copy at the
++   bottom left (radial) over a weaker even layer, gone by 45% of the hero; a top
++   one for the nav, gone by 16%. The middle of the frame has no overlay. */
+ .hero-poster,
+ .hero-video {
+   object-position: 50% 50%;
+ }
+-
+-/* Hero scrims, navy. The bottom one holds ~80% behind the subline and ~60%
+-   behind the headline, the top one ~85% behind the nav, so bone type passes
+-   4.5:1 (body) and 3:1 (headline, wordmark) over the brightest frames. */
+-.hero-scrim-top {
+-  height: 20%;
+-  background: linear-gradient(to bottom, rgb(43 58 85 / 0.9), rgb(43 58 85 / 0.72) 55%, rgb(43 58 85 / 0));
++.hero-shade-bottom {
++  height: 45%;
++  background:
++    radial-gradient(ellipse 90% 100% at 0% 100%, rgb(20 17 15 / 0.62), rgb(20 17 15 / 0) 100%),
++    linear-gradient(to top, rgb(20 17 15 / 0.3), rgb(20 17 15 / 0));
+ }
+-.hero-scrim-bottom {
+-  height: 72%;
+-  background: linear-gradient(to top, rgb(43 58 85 / 0.86), rgb(43 58 85 / 0.82) 40%, rgb(43 58 85 / 0.64) 72%, rgb(43 58 85 / 0));
++.hero-shade-top {
++  height: 16%;
++  background: linear-gradient(to bottom, rgb(20 17 15 / 0.35), rgb(20 17 15 / 0));
+ }
+ 
+ /* ───────── nav over the hero: bone and transparent while the hero is under it,
+-   the cream bar with ink once it has scrolled out (html.past-hero). The nav
+-   wordmark waits until the FRESCA band has faded (html.band-gone). */
++   the cream bar with ink once it has scrolled out (html.past-hero). */
+ .site-header {
+   transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+ }
+@@ -176,43 +142,62 @@ html:not(.past-hero) .site-header {
+ html:not(.past-hero) .site-header .nav-cta {
+   color: var(--ground);
+ }
+-.site-header .wordmark {
+-  transition: opacity 0.3s, visibility 0.3s;
+-}
+-html:not(.band-gone) .site-header .wordmark {
+-  opacity: 0;
+-  visibility: hidden;
+-}
+ 
+ /* ───────── opening: pre-paint state, set by the inline script in <head>
+    (lib/intro.ts) on the first visit per session. Without html.intro the page
+-   renders final. The navy field covers the page; the band's wordmark sits on
+-   it, centered at ~28px (--wm-s is set by an inline script right after it),
+-   bone, lightly tracked. */
++   renders final. The navy veil covers the laid-out hero (poster showing, no
++   video yet) with a copy of the nav wordmark centered at 3.2x. Moving elements
++   carry will-change only while html.intro is set. */
+ html.intro {
+   overflow: hidden;
+ }
+ body.scroll-lock {
+   overflow: hidden;
+ }
+-.intro-field {
++.intro-veil,
++.intro-copy {
+   display: none;
+ }
+-html.intro .intro-field {
++html.intro .intro-veil {
+   display: block;
+ }
+-html.intro .site-header {
++html.intro .intro-copy {
++  display: flex;
++  /* The nav wordmark's slot (header gutter, 16px top padding), moved to the
++     viewport center and scaled; the script FLIPs it back onto the real one. */
++  left: var(--pad);
++  top: 16px;
++  transform: translate(calc(50vw - var(--pad) - 50%), calc(50svh - 16px - 50%)) scale(3.2);
++  will-change: transform;
++}
++/* At 3.2x the wordmark is ~387px wide: on phones it would touch the edges. */
++@media (max-width: 480px) {
++  html.intro .intro-copy {
++    transform: translate(calc(50vw - var(--pad) - 50%), calc(50svh - 16px - 50%)) scale(2.6);
++  }
++}
++html.intro .site-header .wordmark,
++html.intro .site-header nav a,
++html.intro .site-header .hbtn {
+   opacity: 0;
+-  visibility: hidden;
+ }
+-html.intro .wm {
+-  position: relative;
+-  z-index: 46;
+-  letter-spacing: 0.04em;
+-  transform: translateY(calc(-50svh + var(--pad) + 50%)) scale(var(--wm-s, 0.13));
++html.intro .hero-ln,
++html.intro .hero-sub,
++html.intro .hero-btn {
++  opacity: 0;
++  transform: translateY(16px);
++  will-change: transform, opacity;
++}
++html.intro .hero-poster {
++  transform: scale(1.04);
++  will-change: transform;
++}
++html.intro .intro-veil {
++  will-change: opacity;
+ }
+ @media (prefers-reduced-motion: reduce) {
+-  .intro-field {
++  .intro-veil,
++  .intro-copy {
+     display: none !important;
+   }
+ }
+diff --git a/components/Hero.tsx b/components/Hero.tsx
+index 873fb8c..b03cd21 100644
+--- a/components/Hero.tsx
++++ b/components/Hero.tsx
+@@ -1,95 +1,80 @@
+ "use client";
+ 
+ import { useRef } from "react";
+-import { cta, hero, site } from "@/content/site";
++import { cta, hero } from "@/content/site";
+ import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+ import { INTRO_KEY, markOpeningDone } from "@/lib/intro";
+ import { heroMedia } from "@/lib/media/hero";
+ import { MOTION } from "@/lib/motion";
+ import HeroMedia from "./HeroMedia";
+-import Line from "./LineReveal";
+ import { useSmoothScroll } from "./SmoothScroll";
+ 
+-/** Width of "FRESCA" in Instrument Serif caps, in em, after the F/A side-bearing
+- *  corrections in globals.css (.wm). Must match the CSS. */
+-const WORD_EM = 2.693;
+-/** Size of the wordmark on the navy field, in px. */
+-const START_PX = 28;
+-
+ /** Resolves when web fonts are ready, or after 1.5s so a slow font never blocks the page. */
+ const fontsReady = () => Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => window.setTimeout(r, 1500))]);
+ 
+-/**
+- * Before first paint (inline, right after the wordmark): the start scale that
+- * shows the full-size wordmark at ~28px on the navy field. It depends only on
+- * the wordmark's font size, which is viewport-based, so no font is needed yet.
+- */
+-const startScaleScript = `try{var w=document.querySelector('.wm');document.documentElement.style.setProperty('--wm-s',String(${START_PX}/parseFloat(getComputedStyle(w).fontSize)))}catch(e){}`;
+-
+ export default function Hero() {
+   const root = useRef<HTMLElement>(null);
+-  const wmRef = useRef<HTMLParagraphElement>(null);
+-  const fieldRef = useRef<HTMLDivElement>(null);
++  const copyRef = useRef<HTMLDivElement>(null);
++  const veilRef = useRef<HTMLDivElement>(null);
+   const { start } = useSmoothScroll();
+ 
+   useGSAP(
+     () => {
+       const html = document.documentElement;
+-      const hero = root.current!;
+-
+-      // Nav state, on every visit and under reduced motion too: bone over the hero,
+-      // ink once it has scrolled out (html.past-hero); the nav wordmark appears only
+-      // once the FRESCA band has faded (html.band-gone), so the name never shows twice.
+-      const flag = (cls: string, start: string) =>
+-        ScrollTrigger.create({
+-          trigger: hero,
+-          start,
+-          end: "max",
+-          onToggle: (self) => html.classList.toggle(cls, self.isActive),
+-        });
+-      const flags = [flag("band-gone", "50% top"), flag("past-hero", "bottom top+=76")];
++      const heroEl = root.current!;
++
++      // Nav colour, on every visit and under reduced motion too: bone over the
++      // hero, ink once it has scrolled out (html.past-hero).
++      const pastHero = ScrollTrigger.create({
++        trigger: heroEl,
++        start: "bottom top+=76",
++        end: "max",
++        onToggle: (self) => html.classList.toggle("past-hero", self.isActive),
++      });
+ 
+       const mm = gsap.matchMedia();
++      // Scroll: the media moves up at 0.85x scroll speed.
+       mm.add(MOTION, () => {
+-        // Scroll: the media moves up at 0.85x scroll speed; the band is gone by the
+-        // time half the hero is.
+         gsap.to(".hero-media", {
+-          y: () => hero.offsetHeight * 0.15,
++          y: () => heroEl.offsetHeight * 0.15,
+           ease: "none",
+-          scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: true, invalidateOnRefresh: true },
++          scrollTrigger: { trigger: heroEl, start: "top top", end: "bottom top", scrub: true, invalidateOnRefresh: true },
+         });
+-        gsap.to(".wm-band", { autoAlpha: 0, ease: "none", scrollTrigger: { trigger: hero, start: "top top", end: "50% top", scrub: true } });
+       });
+ 
+-      // Opening (first visit per session, html.intro): a navy field with the wordmark
+-      // centered at ~28px. After a 0.8s hold the wordmark tracks out to the gutters,
+-      // grows to its full size and drops onto the hero's bottom edge, where it stays.
+-      // Near the end the field wipes up to reveal the media; the nav fades in last.
++      // Opening (first visit per session, html.intro). Transforms and opacity only.
++      // A navy veil with the wordmark centered at ~3.2x; after a 0.6s hold the
++      // wordmark travels into the nav slot (FLIP onto the real nav wordmark, then a
++      // same-frame swap) while the veil fades and the poster settles; the copy rises
++      // in; the film starts only once everything has finished. Under 2s.
+       mm.add(MOTION, () => {
+-        const html = document.documentElement;
+         if (!html.classList.contains("intro")) return;
+         window.__introTakenOver = true;
+         window.scrollTo(0, 0);
+         document.body.classList.add("scroll-lock");
+-        const wm = wmRef.current!;
+-        const field = fieldRef.current!;
+-        const header = document.querySelector(".site-header");
++        const copy = copyRef.current!;
++        const veil = veilRef.current!;
++        const navMark = document.querySelector<HTMLElement>(".site-header .wordmark")!;
++        const navRest = document.querySelectorAll(".site-header nav a, .site-header .hbtn");
++        const poster = heroEl.querySelector(".hero-poster");
++        const lines = heroEl.querySelectorAll(".hero-ln");
++        const moving = [copy, veil, navMark, poster, ...Array.from(lines), ".hero-sub", ".hero-btn", ...Array.from(navRest)];
+ 
+         let tl: gsap.core.Timeline | null = null;
+         let done = false;
+         const finish = () => {
+           if (done) return;
+           done = true;
+-          markOpeningDone();
+           window.removeEventListener("keydown", onKey);
+           try {
+             sessionStorage.setItem(INTRO_KEY, "1");
+           } catch {}
+-          gsap.set([wm, field, header], { clearProps: "all" });
+-          html.classList.remove("intro");
++          gsap.set(moving, { clearProps: "all" });
++          html.classList.remove("intro"); // also drops the will-change hints
+           document.body.classList.remove("scroll-lock");
+           start();
+           ScrollTrigger.refresh();
++          markOpeningDone(); // the film may load and play now
+         };
+         const onKey = (e: KeyboardEvent) => {
+           if (e.key !== "Escape") return;
+@@ -102,46 +87,34 @@ export default function Hero() {
+         fontsReady().then(() => {
+           if (cancelled || done) return;
+ 
+-          // End state is the wordmark's CSS layout in the hero. Measure it, then
+-          // start from the centered, small, lightly tracked state. Only
+-          // letter-spacing and transform animate; the font size never changes.
+-          const fs = parseFloat(getComputedStyle(wm).fontSize);
+-          const band = wm.parentElement!;
+-          const bandStyle = getComputedStyle(band);
+-          const avail = band.clientWidth - parseFloat(bandStyle.paddingLeft) - parseFloat(bandStyle.paddingRight);
+-          const lsEnd = (avail - WORD_EM * fs) / 5;
+-          wm.style.transform = "none";
+-          const rest = wm.getBoundingClientRect();
+-          wm.style.transform = "";
+-          gsap.set(wm, {
+-            letterSpacing: 0.04 * fs,
+-            x: 0,
+-            y: innerHeight / 2 - (rest.top + rest.height / 2),
+-            scale: START_PX / fs,
+-            transformOrigin: "50% 50%",
++          // FLIP. First: the copy as CSS shows it, centered at 3.2x. Last: the real
++          // nav wordmark. Both measured against the copy's untransformed box.
++          const first = copy.getBoundingClientRect();
++          copy.style.transform = "none";
++          const box = copy.getBoundingClientRect();
++          copy.style.transform = "";
++          const last = navMark.getBoundingClientRect();
++          gsap.set(copy, {
++            transformOrigin: "0 0",
++            x: first.left - box.left,
++            y: first.top - box.top,
++            scale: first.width / box.width,
+             autoRound: false,
+           });
+ 
+-          const wipe = { p: 0 };
++          const T = 0.6; // hold after fonts are ready
++          const rise = { y: 0, opacity: 1, ease: "power3.out" };
+           tl = gsap.timeline({ onComplete: finish });
+-          // autoRound off: the tween must end on the CSS's sub-pixel letter-spacing, or the
+-          // letters shift by a pixel when the inline style is cleared.
+-          tl.to(wm, { letterSpacing: lsEnd, y: 0, scale: 1, duration: 0.9, ease: "power3.inOut", autoRound: false }, 0.8)
+-            .to(
+-              wipe,
+-              {
+-                p: 1,
+-                duration: 0.7,
+-                ease: "power3.inOut",
+-                onUpdate: () => {
+-                  field.style.clipPath = `inset(0 0 ${wipe.p * 100}% 0)`;
+-                },
+-              },
+-              1.5,
+-            )
+-            // A hero video starts here, so its first frame is the first one seen.
+-            .add(markOpeningDone, 2.2)
+-            .to(header, { autoAlpha: 1, duration: 0.3, ease: "power1.out" }, 2.2);
++          tl.to(copy, { x: last.left - box.left, y: last.top - box.top, scale: last.width / box.width, duration: 1, ease: "power3.inOut", autoRound: false }, T)
++            // Same-frame swap: the copy now sits exactly on the nav wordmark.
++            .set(copy, { opacity: 0 }, T + 1)
++            .set(navMark, { opacity: 1 }, T + 1)
++            .to(veil, { opacity: 0, duration: 0.8, ease: "power1.inOut" }, T + 0.15)
++            .fromTo(poster, { scale: 1.04 }, { scale: 1, duration: 1.2, ease: "power2.out" }, T)
++            .fromTo(lines, { y: 16, opacity: 0 }, { ...rise, duration: 0.5, stagger: 0.08 }, T + 0.5)
++            .fromTo(".hero-sub", { y: 16, opacity: 0 }, { ...rise, duration: 0.45 }, T + 0.7)
++            .fromTo(".hero-btn", { y: 16, opacity: 0 }, { ...rise, duration: 0.45 }, T + 0.8)
++            .fromTo(navRest, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power1.out" }, T + 0.9);
+         });
+ 
+         return () => {
+@@ -152,56 +125,43 @@ export default function Hero() {
+       });
+       return () => {
+         mm.revert();
+-        flags.forEach((t) => t.kill());
++        pastHero.kill();
+       };
+     },
+     { scope: root },
+   );
+ 
+   return (
+-    <section ref={root} id="top" className="relative h-svh min-h-[520px] overflow-hidden bg-navy text-ground">
++    <section ref={root} id="top" className="relative h-svh min-h-[520px] overflow-hidden bg-[#14110f] text-ground">
+       {/* Media: full bleed, cover, parallax on this wrapper. */}
+-      <div className="hero-media absolute inset-0 will-change-transform">
++      <div className="hero-media absolute inset-0">
+         <HeroMedia media={heroMedia} alt={hero.mediaAlt} />
+       </div>
+-      {/* Legibility: navy, not black. Top for the nav on the bright ceiling, bottom
+-          for the type. Stops are tuned so every line passes against the kitchen's
+-          brightest pixels (see .hero-scrim in globals.css). */}
+-      <div aria-hidden="true" className="hero-scrim-top pointer-events-none absolute inset-x-0 top-0" />
+-      <div aria-hidden="true" className="hero-scrim-bottom pointer-events-none absolute inset-x-0 bottom-0" />
+-
+-      {/* No z-index here: the wordmark (z-46) must stay above the opening field. */}
+-      <div className="relative flex h-full flex-col justify-end">
+-        <div className="hero-copy px-pad pb-[clamp(16px,3vh,32px)]">
+-          <h1 className="font-serif text-[clamp(40px,5.2vw,84px)] font-normal leading-[.98] tracking-[-.015em]">
+-            {hero.lines.map((line, i) => (
+-              <Line key={line} reveal={false}>
+-                {i === hero.lines.length - 1 ? <em>{line}</em> : line}
+-              </Line>
+-            ))}
+-          </h1>
+-          <p className="mt-4 max-w-[440px] text-base">{hero.text}</p>
+-          <a className="pill pill-accent mt-6" href={cta.href}>
+-            {cta.label}
+-          </a>
+-        </div>
+-
+-        {/* Wordmark band: permanent, on every visit. On a first visit this same
+-            element is the opening's centered wordmark (see globals.css, html.intro). */}
+-        <div className="wm-band px-pad pb-pad">
+-          <p ref={wmRef} aria-hidden="true" className="wm font-serif">
+-            {"FRESCA".split("").map((ch, i) => (
+-              <span key={i}>{ch}</span>
+-            ))}
+-          </p>
+-          <script dangerouslySetInnerHTML={{ __html: startScaleScript }} />
+-        </div>
++      {/* Exactly two shades, warm near-black. The middle of the frame has none. */}
++      <div aria-hidden="true" className="hero-shade-top pointer-events-none absolute inset-x-0 top-0" />
++      <div aria-hidden="true" className="hero-shade-bottom pointer-events-none absolute inset-x-0 bottom-0" />
++
++      {/* Copy: bottom left inside the gutter, 9vh above the bottom edge. */}
++      <div className="absolute inset-x-pad bottom-[9vh]">
++        <h1 className="font-serif text-[clamp(40px,5.2vw,84px)] font-normal leading-[.98] tracking-[-.015em]">
++          {hero.lines.map((line, i) => (
++            <span key={line} className="hero-ln block">
++              {i === hero.lines.length - 1 ? <em>{line}</em> : line}
++            </span>
++          ))}
++        </h1>
++        <p className="hero-sub mt-5 max-w-[440px] text-base">{hero.text}</p>
++        <a className="hero-btn pill pill-accent mt-8" href={cta.href}>
++          {cta.label}
++        </a>
+       </div>
+ 
+-      {/* Opening field: server-rendered, shown only under html.intro. */}
+-      <div ref={fieldRef} aria-hidden="true" className="intro-field fixed inset-0 z-[45] bg-navy text-ground">
+-        <span className="absolute left-pad top-pad text-[11px] uppercase tracking-[.2em] opacity-60">Interior Design</span>
+-        <span className="absolute right-pad top-pad text-[11px] uppercase tracking-[.2em] opacity-60">{site.location.split(",")[0]}</span>
++      {/* Opening veil and its centered wordmark: server-rendered, shown only under
++          html.intro. The copy has the nav wordmark's exact markup and box. */}
++      <div ref={veilRef} aria-hidden="true" className="intro-veil fixed inset-0 z-[60] bg-navy" />
++      <div ref={copyRef} aria-hidden="true" className="intro-copy fixed z-[61] flex-col leading-none text-ground">
++        <b className="font-serif text-[32px] font-normal italic">Fresca</b>
++        <span className="mt-[3px] text-[9px] uppercase tracking-[.36em]">Interior Design</span>
+       </div>
+     </section>
+   );
+diff --git a/components/HeroMedia.tsx b/components/HeroMedia.tsx
+index 47d63ea..74a3ed5 100644
+--- a/components/HeroMedia.tsx
++++ b/components/HeroMedia.tsx
+@@ -11,11 +11,12 @@ const AV1 = 'video/webm; codecs="av01.0.08M.10"';
+  * Full-bleed hero film over a server-rendered poster.
+  *
+  * - The poster (<picture>, webp with jpg fallback) is the first painted frame.
+- * - The source is picked on mount: over 768px, AV1 WebM where supported, else the
+- *   1080 MP4; 768px and under, the 720 MP4. Under reduced motion or Save-Data no
+- *   video element is created, so nothing is downloaded.
+- * - Playback waits for the opening's wipe (onOpeningDone; immediate on later
+- *   visits). If play() rejects (e.g. iOS Low Power Mode) the poster just stays.
++ * - No video element exists until the opening has finished (onOpeningDone;
++ *   immediate on later visits), so nothing loads or decodes during it. Then the
++ *   source is picked: over 768px, AV1 WebM where supported, else the 1080 MP4;
++ *   768px and under, the 720 MP4. Under reduced motion or Save-Data no video
++ *   element is ever created. If play() rejects (e.g. iOS Low Power Mode) the
++ *   poster just stays.
+  * - Pauses when the hero is fully off screen or the tab is hidden.
+  * - Fades in over 400ms on `playing`, so poster → film is invisible.
+  * The file is a seamless loop: plain `loop`, no restart or `ended` handling.
+@@ -23,19 +24,20 @@ const AV1 = 'video/webm; codecs="av01.0.08M.10"';
+ export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt: string }) {
+   const videoRef = useRef<HTMLVideoElement>(null);
+   const [src, setSrc] = useState<string | null>(null);
+-  const [allowed, setAllowed] = useState(false);
+   const [playing, setPlaying] = useState(false);
+ 
+-  // Choose the source (or none) once, on mount.
++  // Choose the source (or none) once the opening is done.
+   useEffect(() => {
+     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+     const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+     if (reduce || saveData) return;
+-    if (window.matchMedia("(min-width: 769px)").matches) {
+-      setSrc(document.createElement("video").canPlayType(AV1) ? media.webm1080 : media.mp41080);
+-    } else {
+-      setSrc(media.mp4720);
+-    }
++    return onOpeningDone(() => {
++      if (window.matchMedia("(min-width: 769px)").matches) {
++        setSrc(document.createElement("video").canPlayType(AV1) ? media.webm1080 : media.mp41080);
++      } else {
++        setSrc(media.mp4720);
++      }
++    });
+   }, [media]);
+ 
+   useEffect(() => {
+@@ -47,21 +49,16 @@ export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt
+     video.defaultMuted = true;
+     video.setAttribute("muted", "");
+ 
+-    let opened = false;
+     let onScreen = true;
+     const sync = () => {
+-      if (opened && onScreen && document.visibilityState === "visible") {
++      if (onScreen && document.visibilityState === "visible") {
+         video.muted = true;
+         video.play().catch(() => {}); // rejected: leave the poster, no UI
+       } else {
+         video.pause();
+       }
+     };
+-    const stopWaiting = onOpeningDone(() => {
+-      opened = true;
+-      setAllowed(true);
+-      sync();
+-    });
++    sync();
+     const io = new IntersectionObserver(([entry]) => {
+       onScreen = entry.isIntersecting;
+       sync();
+@@ -71,7 +68,6 @@ export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt
+     video.addEventListener("playing", onPlaying);
+     document.addEventListener("visibilitychange", sync);
+     return () => {
+-      stopWaiting();
+       io.disconnect();
+       video.removeEventListener("playing", onPlaying);
+       document.removeEventListener("visibilitychange", sync);
+@@ -94,8 +90,7 @@ export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt
+           muted
+           loop
+           playsInline
+-          // Autoplay only once playback is allowed, so the film cannot start under the opening.
+-          autoPlay={allowed}
++          autoPlay
+           preload="metadata"
+           disablePictureInPicture
+           aria-hidden="true"

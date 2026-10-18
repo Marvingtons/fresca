@@ -1,0 +1,308 @@
+diff --git a/app/globals.css b/app/globals.css
+index 855a85b..cda04af 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -144,34 +144,18 @@ html.lenis body {
+   letter-spacing: 0;
+   margin-right: 0.018em;
+ }
+-/* Hero still: one slow settle, 1.06 → 1 over 9s. Held while the opening covers
+-   the page and started as the wipe reveals it (html.revealing). */
+-@keyframes hero-settle {
+-  from {
+-    transform: scale(1.06);
+-  }
+-  to {
+-    transform: scale(1);
+-  }
+-}
+-.hm-still {
+-  animation: hero-settle 9s cubic-bezier(0.25, 0.6, 0.3, 1) both;
+-}
+-html.intro:not(.revealing) .hm-still {
+-  animation-play-state: paused;
+-}
+-@media (prefers-reduced-motion: reduce) {
+-  .hm-still {
+-    animation: none;
+-  }
++/* Hero film over its poster: centered crops hold up for these shots. */
++.hero-poster,
++.hero-video {
++  object-position: 50% 50%;
+ }
+ 
+ /* Hero scrims, navy. The bottom one holds ~80% behind the subline and ~60%
+-   behind the headline, the top one ~80% behind the nav, so bone type passes
+-   4.5:1 (body) and 3:1 (headline, wordmark) over the still's brightest pixels. */
++   behind the headline, the top one ~85% behind the nav, so bone type passes
++   4.5:1 (body) and 3:1 (headline, wordmark) over the brightest frames. */
+ .hero-scrim-top {
+   height: 20%;
+-  background: linear-gradient(to bottom, rgb(43 58 85 / 0.84), rgb(43 58 85 / 0.62) 55%, rgb(43 58 85 / 0));
++  background: linear-gradient(to bottom, rgb(43 58 85 / 0.9), rgb(43 58 85 / 0.72) 55%, rgb(43 58 85 / 0));
+ }
+ .hero-scrim-bottom {
+   height: 72%;
+diff --git a/app/layout.tsx b/app/layout.tsx
+index 71208ae..8c6e2b2 100644
+--- a/app/layout.tsx
++++ b/app/layout.tsx
+@@ -3,6 +3,7 @@ import { Hanken_Grotesk, IBM_Plex_Mono, Instrument_Serif } from "next/font/googl
+ import SmoothScroll from "@/components/SmoothScroll";
+ import { site } from "@/content/site";
+ import { introScript } from "@/lib/intro";
++import { heroMedia } from "@/lib/media/hero";
+ import { siteUrl } from "@/lib/site-url";
+ import "./globals.css";
+ 
+@@ -60,6 +61,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
+     <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
+       <head>
+         <script dangerouslySetInnerHTML={{ __html: introScript }} />
++        {/* The hero poster is the first painted frame. */}
++        <link rel="preload" as="image" href={heroMedia.posterWebp} type="image/webp" fetchPriority="high" />
+       </head>
+       <body>
+         <SmoothScroll>{children}</SmoothScroll>
+diff --git a/components/Hero.tsx b/components/Hero.tsx
+index ab7b1ef..873fb8c 100644
+--- a/components/Hero.tsx
++++ b/components/Hero.tsx
+@@ -4,6 +4,7 @@ import { useRef } from "react";
+ import { cta, hero, site } from "@/content/site";
+ import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+ import { INTRO_KEY, markOpeningDone } from "@/lib/intro";
++import { heroMedia } from "@/lib/media/hero";
+ import { MOTION } from "@/lib/motion";
+ import HeroMedia from "./HeroMedia";
+ import Line from "./LineReveal";
+@@ -85,7 +86,7 @@ export default function Hero() {
+             sessionStorage.setItem(INTRO_KEY, "1");
+           } catch {}
+           gsap.set([wm, field, header], { clearProps: "all" });
+-          html.classList.remove("intro", "revealing");
++          html.classList.remove("intro");
+           document.body.classList.remove("scroll-lock");
+           start();
+           ScrollTrigger.refresh();
+@@ -126,8 +127,6 @@ export default function Hero() {
+           // autoRound off: the tween must end on the CSS's sub-pixel letter-spacing, or the
+           // letters shift by a pixel when the inline style is cleared.
+           tl.to(wm, { letterSpacing: lsEnd, y: 0, scale: 1, duration: 0.9, ease: "power3.inOut", autoRound: false }, 0.8)
+-            // The still's 9s settle starts as the media is revealed.
+-            .add(() => html.classList.add("revealing"), 1.5)
+             .to(
+               wipe,
+               {
+@@ -161,9 +160,9 @@ export default function Hero() {
+ 
+   return (
+     <section ref={root} id="top" className="relative h-svh min-h-[520px] overflow-hidden bg-navy text-ground">
+-      {/* Media: full bleed, cover, parallax on this wrapper (the still's settle is on the image). */}
++      {/* Media: full bleed, cover, parallax on this wrapper. */}
+       <div className="hero-media absolute inset-0 will-change-transform">
+-        <HeroMedia src={hero.media.src} poster={hero.media.poster} alt={hero.media.alt} focalPoint={hero.media.focalPoint} />
++        <HeroMedia media={heroMedia} alt={hero.mediaAlt} />
+       </div>
+       {/* Legibility: navy, not black. Top for the nav on the bright ceiling, bottom
+           for the type. Stops are tuned so every line passes against the kitchen's
+diff --git a/components/HeroMedia.tsx b/components/HeroMedia.tsx
+index 8a4f96d..47d63ea 100644
+--- a/components/HeroMedia.tsx
++++ b/components/HeroMedia.tsx
+@@ -1,47 +1,65 @@
+ "use client";
+ 
+-import Image from "next/image";
+-import { useEffect, useRef } from "react";
++import { useEffect, useRef, useState } from "react";
+ import { onOpeningDone } from "@/lib/intro";
+-import { prefersReducedMotion } from "@/lib/motion";
++import type { HeroMediaSources } from "@/lib/media/hero";
+ 
+-const VIDEO = /\.(mp4|webm|mov|m4v)(\?.*)?$/i;
+-
+-type HeroMediaProps = {
+-  /** A still image, or a video file. Swapping in a video is this one prop. */
+-  src: string;
+-  /** For a video: the still shown until playback starts (use its first frame). */
+-  poster?: string;
+-  alt: string;
+-  /** object-position, e.g. "47% 100%": the point kept in frame at every crop. */
+-  focalPoint?: string;
+-};
++/** AV1 in WebM; anything but "" means the browser will try it. */
++const AV1 = 'video/webm; codecs="av01.0.08M.10"';
+ 
+ /**
+- * Full-bleed hero media, cover-fitted to its parent. A still gets a slow 9s
+- * settle (1.06 → 1, see .hm-still in globals.css). A video is muted, looping
+- * and inline, loads metadata only, and starts playing when the opening's wipe
+- * is done; it pauses under reduced motion and whenever it is off screen.
++ * Full-bleed hero film over a server-rendered poster.
++ *
++ * - The poster (<picture>, webp with jpg fallback) is the first painted frame.
++ * - The source is picked on mount: over 768px, AV1 WebM where supported, else the
++ *   1080 MP4; 768px and under, the 720 MP4. Under reduced motion or Save-Data no
++ *   video element is created, so nothing is downloaded.
++ * - Playback waits for the opening's wipe (onOpeningDone; immediate on later
++ *   visits). If play() rejects (e.g. iOS Low Power Mode) the poster just stays.
++ * - Pauses when the hero is fully off screen or the tab is hidden.
++ * - Fades in over 400ms on `playing`, so poster → film is invisible.
++ * The file is a seamless loop: plain `loop`, no restart or `ended` handling.
+  */
+-export default function HeroMedia({ src, poster, alt, focalPoint = "50% 50%" }: HeroMediaProps) {
+-  const isVideo = VIDEO.test(src);
++export default function HeroMedia({ media, alt }: { media: HeroMediaSources; alt: string }) {
+   const videoRef = useRef<HTMLVideoElement>(null);
++  const [src, setSrc] = useState<string | null>(null);
++  const [allowed, setAllowed] = useState(false);
++  const [playing, setPlaying] = useState(false);
+ 
++  // Choose the source (or none) once, on mount.
+   useEffect(() => {
+-    const video = videoRef.current;
+-    if (!isVideo || !video) return;
+-    if (prefersReducedMotion()) {
+-      video.pause();
+-      return;
++    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
++    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
++    if (reduce || saveData) return;
++    if (window.matchMedia("(min-width: 769px)").matches) {
++      setSrc(document.createElement("video").canPlayType(AV1) ? media.webm1080 : media.mp41080);
++    } else {
++      setSrc(media.mp4720);
+     }
++  }, [media]);
++
++  useEffect(() => {
++    const video = videoRef.current;
++    if (!src || !video) return;
++    // React does not reliably reflect `muted` to the DOM, and iOS will not
++    // autoplay without it: set the property and the attribute ourselves.
++    video.muted = true;
++    video.defaultMuted = true;
++    video.setAttribute("muted", "");
++
+     let opened = false;
+     let onScreen = true;
+     const sync = () => {
+-      if (opened && onScreen) video.play().catch(() => {});
+-      else video.pause();
++      if (opened && onScreen && document.visibilityState === "visible") {
++        video.muted = true;
++        video.play().catch(() => {}); // rejected: leave the poster, no UI
++      } else {
++        video.pause();
++      }
+     };
+     const stopWaiting = onOpeningDone(() => {
+       opened = true;
++      setAllowed(true);
+       sync();
+     });
+     const io = new IntersectionObserver(([entry]) => {
+@@ -49,27 +67,41 @@ export default function HeroMedia({ src, poster, alt, focalPoint = "50% 50%" }:
+       sync();
+     });
+     io.observe(video);
++    const onPlaying = () => setPlaying(true);
++    video.addEventListener("playing", onPlaying);
++    document.addEventListener("visibilitychange", sync);
+     return () => {
+       stopWaiting();
+       io.disconnect();
++      video.removeEventListener("playing", onPlaying);
++      document.removeEventListener("visibilitychange", sync);
+     };
+-  }, [isVideo, src]);
++  }, [src]);
+ 
+-  if (isVideo) {
+-    return (
+-      <video
+-        ref={videoRef}
+-        className="absolute inset-0 h-full w-full object-cover"
+-        style={{ objectPosition: focalPoint }}
+-        src={src}
+-        poster={poster}
+-        muted
+-        loop
+-        playsInline
+-        preload="metadata"
+-        aria-label={alt}
+-      />
+-    );
+-  }
+-  return <Image src={src} alt={alt} fill priority sizes="100vw" quality={85} className="hm-still object-cover" style={{ objectPosition: focalPoint }} />;
++  return (
++    <>
++      <picture>
++        <source srcSet={media.posterWebp} type="image/webp" />
++        {/* eslint-disable-next-line @next/next/no-img-element -- plain img on purpose: server-rendered first frame, no optimizer */}
++        <img src={media.posterJpg} alt={alt} decoding="async" className="hero-poster absolute inset-0 h-full w-full object-cover" />
++      </picture>
++      {src && (
++        <video
++          ref={videoRef}
++          className={`hero-video absolute inset-0 h-full w-full object-cover transition-opacity duration-[400ms] ${playing ? "opacity-100" : "opacity-0"}`}
++          src={src}
++          poster={media.posterWebp}
++          muted
++          loop
++          playsInline
++          // Autoplay only once playback is allowed, so the film cannot start under the opening.
++          autoPlay={allowed}
++          preload="metadata"
++          disablePictureInPicture
++          aria-hidden="true"
++          tabIndex={-1}
++        />
++      )}
++    </>
++  );
+ }
+diff --git a/content/site.ts b/content/site.ts
+index b714346..bf7df81 100644
+--- a/content/site.ts
++++ b/content/site.ts
+@@ -80,15 +80,8 @@ export const cta = { href: "#contact", label: "Book a consultation" };
+ export const hero = {
+   lines: ["Designed from", "the plan up."], // second line is italic
+   text: "Kitchens, baths, and whole homes in Solana Beach.",
+-  /** Full-bleed hero media. To run the film, set `src` to the video file and keep
+-   *  `poster` as its first frame; nothing else changes. */
+-  media: {
+-    src: img("black-hood-kitchen"),
+-    poster: img("black-hood-kitchen"),
+-    alt: "White shaker kitchen with a black range hood, marble island and three glass pendants",
+-    /** Keeps the island in frame from 1440 down to 390 wide. */
+-    focalPoint: "47% 100%",
+-  },
++  /** Hero film and poster URLs live in lib/media/hero.ts. */
++  mediaAlt: "A walk through kitchens, a bath, a living room and a bedroom designed by the studio",
+ };
+ 
+ // ───────── studio wall (exhibition layout)
+diff --git a/lib/media/hero.ts b/lib/media/hero.ts
+new file mode 100644
+index 0000000..bdfa846
+--- /dev/null
++++ b/lib/media/hero.ts
+@@ -0,0 +1,14 @@
++// Hero film and poster. Every URL lives here, so moving hosts is a one-line edit.
++// TODO before launch: r2.dev URLs are rate limited and not meant for production
++// traffic. Connect a custom domain to the bucket (e.g. media.<domain>) and change BASE.
++const BASE = "https://pub-364f647b29874b09922e1889f267c323.r2.dev";
++
++export const heroMedia = {
++  webm1080: `${BASE}/fresca-hero-1080.webm`, // AV1, 1.6 MB
++  mp41080: `${BASE}/fresca-hero-1080.mp4`, // H.264, 3.2 MB
++  mp4720: `${BASE}/fresca-hero-720.mp4`, // H.264, 1.5 MB, mobile
++  posterWebp: `${BASE}/fresca-hero-poster.webp`,
++  posterJpg: `${BASE}/fresca-hero-poster.jpg`,
++};
++
++export type HeroMediaSources = typeof heroMedia;

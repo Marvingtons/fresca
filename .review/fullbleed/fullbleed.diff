@@ -1,0 +1,468 @@
+diff --git a/app/globals.css b/app/globals.css
+index 40949dc..855a85b 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -125,15 +125,17 @@ html.lenis body {
+   --wm-fs: min(calc(11vw / 0.72), calc(100cqw / (2.693 * 1.12)));
+   width: fit-content;
+   margin-inline: auto;
+-  /* Room above the box so caps (0.72em) clear the 0.68em line box when the
+-     wordmark is text-clipped during the opening. Cancelled by the margin. */
+-  padding-top: 0.1em;
+-  margin-top: -0.1em;
++  /* The box holds the whole glyph: caps rise 0.73em above the baseline (the
++     line box is 0.68em) and R, S and C dip 0.009em below it. Cancelled by the
++     margins, so the baseline stays on the gutter. */
++  padding: 0.06em 0 0.02em;
++  margin-top: -0.06em;
++  margin-bottom: -0.02em;
+   font-size: var(--wm-fs);
+   line-height: 0.68;
+   letter-spacing: calc((100cqw - 2.693 * var(--wm-fs)) / 5);
+   white-space: nowrap;
+-  color: var(--ink);
++  color: var(--ground);
+ }
+ .wm span:first-child {
+   margin-left: -0.019em;
+@@ -142,19 +144,67 @@ html.lenis body {
+   letter-spacing: 0;
+   margin-right: 0.018em;
+ }
+-/* Photo frame: as before, but short enough to leave room for the band. */
+-@media (min-width: 861px) {
+-  .hero-media {
+-    width: min(944px, 52vw, calc((100svh - 128px - 0.68 * 11vw / 0.72 - 92px) * 4 / 3));
++/* Hero still: one slow settle, 1.06 → 1 over 9s. Held while the opening covers
++   the page and started as the wipe reveals it (html.revealing). */
++@keyframes hero-settle {
++  from {
++    transform: scale(1.06);
++  }
++  to {
++    transform: scale(1);
+   }
+ }
++.hm-still {
++  animation: hero-settle 9s cubic-bezier(0.25, 0.6, 0.3, 1) both;
++}
++html.intro:not(.revealing) .hm-still {
++  animation-play-state: paused;
++}
++@media (prefers-reduced-motion: reduce) {
++  .hm-still {
++    animation: none;
++  }
++}
++
++/* Hero scrims, navy. The bottom one holds ~80% behind the subline and ~60%
++   behind the headline, the top one ~80% behind the nav, so bone type passes
++   4.5:1 (body) and 3:1 (headline, wordmark) over the still's brightest pixels. */
++.hero-scrim-top {
++  height: 20%;
++  background: linear-gradient(to bottom, rgb(43 58 85 / 0.84), rgb(43 58 85 / 0.62) 55%, rgb(43 58 85 / 0));
++}
++.hero-scrim-bottom {
++  height: 72%;
++  background: linear-gradient(to top, rgb(43 58 85 / 0.86), rgb(43 58 85 / 0.82) 40%, rgb(43 58 85 / 0.64) 72%, rgb(43 58 85 / 0));
++}
++
++/* ───────── nav over the hero: bone and transparent while the hero is under it,
++   the cream bar with ink once it has scrolled out (html.past-hero). The nav
++   wordmark waits until the FRESCA band has faded (html.band-gone). */
++.site-header {
++  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
++}
++html:not(.past-hero) .site-header {
++  background-color: transparent;
++  border-color: transparent;
++  color: var(--ground);
++}
++html:not(.past-hero) .site-header .nav-cta {
++  color: var(--ground);
++}
++.site-header .wordmark {
++  transition: opacity 0.3s, visibility 0.3s;
++}
++html:not(.band-gone) .site-header .wordmark {
++  opacity: 0;
++  visibility: hidden;
++}
+ 
+ /* ───────── opening: pre-paint state, set by the inline script in <head>
+    (lib/intro.ts) on the first visit per session. Without html.intro the page
+    renders final. The navy field covers the page; the band's wordmark sits on
+    it, centered at ~28px (--wm-s is set by an inline script right after it),
+-   bone, lightly tracked. During the wipe it is a text-clipped gradient: bone
+-   above the field's edge (--cut), ink below. */
++   bone, lightly tracked. */
+ html.intro {
+   overflow: hidden;
+ }
+@@ -176,10 +226,6 @@ html.intro .wm {
+   z-index: 46;
+   letter-spacing: 0.04em;
+   transform: translateY(calc(-50svh + var(--pad) + 50%)) scale(var(--wm-s, 0.13));
+-  color: transparent;
+-  background-image: linear-gradient(to bottom, var(--ground) var(--cut, 100%), var(--ink) var(--cut, 100%));
+-  -webkit-background-clip: text;
+-  background-clip: text;
+ }
+ @media (prefers-reduced-motion: reduce) {
+   .intro-field {
+diff --git a/components/Hero.tsx b/components/Hero.tsx
+index db5bc87..ab7b1ef 100644
+--- a/components/Hero.tsx
++++ b/components/Hero.tsx
+@@ -1,11 +1,11 @@
+ "use client";
+ 
+-import Image from "next/image";
+ import { useRef } from "react";
+ import { cta, hero, site } from "@/content/site";
+ import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+-import { INTRO_KEY } from "@/lib/intro";
++import { INTRO_KEY, markOpeningDone } from "@/lib/intro";
+ import { MOTION } from "@/lib/motion";
++import HeroMedia from "./HeroMedia";
+ import Line from "./LineReveal";
+ import { useSmoothScroll } from "./SmoothScroll";
+ 
+@@ -31,13 +31,39 @@ export default function Hero() {
+   const fieldRef = useRef<HTMLDivElement>(null);
+   const { start } = useSmoothScroll();
+ 
+-  // Opening (first visit per session, html.intro): a navy field with the wordmark
+-  // centered at ~28px. After a 0.8s hold the wordmark tracks out to the gutters,
+-  // grows to its full size and drops onto the hero's bottom edge, where it stays.
+-  // Near the end the field wipes up and away; the nav fades in last. ~2.4s.
+   useGSAP(
+     () => {
++      const html = document.documentElement;
++      const hero = root.current!;
++
++      // Nav state, on every visit and under reduced motion too: bone over the hero,
++      // ink once it has scrolled out (html.past-hero); the nav wordmark appears only
++      // once the FRESCA band has faded (html.band-gone), so the name never shows twice.
++      const flag = (cls: string, start: string) =>
++        ScrollTrigger.create({
++          trigger: hero,
++          start,
++          end: "max",
++          onToggle: (self) => html.classList.toggle(cls, self.isActive),
++        });
++      const flags = [flag("band-gone", "50% top"), flag("past-hero", "bottom top+=76")];
++
+       const mm = gsap.matchMedia();
++      mm.add(MOTION, () => {
++        // Scroll: the media moves up at 0.85x scroll speed; the band is gone by the
++        // time half the hero is.
++        gsap.to(".hero-media", {
++          y: () => hero.offsetHeight * 0.15,
++          ease: "none",
++          scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: true, invalidateOnRefresh: true },
++        });
++        gsap.to(".wm-band", { autoAlpha: 0, ease: "none", scrollTrigger: { trigger: hero, start: "top top", end: "50% top", scrub: true } });
++      });
++
++      // Opening (first visit per session, html.intro): a navy field with the wordmark
++      // centered at ~28px. After a 0.8s hold the wordmark tracks out to the gutters,
++      // grows to its full size and drops onto the hero's bottom edge, where it stays.
++      // Near the end the field wipes up to reveal the media; the nav fades in last.
+       mm.add(MOTION, () => {
+         const html = document.documentElement;
+         if (!html.classList.contains("intro")) return;
+@@ -53,12 +79,13 @@ export default function Hero() {
+         const finish = () => {
+           if (done) return;
+           done = true;
++          markOpeningDone();
+           window.removeEventListener("keydown", onKey);
+           try {
+             sessionStorage.setItem(INTRO_KEY, "1");
+           } catch {}
+           gsap.set([wm, field, header], { clearProps: "all" });
+-          html.classList.remove("intro");
++          html.classList.remove("intro", "revealing");
+           document.body.classList.remove("scroll-lock");
+           start();
+           ScrollTrigger.refresh();
+@@ -94,20 +121,13 @@ export default function Hero() {
+             autoRound: false,
+           });
+ 
+-          // While the field wipes, the wordmark is bone above the field's edge and
+-          // ink below it (a hard stop in a text-clipped gradient, kept on the edge).
+           const wipe = { p: 0 };
+-          const syncCut = () => {
+-            const edge = innerHeight * (1 - wipe.p);
+-            const r = wm.getBoundingClientRect();
+-            const sy = Number(gsap.getProperty(wm, "scaleY")) || 1;
+-            wm.style.setProperty("--cut", `${(edge - r.top) / sy}px`);
+-          };
+-
+           tl = gsap.timeline({ onComplete: finish });
+           // autoRound off: the tween must end on the CSS's sub-pixel letter-spacing, or the
+           // letters shift by a pixel when the inline style is cleared.
+-          tl.to(wm, { letterSpacing: lsEnd, y: 0, scale: 1, duration: 0.9, ease: "power3.inOut", autoRound: false, onUpdate: () => wipe.p > 0 && syncCut() }, 0.8)
++          tl.to(wm, { letterSpacing: lsEnd, y: 0, scale: 1, duration: 0.9, ease: "power3.inOut", autoRound: false }, 0.8)
++            // The still's 9s settle starts as the media is revealed.
++            .add(() => html.classList.add("revealing"), 1.5)
+             .to(
+               wipe,
+               {
+@@ -116,11 +136,12 @@ export default function Hero() {
+                 ease: "power3.inOut",
+                 onUpdate: () => {
+                   field.style.clipPath = `inset(0 0 ${wipe.p * 100}% 0)`;
+-                  syncCut();
+                 },
+               },
+               1.5,
+             )
++            // A hero video starts here, so its first frame is the first one seen.
++            .add(markOpeningDone, 2.2)
+             .to(header, { autoAlpha: 1, duration: 0.3, ease: "power1.out" }, 2.2);
+         });
+ 
+@@ -130,46 +151,54 @@ export default function Hero() {
+           window.removeEventListener("keydown", onKey);
+         };
+       });
+-      return () => mm.revert();
++      return () => {
++        mm.revert();
++        flags.forEach((t) => t.kill());
++      };
+     },
+     { scope: root },
+   );
+ 
+   return (
+-    <section ref={root} id="top" className="relative flex min-h-svh flex-col bg-ground pt-[clamp(96px,12vh,128px)]">
+-      <div className="grid w-full flex-1 items-end gap-x-[clamp(32px,5vw,80px)] gap-y-8 px-pad md:grid-cols-[minmax(0,1fr)_auto]">
+-        <div className="text-ink">
+-          <h1 className="font-serif text-[clamp(42px,4.3vw,72px)] font-normal leading-[.98] tracking-[-.015em]">
++    <section ref={root} id="top" className="relative h-svh min-h-[520px] overflow-hidden bg-navy text-ground">
++      {/* Media: full bleed, cover, parallax on this wrapper (the still's settle is on the image). */}
++      <div className="hero-media absolute inset-0 will-change-transform">
++        <HeroMedia src={hero.media.src} poster={hero.media.poster} alt={hero.media.alt} focalPoint={hero.media.focalPoint} />
++      </div>
++      {/* Legibility: navy, not black. Top for the nav on the bright ceiling, bottom
++          for the type. Stops are tuned so every line passes against the kitchen's
++          brightest pixels (see .hero-scrim in globals.css). */}
++      <div aria-hidden="true" className="hero-scrim-top pointer-events-none absolute inset-x-0 top-0" />
++      <div aria-hidden="true" className="hero-scrim-bottom pointer-events-none absolute inset-x-0 bottom-0" />
++
++      {/* No z-index here: the wordmark (z-46) must stay above the opening field. */}
++      <div className="relative flex h-full flex-col justify-end">
++        <div className="hero-copy px-pad pb-[clamp(16px,3vh,32px)]">
++          <h1 className="font-serif text-[clamp(40px,5.2vw,84px)] font-normal leading-[.98] tracking-[-.015em]">
+             {hero.lines.map((line, i) => (
+               <Line key={line} reveal={false}>
+                 {i === hero.lines.length - 1 ? <em>{line}</em> : line}
+               </Line>
+             ))}
+           </h1>
+-          <p className="mt-6 max-w-[420px] text-base text-body">{hero.text}</p>
+-          <a className="pill pill-accent mt-8" href={cta.href}>
++          <p className="mt-4 max-w-[440px] text-base">{hero.text}</p>
++          <a className="pill pill-accent mt-6" href={cta.href}>
+             {cta.label}
+           </a>
+         </div>
+ 
+-        {/* Contained 4:3 frame: never wider than 944 CSS px (the original photo's
+-            width), and short enough to leave room for the wordmark band below. */}
+-        <div className="hero-media relative aspect-[4/3] overflow-hidden rounded-[3px] max-md:-order-1 max-md:w-full">
+-          <Image src={hero.image.src} alt={hero.image.alt} fill priority sizes="(min-width: 861px) min(944px, 52vw), 100vw" quality={85} className="object-cover" />
++        {/* Wordmark band: permanent, on every visit. On a first visit this same
++            element is the opening's centered wordmark (see globals.css, html.intro). */}
++        <div className="wm-band px-pad pb-pad">
++          <p ref={wmRef} aria-hidden="true" className="wm font-serif">
++            {"FRESCA".split("").map((ch, i) => (
++              <span key={i}>{ch}</span>
++            ))}
++          </p>
++          <script dangerouslySetInnerHTML={{ __html: startScaleScript }} />
+         </div>
+       </div>
+ 
+-      {/* Wordmark band: permanent, on every visit. On a first visit this same
+-          element is the opening's centered wordmark (see globals.css, html.intro). */}
+-      <div className="wm-band px-pad pb-pad pt-[clamp(32px,5vh,52px)]">
+-        <p ref={wmRef} aria-hidden="true" className="wm font-serif">
+-          {"FRESCA".split("").map((ch, i) => (
+-            <span key={i}>{ch}</span>
+-          ))}
+-        </p>
+-        <script dangerouslySetInnerHTML={{ __html: startScaleScript }} />
+-      </div>
+-
+       {/* Opening field: server-rendered, shown only under html.intro. */}
+       <div ref={fieldRef} aria-hidden="true" className="intro-field fixed inset-0 z-[45] bg-navy text-ground">
+         <span className="absolute left-pad top-pad text-[11px] uppercase tracking-[.2em] opacity-60">Interior Design</span>
+diff --git a/components/HeroMedia.tsx b/components/HeroMedia.tsx
+new file mode 100644
+index 0000000..8a4f96d
+--- /dev/null
++++ b/components/HeroMedia.tsx
+@@ -0,0 +1,75 @@
++"use client";
++
++import Image from "next/image";
++import { useEffect, useRef } from "react";
++import { onOpeningDone } from "@/lib/intro";
++import { prefersReducedMotion } from "@/lib/motion";
++
++const VIDEO = /\.(mp4|webm|mov|m4v)(\?.*)?$/i;
++
++type HeroMediaProps = {
++  /** A still image, or a video file. Swapping in a video is this one prop. */
++  src: string;
++  /** For a video: the still shown until playback starts (use its first frame). */
++  poster?: string;
++  alt: string;
++  /** object-position, e.g. "47% 100%": the point kept in frame at every crop. */
++  focalPoint?: string;
++};
++
++/**
++ * Full-bleed hero media, cover-fitted to its parent. A still gets a slow 9s
++ * settle (1.06 → 1, see .hm-still in globals.css). A video is muted, looping
++ * and inline, loads metadata only, and starts playing when the opening's wipe
++ * is done; it pauses under reduced motion and whenever it is off screen.
++ */
++export default function HeroMedia({ src, poster, alt, focalPoint = "50% 50%" }: HeroMediaProps) {
++  const isVideo = VIDEO.test(src);
++  const videoRef = useRef<HTMLVideoElement>(null);
++
++  useEffect(() => {
++    const video = videoRef.current;
++    if (!isVideo || !video) return;
++    if (prefersReducedMotion()) {
++      video.pause();
++      return;
++    }
++    let opened = false;
++    let onScreen = true;
++    const sync = () => {
++      if (opened && onScreen) video.play().catch(() => {});
++      else video.pause();
++    };
++    const stopWaiting = onOpeningDone(() => {
++      opened = true;
++      sync();
++    });
++    const io = new IntersectionObserver(([entry]) => {
++      onScreen = entry.isIntersecting;
++      sync();
++    });
++    io.observe(video);
++    return () => {
++      stopWaiting();
++      io.disconnect();
++    };
++  }, [isVideo, src]);
++
++  if (isVideo) {
++    return (
++      <video
++        ref={videoRef}
++        className="absolute inset-0 h-full w-full object-cover"
++        style={{ objectPosition: focalPoint }}
++        src={src}
++        poster={poster}
++        muted
++        loop
++        playsInline
++        preload="metadata"
++        aria-label={alt}
++      />
++    );
++  }
++  return <Image src={src} alt={alt} fill priority sizes="100vw" quality={85} className="hm-still object-cover" style={{ objectPosition: focalPoint }} />;
++}
+diff --git a/components/Navigation.tsx b/components/Navigation.tsx
+index 5eeb0f3..1d23a76 100644
+--- a/components/Navigation.tsx
++++ b/components/Navigation.tsx
+@@ -7,9 +7,9 @@ import { prefersReducedMotion } from "@/lib/motion";
+ import { useSmoothScroll } from "./SmoothScroll";
+ import Copy from "./Placeholder";
+ 
+-function Wordmark({ label }: { label?: string }) {
++function Wordmark({ label, className = "" }: { label?: string; className?: string }) {
+   return (
+-    <a href="#top" aria-label={label} className="flex flex-col leading-none no-underline">
++    <a href="#top" aria-label={label} className={`flex flex-col leading-none no-underline ${className}`}>
+       <b className="font-serif text-[32px] font-normal italic">Fresca</b>{" "}
+       <span className="mt-[3px] text-[9px] uppercase tracking-[.36em]">Interior Design</span>
+     </a>
+@@ -77,7 +77,7 @@ export default function Navigation() {
+         data-scrolled={scrolled || undefined}
+         className="site-header fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-6 border-b border-transparent bg-ground px-pad py-4 text-ink transition-colors duration-300 data-[scrolled]:border-line"
+       >
+-        <Wordmark label="Fresca Interior Design, home" />
++        <Wordmark label="Fresca Interior Design, home" className="wordmark" />
+         <nav aria-label="Main" className="flex items-center gap-[clamp(20px,2.6vw,40px)] max-md:hidden">
+           {navLinks.map((link) => (
+             <a key={link.href} href={link.href} className="nav-link text-sm">
+diff --git a/content/site.ts b/content/site.ts
+index e586edf..b714346 100644
+--- a/content/site.ts
++++ b/content/site.ts
+@@ -78,11 +78,16 @@ export const cta = { href: "#contact", label: "Book a consultation" };
+ // ───────── hero
+ 
+ export const hero = {
+-  lines: ["Kitchens, baths,", "and whole homes,", "designed from", "the plan up."], // last line is italic
+-  text: "A residential design studio in Solana Beach.",
+-  image: {
++  lines: ["Designed from", "the plan up."], // second line is italic
++  text: "Kitchens, baths, and whole homes in Solana Beach.",
++  /** Full-bleed hero media. To run the film, set `src` to the video file and keep
++   *  `poster` as its first frame; nothing else changes. */
++  media: {
+     src: img("black-hood-kitchen"),
++    poster: img("black-hood-kitchen"),
+     alt: "White shaker kitchen with a black range hood, marble island and three glass pendants",
++    /** Keeps the island in frame from 1440 down to 390 wide. */
++    focalPoint: "47% 100%",
+   },
+ };
+ 
+diff --git a/lib/intro.ts b/lib/intro.ts
+index 84738d4..f00b9eb 100644
+--- a/lib/intro.ts
++++ b/lib/intro.ts
+@@ -18,3 +18,29 @@ declare global {
+ export function introIsPlaying() {
+   return typeof document !== "undefined" && document.documentElement.classList.contains("intro");
+ }
++
++// ───────── opening done: the navy wipe has finished (or there was no opening).
++// The hero video waits for this so its first frame is the first one seen.
++
++let openingDone = false;
++const openingDoneListeners = new Set<() => void>();
++
++/** Called by the opening when its wipe completes (and again, harmlessly, on skip). */
++export function markOpeningDone() {
++  if (openingDone) return;
++  openingDone = true;
++  openingDoneListeners.forEach((listener) => listener());
++  openingDoneListeners.clear();
++}
++
++/** Runs `listener` once the opening is done, right away if there is none. Returns an unsubscribe function. */
++export function onOpeningDone(listener: () => void) {
++  if (openingDone || !introIsPlaying()) {
++    listener();
++    return () => {};
++  }
++  openingDoneListeners.add(listener);
++  return () => {
++    openingDoneListeners.delete(listener);
++  };
++}

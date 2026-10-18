@@ -1,0 +1,12 @@
+
+1440×900 @ 4x CPU throttle
+  travel: 61 frames in 1017ms → 60.0 fps; slowest frame 16.8ms; frames over 25ms: 0
+  long tasks (PerformanceObserver, whole load + opening): [[43,50],[245,99]]
+  RunTask > 50ms in trace (any thread): 2 → 50ms@13979288, 99ms@13979288
+  travel window (page clock): 851–1868ms; long tasks overlapping it: 0
+
+390×844 @ 4x CPU throttle
+  travel: 61 frames in 1017ms → 60.0 fps; slowest frame 16.8ms; frames over 25ms: 0
+  long tasks (PerformanceObserver, whole load + opening): [[40,54],[110,52],[202,77]]
+  RunTask > 50ms in trace (any thread): 3 → 55ms@13979476, 52ms@13979476, 77ms@13979476
+  travel window (page clock): 806–1822ms; long tasks overlapping it: 0

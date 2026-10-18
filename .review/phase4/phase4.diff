@@ -1,0 +1,558 @@
+diff --git a/app/globals.css b/app/globals.css
+index 2b61ef0..00dc580 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -4,19 +4,32 @@
+ 
+ :root {
+   --ground: #f4f2eb;
+-  --ground-2: #e7e4db;
+   --ink: #1d1c1a;
+   --body: #4a4740;
+   --muted: #6b665c;
+   --line: rgba(29, 28, 26, 0.14);
+-  --accent: #2b3a55;
++  --navy: #2b3a55;
+   --on-dark: #cfc9bc;
++  --terracotta: #a9502f;
+   --serif: var(--font-instrument), Georgia, serif;
+   --mono: var(--font-plex-mono), ui-monospace, monospace;
+   --sans: var(--font-hanken), system-ui, sans-serif;
+   --pad: clamp(16px, 2.2vw, 32px);
+ }
+ 
++/* Missing content, see content/placeholders.ts. Never final copy. */
++.placeholder {
++  color: var(--terracotta);
++  font-family: var(--mono);
++  font-size: 0.85em;
++  font-style: normal;
++  letter-spacing: 0;
++}
++.bg-navy .placeholder,
++#menu .placeholder {
++  color: #e08a66;
++}
++
+ /* Lenis */
+ html.lenis,
+ html.lenis body {
+@@ -62,17 +75,35 @@ html.lenis body {
+     @apply inline-flex min-h-[44px] cursor-pointer items-center gap-2.5 rounded-full border border-current bg-transparent px-5 text-xs uppercase tracking-[.18em] no-underline;
+   }
+ 
++  /* Header text links: ink, underline drawn in on hover. The CTA is the
++     terracotta action color, underlined at rest. */
++  .nav-link,
++  .nav-cta {
++    @apply relative py-2 no-underline;
++  }
++  .nav-link::after,
++  .nav-cta::after {
++    @apply absolute inset-x-0 bottom-1 h-px origin-left bg-current content-[''];
++  }
++  .nav-link::after {
++    @apply scale-x-0 transition-transform duration-300 ease-curtain;
++  }
++  .nav-link:hover::after,
++  .nav-link:focus-visible::after {
++    @apply scale-x-100;
++  }
++  .nav-cta {
++    @apply text-terracotta hover:text-[#8f4227];
++  }
++
+   .pill {
+     @apply inline-flex min-h-[48px] items-center rounded-full px-6 text-xs uppercase tracking-[.18em] no-underline transition-colors duration-300;
+   }
+-  .pill-light {
+-    @apply bg-ground text-ink hover:bg-white;
+-  }
+   .pill-line {
+-    @apply border border-current hover:bg-ink hover:text-ground;
++    @apply border border-terracotta text-terracotta hover:bg-terracotta hover:text-ground;
+   }
+-  .pill-dark {
+-    @apply bg-ink text-ground hover:bg-[#38352f];
++  .pill-accent {
++    @apply bg-terracotta text-ground hover:bg-[#8f4227];
+   }
+ }
+ 
+@@ -86,22 +117,9 @@ html.intro .site-header {
+   visibility: hidden;
+ }
+ html.intro .hero-media {
+-  clip-path: inset(37% 41.5% 37% 41.5% round 3px);
+-}
+-html.intro .hero-media img {
+   opacity: 0;
+   visibility: hidden;
+ }
+-html.intro .hero-media .hero-cycle:first-child img {
+-  opacity: 1;
+-  visibility: visible;
+-}
+-html.intro .hero-final {
+-  transform: scale(1.35);
+-}
+-html.intro .hero-shade {
+-  opacity: 0;
+-}
+ html.intro .hero-ln > span {
+   transform: translateY(110%);
+ }
+@@ -110,8 +128,10 @@ html.intro .hero-fade {
+   visibility: hidden;
+   transform: translateY(14px);
+ }
+-html:not(.intro) .intro-ui,
+-html:not(.intro) .hero-cycle {
++html.intro .intro-mark {
++  opacity: 0;
++}
++html:not(.intro) .intro-ui {
+   display: none;
+ }
+ 
+@@ -290,6 +310,15 @@ html:not(.intro) .hero-cycle {
+   left: calc(var(--len-fit) + 8px);
+ }
+ 
++/* Plate label (Pl. 01): the same small caps label on both fields. Color follows
++   the field: muted on cream, on-dark on navy. */
++.plate {
++  font-size: 10px;
++  text-transform: uppercase;
++  letter-spacing: 0.18em;
++  line-height: 1.4;
++}
++
+ /* Plate labels: on narrow plates (v5 widths go down to 11% of the wall) the grid
+    coordinate moves under the city instead of squeezing the title. */
+ .pl {
+@@ -323,7 +352,7 @@ html:not(.intro) .hero-cycle {
+ 
+ /* ───────── approach blueprint (v6) */
+ .blueprint {
+-  background-color: var(--accent);
++  background-color: var(--navy);
+   background-image: linear-gradient(rgba(244, 242, 235, 0.045) 1px, transparent 1px),
+     linear-gradient(90deg, rgba(244, 242, 235, 0.045) 1px, transparent 1px),
+     linear-gradient(rgba(244, 242, 235, 0.1) 1px, transparent 1px),
+@@ -395,7 +424,7 @@ html:not(.intro) .hero-cycle {
+   align-items: baseline;
+   gap: 8px;
+   padding: 6px 0;
+-  border-top: 1px solid rgba(244, 242, 235, 0.16);
++  border-top: 1px solid theme("colors.line-dark");
+ }
+ .ap-spec li span:nth-child(2) {
+   flex: 1;
+diff --git a/components/Approach.tsx b/components/Approach.tsx
+index cf5c1aa..9e766b5 100644
+--- a/components/Approach.tsx
++++ b/components/Approach.tsx
+@@ -127,7 +127,10 @@ export default function Approach() {
+           >
+             <div>
+               <ApproachDrawing kind={panel.drawing} />
+-              <span className="font-serif text-[30px] italic text-gold">{String(i + 1).padStart(2, "0")}</span>
++              <p className="plate text-on-dark">
++                {/* Continues the studio wall's plate numbering (Pl. 01–07). */}
++                Pl. {String(i + 8).padStart(2, "0")} <b className="ml-2 font-medium text-ground">{panel.title}</b>
++              </p>
+               <h3 className="mb-3.5 mt-2 font-serif text-[clamp(48px,5vw,84px)] font-normal leading-[.95]">{panel.title}</h3>
+               <p className="max-w-[340px] text-on-dark">{panel.text}</p>
+               <ul className="ap-spec">
+diff --git a/components/ApproachDrawing.tsx b/components/ApproachDrawing.tsx
+index 732d631..0bcedb4 100644
+--- a/components/ApproachDrawing.tsx
++++ b/components/ApproachDrawing.tsx
+@@ -2,7 +2,7 @@ import type { ApproachDrawingKind } from "@/content/site";
+ 
+ // Line drawings from the v6 design source, copied verbatim. `.dw` strokes draw
+ // in (pathLength=1 dash) and `.fd` / text fade in once the panel is `.drawn`;
+-// `.dm` marks gold dimension strokes. Styles live in app/globals.css.
++// `.dm` marks ochre dimension strokes. Styles live in app/globals.css.
+ 
+ function Plan() {
+   return (
+diff --git a/components/ContactForm.tsx b/components/ContactForm.tsx
+index eac6255..b7844a7 100644
+--- a/components/ContactForm.tsx
++++ b/components/ContactForm.tsx
+@@ -138,7 +138,7 @@ export default function ContactForm() {
+         <input id="contact-company" name={HONEYPOT} type="text" tabIndex={-1} autoComplete="off" />
+       </div>
+ 
+-      <button type="submit" disabled={sending} className="pill pill-light mt-3 cursor-pointer justify-self-start border-0 disabled:cursor-wait disabled:opacity-70">
++      <button type="submit" disabled={sending} className="pill pill-accent mt-3 cursor-pointer justify-self-start border-0 disabled:cursor-wait disabled:opacity-70">
+         {sending ? contact.sending : contact.submit}
+       </button>
+       {status === "error" && (
+diff --git a/components/FAQ.tsx b/components/FAQ.tsx
+index ff12bef..cf7091a 100644
+--- a/components/FAQ.tsx
++++ b/components/FAQ.tsx
+@@ -2,6 +2,7 @@
+ 
+ import { useRef, type SyntheticEvent } from "react";
+ import { faq } from "@/content/site";
++import Copy from "./Placeholder";
+ 
+ export default function FAQ() {
+   const list = useRef<HTMLDivElement>(null);
+@@ -16,7 +17,7 @@ export default function FAQ() {
+   };
+ 
+   return (
+-    <section id="faq" className="flex flex-wrap gap-x-20 gap-y-10 bg-ground-2 px-pad py-[clamp(96px,14vh,150px)]">
++    <section id="faq" className="flex flex-wrap gap-x-20 gap-y-10 border-t border-line px-pad py-[clamp(96px,14vh,150px)]">
+       <div className="flex-[1_1_320px]">
+         <p className="cap text-muted">{faq.eyebrow}</p>
+         <h2 className="mt-4 font-serif text-[clamp(44px,5vw,80px)] font-normal leading-[.98]">{faq.heading}</h2>
+@@ -34,7 +35,9 @@ export default function FAQ() {
+               </span>
+             </summary>
+             <div className="overflow-hidden">
+-              <p className="mb-[26px] max-w-[640px] text-body">{item.a}</p>
++              <p className="mb-[26px] max-w-[640px] text-body">
++                <Copy text={item.a} />
++              </p>
+             </div>
+           </details>
+         ))}
+diff --git a/components/Footer.tsx b/components/Footer.tsx
+index 231f379..638b44f 100644
+--- a/components/Footer.tsx
++++ b/components/Footer.tsx
+@@ -6,6 +6,7 @@ import { gsap, useGSAP } from "@/lib/gsap";
+ import { MOTION, revealLines } from "@/lib/motion";
+ import ContactForm from "./ContactForm";
+ import Line from "./LineReveal";
++import Copy from "./Placeholder";
+ 
+ export default function Footer() {
+   const root = useRef<HTMLElement>(null);
+@@ -30,7 +31,7 @@ export default function Footer() {
+   const link = "py-2 no-underline hover:text-ground";
+ 
+   return (
+-    <footer ref={root} id="contact" className="overflow-hidden bg-ink px-pad pt-[clamp(96px,14vh,150px)] text-ground">
++    <footer ref={root} id="contact" className="overflow-hidden bg-navy px-pad pt-[clamp(96px,14vh,150px)] text-ground">
+       <div className="flex flex-wrap justify-between gap-x-20 gap-y-12">
+         <div className="flex-[1_1_420px]">
+           <p className="cap text-on-dark">{contact.eyebrow}</p>
+@@ -41,29 +42,29 @@ export default function Footer() {
+             </Line>
+           </h2>
+           <p className="max-w-[420px] text-on-dark">{contact.text}</p>
++          <p className="mt-3 max-w-[420px] text-on-dark">
++            <Copy text={contact.responseTime} />
++          </p>
+         </div>
+         <ContactForm />
+       </div>
+ 
+-      <div className="mt-24 flex flex-wrap justify-between gap-6 border-t border-ground/[.16] py-6 text-sm text-on-dark">
++      <div className="mt-24 flex flex-wrap justify-between gap-6 border-t border-line-dark py-6 text-sm text-on-dark">
+         <nav aria-label="Footer" className="flex flex-wrap gap-x-7 gap-y-1">
+           {footerLinks.map((l) => (
+             <a key={l.href} href={l.href} className={link}>
+               {l.label}
+             </a>
+           ))}
+-          <a href={site.instagram.href} className={link}>
+-            {site.instagram.handle}
+-          </a>
++          <span className="py-2">
++            <Copy text={site.instagram.handle} />
++          </span>
+         </nav>
+         <span>
+-          <a href={site.phone.href} className={link}>
+-            {site.phone.label}
+-          </a>
++          {/* Plain text until the real numbers arrive; restore tel: and mailto: links then. */}
++          <Copy text={site.phone.label} />
+           {" · "}
+-          <a href={`mailto:${site.email}`} className={link}>
+-            {site.email}
+-          </a>
++          <Copy text={site.email} />
+         </span>
+         <span>{site.copyright}</span>
+       </div>
+diff --git a/components/Navigation.tsx b/components/Navigation.tsx
+index 145b02c..5eeb0f3 100644
+--- a/components/Navigation.tsx
++++ b/components/Navigation.tsx
+@@ -5,6 +5,7 @@ import { cta, navLinks, site } from "@/content/site";
+ import { gsap, useGSAP } from "@/lib/gsap";
+ import { prefersReducedMotion } from "@/lib/motion";
+ import { useSmoothScroll } from "./SmoothScroll";
++import Copy from "./Placeholder";
+ 
+ function Wordmark({ label }: { label?: string }) {
+   return (
+@@ -22,6 +23,14 @@ export default function Navigation() {
+   const closeBtnRef = useRef<HTMLButtonElement>(null);
+   const { stop, start } = useSmoothScroll();
+   const { contextSafe } = useGSAP({ scope: menuRef });
++  const [scrolled, setScrolled] = useState(false);
++
++  useEffect(() => {
++    const onScroll = () => setScrolled(window.scrollY > 8);
++    onScroll();
++    window.addEventListener("scroll", onScroll, { passive: true });
++    return () => window.removeEventListener("scroll", onScroll);
++  }, []);
+ 
+   const animateLinks = contextSafe(() => {
+     if (prefersReducedMotion()) return;
+@@ -62,25 +71,34 @@ export default function Navigation() {
+ 
+   return (
+     <>
+-      {/* Difference blend keeps the header legible on any background. */}
+-      <header className="site-header pointer-events-none fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-4 px-pad py-5 text-white mix-blend-difference [&>*]:pointer-events-auto">
++      {/* Solid cream bar: readable at the top of the page and over the dark sections.
++          A hairline appears once the page has scrolled. */}
++      <header
++        data-scrolled={scrolled || undefined}
++        className="site-header fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-6 border-b border-transparent bg-ground px-pad py-4 text-ink transition-colors duration-300 data-[scrolled]:border-line"
++      >
+         <Wordmark label="Fresca Interior Design, home" />
+-        <div className="flex items-center gap-2.5">
+-          <button
+-            ref={menuBtnRef}
+-            type="button"
+-            className="hbtn"
+-            aria-expanded={open}
+-            aria-controls="menu"
+-            onClick={openMenu}
+-          >
+-            <i aria-hidden="true" className="block h-px w-4 -translate-y-0.5 bg-current shadow-[0_5px_0_currentColor]" />
+-            Menu
+-          </button>
+-          <a className="hbtn max-md:hidden" href={cta.href}>
++        <nav aria-label="Main" className="flex items-center gap-[clamp(20px,2.6vw,40px)] max-md:hidden">
++          {navLinks.map((link) => (
++            <a key={link.href} href={link.href} className="nav-link text-sm">
++              {link.label}
++            </a>
++          ))}
++          <a href={cta.href} className="nav-cta text-sm">
+             {cta.label}
+           </a>
+-        </div>
++        </nav>
++        <button
++          ref={menuBtnRef}
++          type="button"
++          className="hbtn md:hidden"
++          aria-expanded={open}
++          aria-controls="menu"
++          onClick={openMenu}
++        >
++          <i aria-hidden="true" className="block h-px w-4 -translate-y-0.5 bg-current shadow-[0_5px_0_currentColor]" />
++          Menu
++        </button>
+       </header>
+ 
+       <div
+@@ -89,7 +107,7 @@ export default function Navigation() {
+         // Rendered inert on the server too, before the effect above runs. React 18
+         // only renders the attribute from a string, though the types say boolean.
+         {...({ inert: "" } as object)}
+-        className={`fixed inset-0 z-[60] flex flex-col bg-ink px-pad pb-8 pt-5 text-ground transition-[clip-path] duration-[900ms] ease-curtain ${
++        className={`fixed inset-0 z-[60] flex flex-col bg-navy px-pad pb-8 pt-5 text-ground transition-[clip-path] duration-[900ms] ease-curtain ${
+           open ? "[clip-path:inset(0_0_0_0)]" : "[clip-path:inset(0_0_100%_0)]"
+         }`}
+       >
+@@ -99,7 +117,7 @@ export default function Navigation() {
+             Close
+           </button>
+         </div>
+-        <nav aria-label="Main" className="flex flex-1 flex-col justify-center gap-1 py-10">
++        <nav aria-label="Menu" className="flex flex-1 flex-col justify-center gap-1 py-10">
+           {navLinks.map((link, i) => (
+             <span key={link.href} className="ln">
+               <a
+@@ -115,12 +133,12 @@ export default function Navigation() {
+         </nav>
+         <div className="flex flex-wrap justify-between gap-4 text-sm text-on-dark">
+           <span>{site.location}</span>
+-          <a className="no-underline" href={site.phone.href}>
+-            {site.phone.label}
+-          </a>
+-          <a className="no-underline" href={`mailto:${site.email}`}>
+-            {site.email}
+-          </a>
++          <span>
++            <Copy text={site.phone.label} />
++          </span>
++          <span>
++            <Copy text={site.email} />
++          </span>
+         </div>
+       </div>
+     </>
+diff --git a/components/ProjectShowcase.tsx b/components/ProjectShowcase.tsx
+index 8a8e285..ba94a21 100644
+--- a/components/ProjectShowcase.tsx
++++ b/components/ProjectShowcase.tsx
+@@ -6,7 +6,7 @@ import { showcase } from "@/content/site";
+ import { gsap, useGSAP } from "@/lib/gsap";
+ import { MOTION, prefersReducedMotion } from "@/lib/motion";
+ 
+-const { projects, labels } = showcase;
++const { projects } = showcase;
+ const pad2 = (n: number) => String(n).padStart(2, "0");
+ 
+ function Arrow({ dir, onClick }: { dir: "prev" | "next"; onClick: () => void }) {
+@@ -95,7 +95,7 @@ export default function ProjectShowcase() {
+         gsap.fromTo(titleRef.current, { yPercent: 110 }, { yPercent: 0, duration: 0.8, ease: "power3.out" });
+       },
+     });
+-    gsap.fromTo(".sc-stats dd", { opacity: 1 }, { opacity: 0, duration: 0.3, yoyo: true, repeat: 1, repeatDelay: 0.25 });
++    gsap.fromTo(".sc-room", { opacity: 1 }, { opacity: 0, duration: 0.3, yoyo: true, repeat: 1, repeatDelay: 0.25 });
+   });
+ 
+   const p = projects[shown];
+@@ -104,7 +104,7 @@ export default function ProjectShowcase() {
+   return (
+     <section ref={root} id="work" aria-label="Selected projects" className="relative h-[280vh]">
+       <div className="sticky top-0 h-svh p-1.5">
+-        <div className="relative h-full overflow-hidden rounded-lg bg-panel text-ground">
++        <div className="relative h-full overflow-hidden rounded-lg bg-navy text-ground">
+           {[1, 2].map((g) => (
+             <div
+               key={g}
+@@ -130,7 +130,7 @@ export default function ProjectShowcase() {
+                 className={`sc-img object-cover ${i === 0 ? "opacity-100" : "opacity-0"}`}
+               />
+             ))}
+-            <div className="sc-shade absolute inset-0 z-[3] bg-[rgba(14,13,12,.42)]" />
++            <div className="sc-shade absolute inset-0 z-[3] bg-[rgba(20,27,40,.42)]" />
+           </div>
+ 
+           <div aria-hidden="true" className="sc-chess-l absolute left-0 top-0 z-[6] h-0 w-1/2 bg-ground" />
+@@ -150,28 +150,12 @@ export default function ProjectShowcase() {
+                   {p.title}
+                 </h3>
+               </div>
+-              <dl className="sc-stats sc-fade mt-6 flex flex-wrap gap-x-11 gap-y-5">
+-                {(
+-                  [
+-                    [labels.weeks, p.weeks, "weeks"],
+-                    [labels.area, p.area, "sq ft"],
+-                    [labels.city, p.city, null],
+-                  ] as const
+-                ).map(([dt, value, unit]) => (
+-                  <div key={dt} className="min-w-[96px]">
+-                    <dt className="text-[10px] uppercase tracking-[.22em] text-on-dark">{dt}</dt>
+-                    <dd className="mt-1.5 font-serif text-[30px] leading-none">
+-                      {value}
+-                      {unit && <small className="ml-1 font-sans text-[13px]">{unit}</small>}
+-                    </dd>
+-                  </div>
+-                ))}
+-              </dl>
++              <p className="sc-room sc-fade mt-5 text-[10px] uppercase tracking-[.22em] text-on-dark">{p.room}</p>
+             </div>
+             <div className="sc-fade flex items-center gap-2.5">
+               <Arrow dir="prev" onClick={() => go(-1)} />
+               <Arrow dir="next" onClick={() => go(1)} />
+-              <a className="pill pill-light" href={showcase.projectLink.href}>
++              <a className="pill pill-accent" href={showcase.projectLink.href}>
+                 {showcase.projectLink.label}
+               </a>
+             </div>
+diff --git a/components/Promises.tsx b/components/Promises.tsx
+index e1ab5ec..ddb1765 100644
+--- a/components/Promises.tsx
++++ b/components/Promises.tsx
+@@ -43,7 +43,7 @@ export default function Promises() {
+         </div>
+         <div className="flex max-w-[360px] flex-col items-start gap-6">
+           <p className="text-body">{promises.intro}</p>
+-          <a className="pill pill-dark" href={cta.href}>
++          <a className="pill pill-accent" href={cta.href}>
+             {cta.label}
+           </a>
+         </div>
+@@ -59,7 +59,7 @@ export default function Promises() {
+             <h3 className="mb-3 font-serif text-[clamp(30px,2.8vw,44px)] font-normal leading-[1.05]">{row.title}</h3>
+             <p className="max-w-[440px] text-body">{row.text}</p>
+           </div>
+-          <div className={`promise-media relative aspect-[16/10] overflow-hidden max-md:col-span-full ${row.board ? "bg-white" : "bg-ground-2"}`}>
++          <div className={`promise-media relative aspect-[16/10] overflow-hidden max-md:col-span-full ${row.board ? "bg-white" : "bg-ground"}`}>
+             <Image
+               src={row.image.src}
+               alt={row.image.alt}
+diff --git a/components/StudioWall.tsx b/components/StudioWall.tsx
+index 3e66fbc..fddf054 100644
+--- a/components/StudioWall.tsx
++++ b/components/StudioWall.tsx
+@@ -44,7 +44,7 @@ function WallPiece({ item }: { item: WallItem }) {
+             <br />
+             <a
+               href={item.link.href}
+-              className="mt-[18px] inline-flex text-[11px] uppercase tracking-[.2em] text-ink underline underline-offset-[6px]"
++              className="mt-[18px] inline-flex text-[11px] uppercase tracking-[.2em] text-terracotta underline underline-offset-[6px] hover:text-[#8f4227]"
+             >
+               {item.link.label}
+             </a>
+@@ -66,7 +66,7 @@ function WallPiece({ item }: { item: WallItem }) {
+     >
+       {/* .fr has no overflow clip, so dimension lines and callouts can sit outside the photo. */}
+       <div className="fr">
+-        <div className="pl-frame relative overflow-hidden bg-ground-2" style={{ aspectRatio: item.ratio }}>
++        <div className="pl-frame relative overflow-hidden bg-ink/[.06]" style={{ aspectRatio: item.ratio }}>
+           <div className="pl-img absolute left-0 top-[-10%] h-[120%] w-full">
+             <Image
+               src={item.src}
+@@ -105,11 +105,11 @@ function WallPiece({ item }: { item: WallItem }) {
+           </span>
+         )}
+       </div>
+-      <span className="pl-label mt-2.5 grid grid-cols-[auto_1fr_auto] gap-x-3 gap-y-[3px] text-[10px] uppercase tracking-[.18em] text-muted">
++      <span className="pl-label plate mt-2.5 grid grid-cols-[auto_1fr_auto] gap-x-3 gap-y-[3px] text-muted">
+         <span>{item.no}</span>
+         <b className="font-medium text-ink">{item.title}</b>
+         <span className="xy col-start-3 row-start-1 font-mono text-[9px] tracking-[.04em] text-ink/45">{coord(item.x, item.y)}</span>
+-        <span className="col-start-2">{item.city}</span>
++        <span className="col-start-2">{item.room}</span>
+       </span>
+     </a>
+   );
+diff --git a/tailwind.config.ts b/tailwind.config.ts
+index ac0a7d1..333b5df 100644
+--- a/tailwind.config.ts
++++ b/tailwind.config.ts
+@@ -8,17 +8,19 @@ const config: Config = {
+     screens: { md: "861px" },
+     extend: {
+       colors: {
++        // Two fields only: cream (everything) and navy (Approach and the Contact
++        // footer). Terracotta is the single action color in both.
+         ground: "#F4F2EB",
+-        "ground-2": "#E7E4DB",
++        navy: "#2B3A55",
+         ink: "#1D1C1A",
+         body: "#4A4740",
+         muted: "#6B665C",
+         line: "rgba(29,28,26,.14)",
+-        accent: "#2B3A55",
++        "line-dark": "rgba(244,242,235,.16)",
+         "on-dark": "#CFC9BC",
+-        gold: "#C9A86A",
+-        panel: "#141311",
++        ochre: "#C9A86A", // drawing annotations only (dimensions, callouts), never actions
+         error: "#E9B4A2",
++        terracotta: "#A9502F",
+       },
+       fontFamily: {
+         serif: ["var(--serif)"],

@@ -1,0 +1,66 @@
+diff --git a/components/StudioWall.tsx b/components/StudioWall.tsx
+index 3e66fbc..5e98050 100644
+--- a/components/StudioWall.tsx
++++ b/components/StudioWall.tsx
+@@ -18,13 +18,15 @@ const coord = (x: string, y: string) =>
+   `C${String(Math.round(parseFloat(x) / (100 / 12)) + 1).padStart(2, "0")}·R${String(Math.round(parseFloat(y) / 5)).padStart(2, "0")}`;
+ 
+ function WallPiece({ item }: { item: WallItem }) {
++  // Words sit above the plates (z-3) so a drifting word never passes behind a
++  // photo; they let clicks through to the plate underneath.
+   if (item.kind === "word") {
+     return (
+       <span
+         aria-hidden="true"
+         data-speed={item.speed}
+         style={at(item.x, item.y)}
+-        className={`${placed} z-[1] whitespace-nowrap font-serif text-[clamp(64px,9.2vw,152px)] font-normal leading-[.9] tracking-[-.02em] max-md:text-[19vw] ${item.right ? "max-md:self-end" : ""}`}
++        className={`${placed} pointer-events-none z-[3] whitespace-nowrap font-serif text-[clamp(64px,9.2vw,152px)] font-normal leading-[.9] tracking-[-.02em] max-md:text-[19vw] ${item.right ? "max-md:self-end" : ""}`}
+       >
+         <Line>{item.italic ? <em>{item.text}</em> : item.text}</Line>
+       </span>
+@@ -44,7 +46,7 @@ function WallPiece({ item }: { item: WallItem }) {
+             <br />
+             <a
+               href={item.link.href}
+-              className="mt-[18px] inline-flex text-[11px] uppercase tracking-[.2em] text-ink underline underline-offset-[6px]"
++              className="mt-[18px] inline-flex text-[11px] uppercase tracking-[.2em] text-terracotta underline underline-offset-[6px] hover:text-[#8f4227]"
+             >
+               {item.link.label}
+             </a>
+@@ -66,7 +68,7 @@ function WallPiece({ item }: { item: WallItem }) {
+     >
+       {/* .fr has no overflow clip, so dimension lines and callouts can sit outside the photo. */}
+       <div className="fr">
+-        <div className="pl-frame relative overflow-hidden bg-ground-2" style={{ aspectRatio: item.ratio }}>
++        <div className="pl-frame relative overflow-hidden bg-ink/[.06]" style={{ aspectRatio: item.ratio }}>
+           <div className="pl-img absolute left-0 top-[-10%] h-[120%] w-full">
+             <Image
+               src={item.src}
+@@ -105,11 +107,11 @@ function WallPiece({ item }: { item: WallItem }) {
+           </span>
+         )}
+       </div>
+-      <span className="pl-label mt-2.5 grid grid-cols-[auto_1fr_auto] gap-x-3 gap-y-[3px] text-[10px] uppercase tracking-[.18em] text-muted">
++      <span className="pl-label plate mt-2.5 grid grid-cols-[auto_1fr_auto] gap-x-3 gap-y-[3px] text-muted">
+         <span>{item.no}</span>
+         <b className="font-medium text-ink">{item.title}</b>
+         <span className="xy col-start-3 row-start-1 font-mono text-[9px] tracking-[.04em] text-ink/45">{coord(item.x, item.y)}</span>
+-        <span className="col-start-2">{item.city}</span>
++        <span className="col-start-2">{item.room}</span>
+       </span>
+     </a>
+   );
+     @apply text-[11px] uppercase tracking-[.24em];
+   }
+ 
+-  /* Masked line: the inner span slides up from below the mask. */
++  /* Masked line: the inner span slides up from below the mask. The padding
++     (cancelled by equal negative margins, so layout is unchanged) gives tall
++     ascenders and italic overhang room inside the clip; at leading .9 the mask
++     was cutting the tops off the "d"s in "considered.". */
+   .ln {
+-    @apply -mb-[.06em] block overflow-hidden pb-[.06em];
++    @apply -mx-[.1em] -mb-[.06em] -mt-[.14em] block overflow-hidden px-[.1em] pb-[.06em] pt-[.14em];
+   }
+   .ln > span {

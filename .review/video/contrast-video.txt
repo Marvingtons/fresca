@@ -1,0 +1,21 @@
+
+390×844  brightest frame overall at 3.1s
+  headline     worst 4.96:1 at 7.1s  (needs 3:1) PASS
+  subline      worst 6.09:1 at 6.6s  (needs 4.5:1) PASS
+  menu button  worst 5.34:1 at 1.85s  (needs 4.5:1) PASS
+  wordmark     worst 6.81:1 at 8.6s  (needs 3:1) PASS
+  button       bone on terracotta 4.84:1 (fixed colors) PASS
+
+1440×900  brightest frame overall at 7.1s
+  headline     worst 3.03:1 at 8.85s  (needs 3:1) PASS
+  subline      worst 5.41:1 at 7.1s  (needs 4.5:1) PASS
+  nav          worst 6.10:1 at 1.1s  (needs 4.5:1) PASS
+  wordmark     worst 6.00:1 at 6.1s  (needs 3:1) PASS
+  button       bone on terracotta 4.84:1 (fixed colors) PASS
+
+1180×820  brightest frame overall at 8.1s
+  headline     worst 3.56:1 at 8.85s  (needs 3:1) PASS
+  subline      worst 5.67:1 at 7.1s  (needs 4.5:1) PASS
+  nav          worst 5.42:1 at 2.1s  (needs 4.5:1) PASS
+  wordmark     worst 6.02:1 at 6.85s  (needs 3:1) PASS
+  button       bone on terracotta 4.84:1 (fixed colors) PASS
