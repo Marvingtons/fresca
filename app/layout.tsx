@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import SmoothScroll from "@/components/SmoothScroll";
+import { heroFilm } from "@/content/media";
 import { site } from "@/content/site";
 import { introScript } from "@/lib/intro";
 import { siteUrl } from "@/lib/site-url";
@@ -60,6 +61,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: introScript }} />
+        {/* The hero poster is the LCP image. */}
+        <link rel="preload" as="image" href={heroFilm.poster.webp} type="image/webp" fetchPriority="high" />
       </head>
       <body>
         <SmoothScroll>{children}</SmoothScroll>

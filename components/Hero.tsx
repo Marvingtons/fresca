@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { heroFilm } from "@/content/media";
 import { hero } from "@/content/site";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { INTRO_KEY, introIsPlaying } from "@/lib/intro";
 import { MOTION } from "@/lib/motion";
+import HeroFilm from "./HeroFilm";
 import Line from "./LineReveal";
 import { useSmoothScroll } from "./SmoothScroll";
 
@@ -17,8 +19,11 @@ export default function Hero() {
   // they download after first paint instead of competing with it. They're not
   // shown until 0.33s into the intro; if one is late, the previous frame stays.
   const [laterFrames, setLaterFrames] = useState(false);
+  // The film only gets its sources once the preloader is done (right away when it doesn't play).
+  const [introDone, setIntroDone] = useState(false);
   useEffect(() => {
     if (introIsPlaying()) setLaterFrames(true);
+    else setIntroDone(true);
   }, []);
 
   useGSAP(
@@ -80,6 +85,7 @@ export default function Hero() {
               } catch {}
               html.classList.remove("intro");
               start();
+              setIntroDone(true);
             }, 3.4)
             // Recalculate triggers once everything has settled, not mid-animation.
             .eventCallback("onComplete", () => ScrollTrigger.refresh());
@@ -118,15 +124,23 @@ export default function Hero() {
             )}
           </div>
         ))}
-        <Image
-          src={hero.image.src}
-          alt={hero.image.alt}
-          fill
-          priority
-          sizes="100vw"
-          quality={85}
-          className="hero-final scale-[1.06] object-cover object-[40%_50%]"
-        />
+        {/* Poster (the film's first frame, and the LCP image) with the film over it. The
+            wrapper carries the intro zoom and the parallax so both layers move as one. */}
+        <div className="hero-final absolute inset-0 scale-[1.06]">
+          <picture>
+            <source srcSet={heroFilm.poster.webp} type="image/webp" />
+            {/* eslint-disable-next-line @next/next/no-img-element -- remote poster, preloaded in the layout */}
+            <img
+              src={heroFilm.poster.jpg}
+              alt={hero.image.alt}
+              width={heroFilm.poster.width}
+              height={heroFilm.poster.height}
+              fetchPriority="high"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          </picture>
+          <HeroFilm ready={introDone} />
+        </div>
         <div className="hero-shade absolute inset-0 bg-[rgba(18,17,15,.38)]" />
       </div>
 

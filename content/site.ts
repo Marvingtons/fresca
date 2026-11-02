@@ -88,8 +88,8 @@ export const hero = {
     img("orb-chandelier-dining"),
     img("navy-chair-great-room"),
   ],
+  // The hero still is the film's poster (content/media.ts); this describes it.
   image: {
-    src: img("black-hood-kitchen"),
     alt: "White shaker kitchen with a black range hood, marble island and three glass pendants",
   },
 };
