@@ -23,6 +23,14 @@
  *                                          42 → cognac-living-room.jpg
  *                                          43 → two-story-living-room.jpg
  *                                          44 → sectional-living-room.jpg
+ *
+ * Karen's round 1 photos (assets/source/karen-round1/, prepared by
+ * scripts/prepare-karen-round1.mjs, which also turns them upright):
+ *   white-oak-ceiling-bedroom.jpg  replaces reclaimed-wood-bedroom in the work slider
+ *   subway-tile-secondary-bath.jpg replaces hammered-sink-bath on the About stat card
+ *   lantern-pendant-kitchen.jpg    replaces orb-chandelier-dining in the Approach "Light" panel
+ *                                  (the hero intro still uses orb-chandelier-dining)
+ *   del-mar-primary-bath.jpg, linen-coastal-bedroom.jpg  new work slider projects
  */
 
 const img = (name: string) => `/images/${name}.jpg`;
@@ -35,21 +43,22 @@ export const site = {
   name: "Fresca Interior Design",
   shortName: "Fresca",
   url: "https://frescainteriordesign.com", // DEMO: confirm the production domain (or set NEXT_PUBLIC_SITE_URL)
-  title: "Fresca Interior Design | San Diego",
+  title: "Fresca Interior Design | Solana Beach",
   description:
-    "Fresca is a residential interior design studio in San Diego designing kitchens, bathrooms and whole homes from the floor plan up.",
+    "Beautiful spaces begin with thoughtful planning. Fresca is a residential interior design studio in Solana Beach designing kitchens, bathrooms and whole homes from the floor plan up.",
   ogImage: { url: img("og-image"), width: 1200, height: 629, alt: "White shaker kitchen with a black range hood and marble island" },
-  location: "San Diego, California",
-  phone: { label: "(858) 555-0142", href: "tel:+18585550142" }, // DEMO: placeholder phone number
-  email: "hello@frescainteriordesign.com", // DEMO: placeholder email
-  instagram: { handle: "@frescainteriordesign", href: "#contact" }, // DEMO: placeholder handle; point href at the real profile
-  copyright: "© 2026 Fresca Interior Design",
+  location: "Solana Beach, California",
+  phone: { label: "858.750.0665", href: "tel:+18587500665" },
+  email: "frescainteriordesign@gmail.com",
+  instagram: { handle: "fresca.interior.design", href: "https://www.instagram.com/fresca.interior.design/" },
+  legalName: "Fresca Interior Design, LLC",
+  copyright: "© 2026 Fresca Interior Design, LLC",
 };
 
 export const founder = {
-  name: "Elena Marquez", // DEMO: placeholder founder name
-  initials: "EM", // DEMO: derived from the placeholder name
-  role: "Founder & principal designer",
+  name: "Karen Onofrey",
+  initials: "KO",
+  role: "Founder and Principal Designer",
 };
 const firstName = founder.name.split(" ")[0];
 
@@ -76,9 +85,9 @@ export const cta = { href: "#contact", label: "Book a consultation" };
 // ───────── hero
 
 export const hero = {
-  eyebrow: "Residential interiors · San Diego",
+  eyebrow: "Residential interiors · Solana Beach",
   lines: ["Interiors that", "feel fresh."], // second line is italic
-  text: "Kitchens, bathrooms and whole homes, designed from the floor plan up.",
+  text: "Beautiful spaces begin with thoughtful planning.",
   introLabel: "Fresca · Interior Design",
   /** Photos that flash in the small frame during the intro, in order. */
   cycle: [
@@ -163,7 +172,7 @@ export const studio = {
     },
     {
       kind: "text",
-      text: "Fresca is a residential design studio in San Diego. We design kitchens, baths and whole homes around how you actually live in them.",
+      text: "Fresca is a residential design studio in Solana Beach. I design kitchens, baths and whole homes around how you actually live in them.",
       x: "30%",
       y: "45%",
       speed: 1,
@@ -182,7 +191,7 @@ export const studio = {
       callout: { side: "l", px: "45%", py: "70%", len: "165px", text: "Blue-gray island" },
     },
     {
-      kind: "plate", no: "Pl. 06", title: "Walnut Guest Bath", city: "Encinitas",
+      kind: "plate", no: "Pl. 06", title: "Guest Bath with Stenciled Ceiling", city: "Solana Beach",
       src: img("walnut-guest-bath"), ratio: "3/4", x: "86%", y: "77%", w: "11%", speed: 1.65, right: true,
       dim: { dir: "v", side: "l", label: "3 : 4" },
     },
@@ -193,7 +202,7 @@ export const studio = {
     },
     {
       kind: "text",
-      text: "One designer carries every project from the first walkthrough to installation day, so the finished room looks the way it did on paper.",
+      text: "I carry every project from the first walkthrough to installation day, so the finished room looks the way it did on paper.",
       link: { href: "#work", label: "View selected work →" },
       x: "55%",
       y: "88%",
@@ -205,39 +214,52 @@ export const studio = {
 
 // ───────── project showcase
 
+/**
+ * `fit` marks a photo that is too small or too tall to fill the full-bleed
+ * slide: it is shown whole (object-contain) and never wider or taller than
+ * its source pixels, instead of being cropped and enlarged.
+ */
+export type ShowcaseProject = {
+  title: string;
+  city: string;
+  image: Photo & { fit?: { width: number; height: number } };
+};
+
 export const showcase = {
   eyebrow: "(02) Selected work",
   projects: [
     {
       title: "Coastal Blue Family Room",
-      weeks: "8", // DEMO: timeline placeholder
-      area: "510", // DEMO: square footage placeholder
       city: "Carmel Valley", // DEMO: city placeholder
       image: { src: img("mosaic-fireplace-family-room"), alt: "Family room with mosaic fireplace and blue art" },
     },
     {
       title: "Cognac & Linen Living Room",
-      weeks: "10", // DEMO: timeline placeholder
-      area: "640", // DEMO: square footage placeholder
       city: "Encinitas", // DEMO: city placeholder
       image: { src: img("cognac-living-room"), alt: "Vaulted living room with cognac leather sofas and woven chairs" },
     },
     {
-      title: "Hillside Gloss Kitchen",
-      weeks: "14", // DEMO: timeline placeholder
-      area: "420", // DEMO: square footage placeholder
-      city: "Poway", // DEMO: city placeholder
+      title: "Canyon View Sleek Modern Kitchen",
+      city: "Solana Beach",
       image: { src: img("gloss-kitchen"), alt: "Modern kitchen with white gloss cabinets and charcoal counters" },
     },
     {
-      title: "Reclaimed Wood Primary Suite",
-      weeks: "12", // DEMO: timeline placeholder
-      area: "380", // DEMO: square footage placeholder
-      city: "Rancho Bernardo", // DEMO: city placeholder
-      image: { src: img("reclaimed-wood-bedroom"), alt: "Bedroom with reclaimed wood wall and tufted headboard" },
+      title: "Primary Bedroom with White Oak Ceiling",
+      city: "Del Mar",
+      image: { src: img("white-oak-ceiling-bedroom"), alt: "Primary bedroom with a white oak ceiling, gray upholstered bed and woven bench", fit: { width: 1065, height: 1420 } },
     },
-  ],
-  labels: { weeks: "Completed in", area: "Area", city: "Location" },
+    {
+      title: "Primary Bathroom with Custom Cabinetry",
+      city: "Del Mar",
+      image: { src: img("del-mar-primary-bath"), alt: "Primary bathroom with oak vanity cabinetry, black sconces and a freestanding tub", fit: { width: 1072, height: 1430 } },
+    },
+    {
+      title: "Linen Coastal Bedroom",
+      city: "Del Mar",
+      image: { src: img("linen-coastal-bedroom"), alt: "Bedroom with a linen upholstered headboard, rustic nightstand and round shell mirror", fit: { width: 1072, height: 1430 } },
+    },
+  ] as ShowcaseProject[],
+  labels: { city: "Location" },
   projectLink: { href: "#work", label: "View project" }, // DEMO: no project pages yet
 };
 
@@ -245,18 +267,19 @@ export const showcase = {
 
 export const promises = {
   eyebrow: "(03) Working with us",
-  heading: ["No guesswork.", "No surprises."], // second line is italic
+  // Karen's words, verbatim. Second line is italic.
+  heading: ["A thoughtful process, with open communication every step of the way", "from the first conversation to the finishing touches."],
   intro:
-    "Every decision is drawn, priced and approved before work starts, so your remodel runs on a plan instead of on hope.",
+    "A successful remodel begins with a thoughtful plan. By addressing design details, selections, and budgets upfront, we create a clear path forward before construction begins.",
   rows: [
     {
       title: `You'll always talk to ${firstName}`,
-      text: "The designer who measures your kitchen is the one who signs off the tile. No account managers, no hand-offs between people who have never seen your house.",
+      text: "I measure your kitchen and I sign off the tile. No account managers, no hand-offs between people who have never seen your house.",
       image: { src: img("freestanding-tub-bath"), alt: "Freestanding tub in a gray tile alcove" },
     },
     {
       title: "Drawn before it's bought",
-      text: "Floor plans, elevations and a fixture sheet like this one are finished and signed before a single item is ordered.",
+      text: "Floor plans, mood boards, and a schedule of selections and specifications are created and signed before a single item is ordered.",
       image: { src: img("lighting-fixture-sheet"), alt: "Lighting fixture selection sheet organized by room" },
       board: true,
     },
@@ -266,7 +289,7 @@ export const promises = {
       image: { src: img("walnut-guest-bath"), alt: "Bathroom with walnut vanity, glass shower and round mirror" },
     },
     {
-      title: "We're there for the last walkthrough",
+      title: "I'm there for the last walkthrough",
       text: `${firstName} checks in on site during construction and walks the finished room with you, punch list in hand.`,
       image: { src: img("walnut-island-kitchen"), alt: "Kitchen with a long walnut island and white quartz top" },
     },
@@ -284,7 +307,7 @@ export const approach = {
   panels: [
     {
       title: "Plan",
-      text: "We start with how you move through the house: where you cook, gather and put things down. The floor plan comes before any finish.",
+      text: "I start with how you move through the house: where you cook, gather and put things down. The floor plan comes before any finish.",
       photo: { src: img("navy-chair-great-room"), alt: "Great room with navy swivel chairs and linear fireplace" },
       board: { src: img("color-floor-plan"), alt: "Color floor plan of a two-story home" },
       drawing: "plan" as ApproachDrawingKind,
@@ -307,7 +330,7 @@ export const approach = {
     {
       title: "Light",
       text: "Each fixture is placed on a ceiling plan with the room’s daylight in mind, so the space works at noon and at night.",
-      photo: { src: img("orb-chandelier-dining"), alt: "Dining room under an iron orb chandelier" },
+      photo: { src: img("lantern-pendant-kitchen"), alt: "Kitchen with a black lantern pendant over a quartz island" },
       board: { src: img("lighting-ceiling-plan"), alt: "Reflected ceiling and lighting plan" },
       drawing: "ceiling" as ApproachDrawingKind,
       spec: [
@@ -323,12 +346,12 @@ export const approach = {
 export const about = {
   eyebrow: "(05) About us",
   heading: ["About", "Fresca."],
-  text: `Founded by designer ${founder.name}, Fresca works with homeowners across North County and the coast. We take on a small number of projects at a time so each one gets full attention.`,
+  text: `Founded by designer ${founder.name}, Fresca works with homeowners across North County and the coast. Karen takes on a small number of projects at a time so each one gets full attention.`,
   link: { href: "#work", label: "View projects" },
   stats: [
     { label: "Years designing homes", value: "12", image: { src: img("iron-bed-bedroom"), alt: "Bedroom with iron bed and floral bedding" } }, // DEMO: stat placeholder
     { label: "Rooms designed", value: "140+", image: { src: img("sectional-living-room"), alt: "Living room with sectional and tall windows" } }, // DEMO: stat placeholder
-    { label: "Neighborhoods served", value: "9", image: { src: img("hammered-sink-bath"), alt: "Bathroom with hammered sinks and lantern sconce" } }, // DEMO: stat placeholder
+    { label: "Neighborhoods served", value: "9", image: { src: img("subway-tile-secondary-bath"), alt: "Secondary bath with white subway tile shower, wood vanity and globe sconce" } }, // DEMO: stat placeholder
     { label: "Clients who came back", value: "1 in 3", image: { src: img("bay-window-sitting-room"), alt: "Sitting room with bay windows and fireplace" } }, // DEMO: stat placeholder
   ],
 };
@@ -336,7 +359,7 @@ export const about = {
 // ───────── founder quote
 
 export const quote = {
-  text: "“If a room needs explaining, it isn’t finished yet.”",
+  text: "“Your home should be a place you walk into and think, ‘How lucky am I to live here?’”",
 };
 
 // ───────── FAQ
@@ -347,23 +370,19 @@ export const faq = {
   items: [
     {
       q: "What does a design project include?",
-      a: "A full project includes a measured floor plan, a materials and finishes board, elevations for kitchens and baths, a lighting plan, and a product list with every item specified. Smaller projects can include only the pieces you need.",
+      a: "A full project includes a measured floor plan, a materials and finishes board, a lighting plan, and a product list with every item specified. Smaller projects can include only the pieces you need.",
     },
     {
       q: "Do you manage the remodel, or only the design?",
-      a: "We design and document the project, then work alongside your contractor through construction. If you don’t have a contractor yet, we can recommend ones we have worked with before.",
+      a: "I design and document the project, then work alongside your contractor through construction. If you don’t have a contractor yet, I can recommend ones I have worked with before.",
     },
     {
       q: "How is a project priced?",
-      a: "Design is billed as a flat fee based on the size and scope of the project, which we set after the first consultation. Construction and furnishings are paid directly to your contractor and vendors.",
-    },
-    {
-      q: "How long does a kitchen or bathroom take?",
-      a: "Design usually takes four to eight weeks. Construction depends on the contractor and materials, but most kitchens take two to four months and most bathrooms six to ten weeks.",
+      a: "Every project is unique, and my approach to pricing reflects that. Design services are offered at an hourly rate or a flat project fee, depending on the scope and needs of your project. My goal is to provide a thoughtful, transparent approach that aligns with your design goals and budget.",
     },
     {
       q: "Do you take on single rooms?",
-      a: "Yes. Many projects start with one kitchen or bathroom, and the process is the same whether it’s one room or the whole house.",
+      a: "Absolutely! Whether you’re refreshing a single room or redesigning an entire home, I welcome projects of all sizes. My approach is tailored to your specific needs, style, and budget, with the goal of creating a space that feels both beautiful and functional.",
     },
   ],
 };
@@ -373,10 +392,10 @@ export const faq = {
 export const contact = {
   eyebrow: "(07) Get in touch",
   heading: ["Let's talk about", "your home."], // second line is italic
-  text: `Tell us which rooms you're thinking about and roughly when. ${firstName} replies personally within two business days.`,
+  text: "Please tell us about your project. Karen replies personally within two business days.",
   fields: { name: "Name", email: "Email", message: "About your project" },
   submit: "Send inquiry",
   sending: "Sending…",
-  thanks: "Thank you. We’ll be in touch within two business days.",
-  error: "Something went wrong sending your message. Please try again, or email us directly.",
+  thanks: "Thank you. I’ll be in touch within two business days.",
+  error: "Something went wrong sending your message. Please try again, or email me directly.",
 };

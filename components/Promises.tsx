@@ -32,9 +32,10 @@ export default function Promises() {
   return (
     <section ref={root} id="process" className="px-pad py-[clamp(96px,14vh,160px)]">
       <div className="flex flex-wrap items-end justify-between gap-x-20 gap-y-8 border-b border-line pb-14">
-        <div>
+        <div className="min-w-0 flex-[1_1_560px]">
           <p className="cap mb-5 text-muted">{promises.eyebrow}</p>
-          <h2 className="font-serif text-[clamp(44px,5.6vw,92px)] font-normal leading-[.96]">
+          {/* Karen's heading is a full sentence, so it runs smaller than the old two-word lines. */}
+          <h2 className="max-w-[17em] text-balance font-serif text-[clamp(34px,3.6vw,60px)] font-normal leading-[1.04]">
             <Line>{promises.heading[0]}</Line>
             <Line>
               <em>{promises.heading[1]}</em>

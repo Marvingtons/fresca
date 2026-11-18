@@ -156,7 +156,7 @@ export default function Hero() {
 
       <div className="hero-content absolute inset-x-0 bottom-0 flex flex-col items-center px-pad pb-[9vh] text-center text-white">
         {/* The spec's `.hero-content p` rule outranks `.cap` here: 16px, white/86. */}
-        <p className="cap hero-fade mb-5 max-w-[420px] !text-base text-white/[.86]">{hero.eyebrow}</p>
+        <p className="cap hero-fade mb-5 max-w-[480px] !text-base text-white/[.86]">{hero.eyebrow}</p>
         <h1 className="font-serif text-[clamp(52px,7.4vw,124px)] font-normal leading-[.95] tracking-[-.015em]">
           <Line reveal={false} className="hero-ln">
             {hero.lines[0]}
