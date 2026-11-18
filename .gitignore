@@ -45,3 +45,7 @@ next-env.d.ts
 /reference/upscaled-raw/
 /reference/upscaled/
 __pycache__/
+
+# Cloudflare (OpenNext)
+/.open-next/
+/.wrangler/

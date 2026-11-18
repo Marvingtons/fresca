@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "fresca-site",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  // next/image is served by Cloudflare Images (OpenNext wires /_next/image to it),
+  // so photos keep their WebP/AVIF srcsets.
+  "images": {
+    "binding": "IMAGES"
+  },
+  // Public values. NEXT_PUBLIC_* are inlined at build time from .env.local or the
+  // shell, so keep these in step with what the build uses.
+  "vars": {
+    "NEXT_PUBLIC_SITE_URL": "",
+    "NEXT_PUBLIC_MEDIA_BASE": "https://pub-364f647b29874b09922e1889f267c323.r2.dev"
+  },
+  "observability": {
+    "enabled": true
+  }
+}
