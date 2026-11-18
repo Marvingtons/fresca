@@ -100,7 +100,7 @@ export default function Approach() {
     <section
       ref={root}
       id="approach"
-      aria-label="Our approach"
+      aria-label="My approach"
       className="blueprint relative py-24 text-ground md:motion-safe:h-svh md:motion-safe:overflow-hidden md:motion-safe:py-0"
     >
       <div className="pointer-events-none relative flex flex-col justify-center px-pad pb-14 md:motion-safe:absolute md:motion-safe:inset-0 md:motion-safe:pb-0">

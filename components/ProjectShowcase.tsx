@@ -126,8 +126,10 @@ export default function ProjectShowcase() {
                 alt={project.image.alt}
                 fill
                 quality={85}
-                sizes="100vw"
-                className={`sc-img object-cover ${i === 0 ? "opacity-100" : "opacity-0"}`}
+                // A `fit` photo is shown whole, never larger than its source, centered on
+                // the panel color (which also hides the slide underneath).
+                sizes={project.image.fit ? `min(100vw, ${project.image.fit.width}px)` : "100vw"}
+                className={`sc-img ${project.image.fit ? "bg-panel object-scale-down" : "object-cover"} ${i === 0 ? "opacity-100" : "opacity-0"}`}
               />
             ))}
             <div className="sc-shade absolute inset-0 z-[3] bg-[rgba(14,13,12,.42)]" />
@@ -151,21 +153,12 @@ export default function ProjectShowcase() {
                 </h3>
               </div>
               <dl className="sc-stats sc-fade mt-6 flex flex-wrap gap-x-11 gap-y-5">
-                {(
-                  [
-                    [labels.weeks, p.weeks, "weeks"],
-                    [labels.area, p.area, "sq ft"],
-                    [labels.city, p.city, null],
-                  ] as const
-                ).map(([dt, value, unit]) => (
-                  <div key={dt} className="min-w-[96px]">
-                    <dt className="text-[10px] uppercase tracking-[.22em] text-on-dark">{dt}</dt>
-                    <dd className="mt-1.5 font-serif text-[30px] leading-none">
-                      {value}
-                      {unit && <small className="ml-1 font-sans text-[13px]">{unit}</small>}
-                    </dd>
+                {p.city && (
+                  <div className="min-w-[96px]">
+                    <dt className="text-[10px] uppercase tracking-[.22em] text-on-dark">{labels.city}</dt>
+                    <dd className="mt-1.5 font-serif text-[30px] leading-none">{p.city}</dd>
                   </div>
-                ))}
+                )}
               </dl>
             </div>
             <div className="sc-fade flex items-center gap-2.5">

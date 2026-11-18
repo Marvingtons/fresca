@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import SmoothScroll from "@/components/SmoothScroll";
 import { heroFilm } from "@/content/media";
-import { site } from "@/content/site";
+import { founder, site } from "@/content/site";
 import { introScript } from "@/lib/intro";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
@@ -51,6 +51,28 @@ export const metadata: Metadata = {
   },
 };
 
+// Structured data for search engines (schema.org LocalBusiness).
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  name: site.legalName,
+  legalName: site.legalName,
+  description: site.description,
+  url: siteUrl,
+  image: new URL(site.ogImage.url, siteUrl).toString(),
+  email: site.email,
+  telephone: "+1-858-750-0665",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Solana Beach",
+    addressRegion: "CA",
+    addressCountry: "US",
+  },
+  areaServed: ["Solana Beach", "Del Mar", "Carmel Valley", "North County San Diego"],
+  founder: { "@type": "Person", name: founder.name, jobTitle: founder.role },
+  sameAs: [site.instagram.href],
+};
+
 export const viewport: Viewport = {
   themeColor: "#F4F2EB",
 };
@@ -65,6 +87,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link rel="preload" as="image" href={heroFilm.poster.webp} type="image/webp" fetchPriority="high" />
       </head>
       <body>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>
