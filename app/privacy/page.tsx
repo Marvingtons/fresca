@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Copy from "@/components/Copy";
 import { privacy, site } from "@/content/site";
 
 export const metadata: Metadata = {
@@ -24,16 +23,13 @@ export default function PrivacyPage() {
       <main id="main" className="px-pad pb-24 pt-[clamp(48px,10vh,120px)]">
         <div className="mx-auto max-w-[680px]">
           <p className="cap text-muted">{privacy.eyebrow}</p>
-          <h1 className="mb-4 mt-4 font-serif text-[clamp(44px,6vw,80px)] font-normal leading-[.98]">{privacy.heading}</h1>
-          <p className="mb-12 text-sm text-muted">
-            <Copy text={privacy.updated} />
-          </p>
+          <h1 className="mb-12 mt-4 font-serif text-[clamp(44px,6vw,80px)] font-normal leading-[.98]">{privacy.heading}</h1>
           {privacy.sections.map((section) => (
             <section key={section.title} className="mb-10">
               <h2 className="mb-3 font-serif text-[clamp(26px,2.4vw,34px)] font-normal leading-[1.1]">{section.title}</h2>
               {section.body.map((para) => (
                 <p key={para} className="mb-4 text-body">
-                  <Copy text={para} />
+                  {para}
                 </p>
               ))}
             </section>

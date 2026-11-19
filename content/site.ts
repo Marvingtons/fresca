@@ -402,9 +402,6 @@ export const contact = {
 };
 
 // ───────── privacy page
-// Describes what the site actually does: the inquiry form emails Karen through
-// Resend, the site is hosted on Cloudflare, there are no analytics or cookies.
-// Update it if any of that changes. Karen (or her counsel) should review it.
 
 export const privacy = {
   title: "Privacy | Fresca Interior Design",
@@ -412,35 +409,30 @@ export const privacy = {
   eyebrow: "Privacy",
   heading: "Your details",
   back: "Back to the site",
-  updated: "Last updated November 18, 2026. [PLACEHOLDER: Karen to review this page]",
   link: { href: "/privacy", label: "Privacy" },
   formNote: "I only use your details to reply to you.",
   sections: [
     {
-      title: "What I collect",
+      title: "Who collects it",
+      body: [`${site.legalName}, Solana Beach, California.`],
+    },
+    {
+      title: "What the form collects",
+      body: ["Your name, your email address and your message. Nothing else."],
+    },
+    {
+      title: "Why",
       body: [
-        `When you send the inquiry form, I receive your name, your email address and your message. Nothing else is collected through this site.`,
+        "To reply to your inquiry. Your message is emailed to Karen. It is not sold or shared with anyone.",
       ],
     },
     {
-      title: "How I use it",
-      body: [
-        "I use your details only to reply to you and, if you hire me, to run your project. I don’t add you to a mailing list, and I never sell or share your details for marketing.",
-        "Your message reaches my inbox through Resend, an email delivery service, which handles it only to deliver it to me.",
-      ],
+      title: "Cookies",
+      body: ["This site sets no tracking cookies."],
     },
     {
-      title: "Cookies and analytics",
-      body: [
-        "This site uses no tracking cookies and no analytics. Your browser keeps one setting for the length of your visit, so the opening animation doesn’t replay on every page load.",
-        "The site is hosted on Cloudflare, which processes standard request information such as your IP address to deliver and protect the site.",
-      ],
-    },
-    {
-      title: "Keeping and deleting your details",
-      body: [
-        `I keep inquiry emails for as long as I need them to reply and to keep records of my projects. To see, correct or delete what I hold about you, email ${site.email} and I’ll take care of it.`,
-      ],
+      title: "Deleting your details",
+      body: [`Email ${site.email} and ask, and your details will be deleted.`],
     },
   ],
 };
