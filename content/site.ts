@@ -27,9 +27,10 @@
  * Karen's round 1 photos (assets/source/karen-round1/, prepared by
  * scripts/prepare-karen-round1.mjs, which also turns them upright):
  *   white-oak-ceiling-bedroom.jpg  replaces reclaimed-wood-bedroom in the work slider
- *   subway-tile-secondary-bath.jpg replaces hammered-sink-bath on the About stat card
- *   lantern-pendant-kitchen.jpg    replaces orb-chandelier-dining in the Approach "Light" panel
+ *   subway-tile-secondary-bath.jpg studio wall Pl. 03, and the About stat card
+ *   lantern-pendant-kitchen.jpg    replaces the orb photo as studio wall Pl. 05
  *                                  (the hero intro still uses orb-chandelier-dining)
+ *   glass-pendants-crop.jpg        crop of black-hood-kitchen-island for the Approach "Light" panel
  *   del-mar-primary-bath.jpg, linen-coastal-bedroom.jpg  new work slider projects
  */
 
@@ -119,7 +120,10 @@ type WallPlate = {
   kind: "plate";
   no: string;
   title: string;
-  city: string; // DEMO: project cities are placeholders
+  /** Only locations Karen supplied. Leave out when she hasn't given one. */
+  city?: string;
+  /** Optional note shown under the title in the label's small type. */
+  caption?: string;
   src: string;
   ratio: string;
   x: string;
@@ -154,20 +158,21 @@ export const studio = {
   items: [
     { kind: "word", text: "A fresh", x: "3%", y: "11%", speed: 0.55 },
     {
-      kind: "plate", no: "Pl. 01", title: "Black-Hood Kitchen", city: "Rancho Bernardo",
+      kind: "plate", no: "Pl. 01", title: "Modern Coastal Kitchen", city: "Solana Beach",
       src: img("black-hood-kitchen-island"), ratio: "4/5", x: "42%", y: "7%", w: "21%", speed: 1.25,
       dim: { dir: "h", label: "2.5 COL · 4 : 5" },
       // maxLen keeps the label clear of "A fresh" below ~1440px wide.
       callout: { side: "l", px: "50%", py: "26%", len: "260px", maxLen: "calc(29vw - 150px)", text: "Glass pendants ×3" },
     },
     {
-      kind: "plate", no: "Pl. 02", title: "Blush Guest Bedroom", city: "Poway",
+      kind: "plate", no: "Pl. 02", title: "Blush Primary Bedroom", city: "Carmel Valley",
       src: img("blush-guest-bedroom"), ratio: "3/4", x: "79%", y: "17%", w: "13%", speed: 1.9, right: true,
     },
     { kind: "word", text: "home,", x: "62%", y: "35%", speed: 0.85, right: true },
     {
-      kind: "plate", no: "Pl. 03", title: "Navy Double Vanity", city: "Carmel Valley",
-      src: img("navy-double-vanity"), ratio: "3/4", x: "7%", y: "35%", w: "15%", speed: 1.45,
+      kind: "plate", no: "Pl. 03", title: "Coastal Secondary Bath", city: "San Diego",
+      caption: "A look at the completed space before the final layers of furnishings and accessories.",
+      src: img("subway-tile-secondary-bath"), ratio: "3/4", x: "7%", y: "35%", w: "15%", speed: 1.45,
       dim: { dir: "v", side: "l", label: "3 : 4" },
     },
     {
@@ -186,9 +191,9 @@ export const studio = {
     },
     { kind: "word", text: "considered.", italic: true, x: "2%", y: "61%", speed: 0.7 },
     {
-      kind: "plate", no: "Pl. 05", title: "Orb Pendant Kitchen", city: "Poway",
-      src: img("blue-gray-island-kitchen"), ratio: "1/1", x: "47%", y: "74%", w: "13%", speed: 1.8,
-      callout: { side: "l", px: "45%", py: "70%", len: "165px", text: "Blue-gray island" },
+      kind: "plate", no: "Pl. 05", title: "Kitchen with Lantern Pendant",
+      src: img("lantern-pendant-kitchen"), ratio: "1/1", x: "47%", y: "74%", w: "13%", speed: 1.8,
+      callout: { side: "l", px: "36%", py: "14%", len: "165px", text: "Lantern pendant" },
     },
     {
       kind: "plate", no: "Pl. 06", title: "Guest Bath with Stenciled Ceiling", city: "Solana Beach",
@@ -196,7 +201,7 @@ export const studio = {
       dim: { dir: "v", side: "l", label: "3 : 4" },
     },
     {
-      kind: "plate", no: "Pl. 07", title: "Bay Window Dining", city: "Rancho Bernardo",
+      kind: "plate", no: "Pl. 07", title: "Bay Window Dining",
       src: img("bay-window-dining"), ratio: "1/1", x: "12%", y: "83%", w: "17%", speed: 1.3,
       dim: { dir: "h", label: "2 COL · 1 : 1" },
     },
@@ -221,7 +226,7 @@ export const studio = {
  */
 export type ShowcaseProject = {
   title: string;
-  city: string;
+  city?: string;
   image: Photo & { fit?: { width: number; height: number } };
 };
 
@@ -230,12 +235,13 @@ export const showcase = {
   projects: [
     {
       title: "Coastal Blue Family Room",
-      city: "Carmel Valley", // DEMO: city placeholder
+      city: "Del Mar",
       image: { src: img("mosaic-fireplace-family-room"), alt: "Family room with mosaic fireplace and blue art" },
     },
     {
-      title: "Cognac & Linen Living Room",
-      city: "Encinitas", // DEMO: city placeholder
+      title: "Cognac and Linen Living Room",
+      city: "Solana Beach",
+      // Photo kept until Karen confirms whether hers replaces it.
       image: { src: img("cognac-living-room"), alt: "Vaulted living room with cognac leather sofas and woven chairs" },
     },
     {
@@ -330,7 +336,8 @@ export const approach = {
     {
       title: "Light",
       text: "Each fixture is placed on a ceiling plan with the room’s daylight in mind, so the space works at noon and at night.",
-      photo: { src: img("lantern-pendant-kitchen"), alt: "Kitchen with a black lantern pendant over a quartz island" },
+      // Tight crop of the Pl. 01 pendants, so the lantern kitchen (Pl. 05) isn't shown twice.
+      photo: { src: img("glass-pendants-crop"), alt: "Three clear glass pendants over a marble kitchen island" },
       board: { src: img("lighting-ceiling-plan"), alt: "Reflected ceiling and lighting plan" },
       drawing: "ceiling" as ApproachDrawingKind,
       spec: [

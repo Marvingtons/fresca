@@ -109,7 +109,10 @@ function WallPiece({ item }: { item: WallItem }) {
         <span>{item.no}</span>
         <b className="font-medium text-ink">{item.title}</b>
         <span className="xy col-start-3 row-start-1 font-mono text-[9px] tracking-[.04em] text-ink/45">{coord(item.x, item.y)}</span>
-        <span className="col-start-2">{item.city}</span>
+        {item.city && <span className="col-start-2">{item.city}</span>}
+        {item.caption && (
+          <span className="col-start-2 mt-1 normal-case leading-[1.5] tracking-[.02em]">{item.caption}</span>
+        )}
       </span>
     </a>
   );
