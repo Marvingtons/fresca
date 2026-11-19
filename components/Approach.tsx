@@ -104,11 +104,13 @@ export default function Approach() {
       className="blueprint relative py-24 text-ground md:motion-safe:h-svh md:motion-safe:overflow-hidden md:motion-safe:py-0"
     >
       <div className="pointer-events-none relative flex flex-col justify-center px-pad pb-14 md:motion-safe:absolute md:motion-safe:inset-0 md:motion-safe:pb-0">
-        <p className="cap ap-l mb-7 block text-on-dark">{approach.eyebrow}</p>
-        <h2 className="font-serif text-[clamp(48px,7vw,120px)] font-normal leading-[.95]">
-          <span className="ap-l block">{approach.heading[0]}</span>
-          <span className="ap-r block text-right italic">{approach.heading[1]}</span>
-        </h2>
+        <hgroup>
+          <h2 className="cap ap-l mb-7 block text-on-dark">{approach.eyebrow}</h2>
+          <p className="font-serif text-[clamp(48px,7vw,120px)] font-normal leading-[.95]">
+            <span className="ap-l block">{approach.heading[0]}</span>{" "}
+            <span className="ap-r block text-right italic">{approach.heading[1]}</span>
+          </p>
+        </hgroup>
       </div>
 
       {/* Playhead: fixed at the center under the panels, reading the ruler position. */}

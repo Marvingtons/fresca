@@ -35,15 +35,21 @@ export default function Footer() {
     <footer ref={root} id="contact" className="overflow-hidden bg-ink px-pad pt-[clamp(96px,14vh,150px)] text-ground">
       <div className="flex flex-wrap justify-between gap-x-20 gap-y-12">
         <div className="flex-[1_1_420px]">
-          <p className="cap text-on-dark">{contact.eyebrow}</p>
-          <h2 className="mb-6 mt-[18px] font-serif text-[clamp(52px,6.4vw,110px)] font-normal leading-[.94]">
-            <Line>{contact.heading[0]}</Line>
-            <Line>
-              <em>{contact.heading[1]}</em>
-            </Line>
-          </h2>
+          <hgroup>
+            <h2 className="cap text-on-dark">{contact.eyebrow}</h2>
+            <p className="mb-6 mt-[18px] font-serif text-[clamp(52px,6.4vw,110px)] font-normal leading-[.94]">
+              <Line>{contact.heading[0]}</Line>{" "}
+              <Line>
+                <em>{contact.heading[1]}</em>
+              </Line>
+            </p>
+          </hgroup>
           <p className="max-w-[420px] text-on-dark">
             <Copy text={contact.text} />
+          </p>
+          <p className="mt-5 max-w-[420px] text-sm text-on-dark">
+            <span className="cap mr-2 text-ground">{contact.serviceArea.label}</span>
+            {contact.serviceArea.text}
           </p>
         </div>
         <ContactForm />

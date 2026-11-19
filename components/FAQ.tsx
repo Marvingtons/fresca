@@ -18,14 +18,16 @@ export default function FAQ() {
   return (
     <section id="faq" className="flex flex-wrap gap-x-20 gap-y-10 bg-ground-2 px-pad py-[clamp(96px,14vh,150px)]">
       <div className="flex-[1_1_320px]">
-        <p className="cap text-muted-2">{faq.eyebrow}</p>
-        <h2 className="mt-4 font-serif text-[clamp(44px,5vw,80px)] font-normal leading-[.98]">{faq.heading}</h2>
+        <hgroup>
+          <h2 className="cap text-muted-2">{faq.eyebrow}</h2>
+          <p className="mt-4 font-serif text-[clamp(44px,5vw,80px)] font-normal leading-[.98]">{faq.heading}</p>
+        </hgroup>
       </div>
       <div ref={list} className="min-w-0 flex-[2_1_560px] border-t border-ink">
         {faq.items.map((item, i) => (
           <details key={item.q} open={i === 0} onToggle={onToggle} className="group border-b border-line">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 [&::-webkit-details-marker]:hidden">
-              <span className="font-serif text-[clamp(22px,2vw,30px)] leading-[1.2]">{item.q}</span>
+              <h3 className="font-serif text-[clamp(22px,2vw,30px)] font-normal leading-[1.2]">{item.q}</h3>
               <span
                 aria-hidden="true"
                 className="grid h-10 w-10 flex-none place-items-center rounded-full border border-line transition-[transform,background-color] duration-[400ms,300ms] group-open:rotate-45 group-open:bg-ink group-open:text-ground"

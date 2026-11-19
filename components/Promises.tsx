@@ -33,14 +33,17 @@ export default function Promises() {
     <section ref={root} id="process" className="px-pad py-[clamp(96px,14vh,160px)]">
       <div className="flex flex-wrap items-end justify-between gap-x-20 gap-y-8 border-b border-line pb-14">
         <div className="min-w-0 flex-[1_1_560px]">
-          <p className="cap mb-5 text-muted">{promises.eyebrow}</p>
-          {/* Karen's heading is a full sentence, so it runs smaller than the old two-word lines. */}
-          <h2 className="max-w-[17em] text-balance font-serif text-[clamp(34px,3.6vw,60px)] font-normal leading-[1.04]">
-            <Line>{promises.heading[0]}</Line>
-            <Line>
-              <em>{promises.heading[1]}</em>
-            </Line>
-          </h2>
+          {/* The eyebrow names the section, so it is the H2; the display line is its subheading. */}
+          <hgroup>
+            <h2 className="cap mb-5 text-muted">{promises.eyebrow}</h2>
+            {/* Karen's heading is a full sentence, so it runs smaller than the old two-word lines. */}
+            <p className="max-w-[17em] text-balance font-serif text-[clamp(34px,3.6vw,60px)] font-normal leading-[1.04]">
+              <Line>{promises.heading[0]}</Line>{" "}
+              <Line>
+                <em>{promises.heading[1]}</em>
+              </Line>
+            </p>
+          </hgroup>
         </div>
         <div className="flex max-w-[360px] flex-col items-start gap-6">
           <p className="text-body">{promises.intro}</p>

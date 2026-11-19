@@ -30,13 +30,15 @@ export default function AboutStack() {
 
   return (
     <section ref={root} id="about-us" className="px-pad py-[clamp(96px,14vh,160px)]">
-      <p className="cap mb-5 text-muted">{about.eyebrow}</p>
-      <h2 className="mb-7 font-serif text-[clamp(48px,6vw,104px)] font-normal leading-[.95]">
-        <Line>{about.heading[0]}</Line>
-        <Line>
-          <em>{about.heading[1]}</em>
-        </Line>
-      </h2>
+      <hgroup>
+        <h2 className="cap mb-5 text-muted">{about.eyebrow}</h2>
+        <p className="mb-7 font-serif text-[clamp(48px,6vw,104px)] font-normal leading-[.95]">
+          <Line>{about.heading[0]}</Line>{" "}
+          <Line>
+            <em>{about.heading[1]}</em>
+          </Line>
+        </p>
+      </hgroup>
       <p className="mb-12 max-w-[420px] text-body">{about.text}</p>
 
       <figure className="about-quote mb-12 max-w-[1000px]">

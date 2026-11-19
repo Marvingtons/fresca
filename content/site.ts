@@ -47,9 +47,13 @@ export type Photo = { src: string; alt: string };
 export const site = {
   name: "Fresca Interior Design",
   shortName: "Fresca",
-  title: "Fresca Interior Design | Solana Beach",
+  // Under 60 characters: the full "… Design in Solana Beach" ran to 76, so the
+  // tail was trimmed and the brand kept first. Solana Beach is in the H1 and
+  // the description.
+  title: "Fresca Interior Design | Kitchen, Bath and Whole Home Design",
+  // Karen's tagline and service list, under 155 characters.
   description:
-    "Beautiful spaces begin with thoughtful planning. Fresca is a residential interior design studio in Solana Beach designing kitchens, bathrooms and whole homes from the floor plan up.",
+    "Beautiful spaces begin with thoughtful planning. Kitchen, bath and whole home design by Karen Onofrey in Solana Beach and North County San Diego.",
   ogImage: { url: img("og-image"), width: 1200, height: 629, alt: "White shaker kitchen with a black range hood and marble island" },
   location: "Solana Beach, California",
   phone: { label: "858.750.0665", href: "tel:+18587500665" },
@@ -380,6 +384,9 @@ export const contact = {
   eyebrow: "(07) Get in touch",
   heading: ["Let's talk about", "your home."], // second line is italic
   text: "Please tell me about your project. Karen replies personally within two business days.",
+  // Only places Karen has named through her projects. Waiting on her to confirm
+  // or extend (docs/COPY-FOR-KAREN.md).
+  serviceArea: { label: "Service area", text: "Solana Beach, Del Mar, Carmel Valley and North County San Diego." },
   fields: { name: "Name", email: "Email", message: "About your project" },
   submit: "Send inquiry",
   sending: "Sending…",

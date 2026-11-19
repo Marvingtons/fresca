@@ -164,7 +164,7 @@ export default function Hero() {
           <span className="sr-only">{hero.srPrefix} </span>
           <Line reveal={false} className="hero-ln">
             {hero.lines[0]}
-          </Line>
+          </Line>{" "}
           <Line reveal={false} className="hero-ln">
             <em>{hero.lines[1]}</em>
           </Line>

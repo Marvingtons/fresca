@@ -107,7 +107,7 @@ function WallPiece({ item }: { item: WallItem }) {
       </div>
       <figcaption className={`pl-label mt-2.5 grid md:w-[max(100%,180px)] ${item.right ? "md:ml-[min(0px,calc(100%-180px))]" : ""} grid-cols-[auto_1fr_auto] gap-x-3 gap-y-[3px] text-[10px] uppercase max-md:text-[12px] tracking-[.18em] text-muted`}>
         <span>{item.no}</span>
-        <b className="font-medium text-ink">{item.title}</b>
+        <h3 className="font-medium text-ink">{item.title}</h3>
         <span className="xy col-start-3 row-start-1 font-mono text-[9px] tracking-[.04em] text-ink/45">{coord(item.x, item.y)}</span>
         {item.city && <span className="col-start-2">{item.city}</span>}
         {item.caption && (
@@ -220,10 +220,11 @@ export default function StudioWall() {
           </span>
         ))}
       </div>
-      {/* The spec's hidden h2 keeps its default margins (they space the mobile column). */}
-      <h2 className="sr-only mx-0 my-5">{studio.srHeading}</h2>
+      {/* The big words are aria-hidden, so their line is read here. Keeps its margins
+          (they space the mobile column). */}
+      <p className="sr-only mx-0 my-5">{studio.srHeading}</p>
       <div className="wall-caption cap absolute inset-x-0 top-[3%] flex justify-between text-muted max-md:-order-1">
-        <span className="whitespace-nowrap">{studio.caption[0]}</span>
+        <h2 className="whitespace-nowrap">{studio.caption[0]}</h2>
         <span className="text-right">
           {studio.caption[1]}
           <span className="max-md:hidden"> · {studio.caption[2]}</span>

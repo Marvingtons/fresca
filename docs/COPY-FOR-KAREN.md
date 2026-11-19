@@ -119,3 +119,16 @@ Keep / Change to: ______________________________
 **21.** "Glass pendants ×3" (Modern Coastal Kitchen), "Linen sectional" (Two-Story Living Room), "Lantern pendant" (Kitchen with Lantern Pendant)
 
 Keep / Change to: ______________________________
+
+## Search and AI answers (SEO round)
+
+These were added so search engines and AI assistants describe the studio correctly.
+Each uses only words already on the site, but please confirm them.
+
+**22. Service area** (contact section, page description, and the search data)
+> Service area: Solana Beach, Del Mar, Carmel Valley and North County San Diego.
+
+The first three are the cities of your projects on the site. "North County San Diego"
+is not from you. Is this the area you work in? Add or remove places.
+
+Keep / Change to: ______________________________
