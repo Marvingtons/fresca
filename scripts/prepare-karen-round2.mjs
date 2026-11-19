@@ -27,9 +27,10 @@ const PHOTOS = {
   // Selected work slider. Replaces cognac-living-room (original photo 42).
   // Full-bleed, so it gets a larger budget than the plates.
   "cognac-linen-living-room-wide": { width: 2880, budget: 900 * 1024 },
-  // stenciled-ceiling-guest-bath (meant for Pl. 06) is held: it is the same
-  // photo Pl. 03 already shows (subway-tile-secondary-bath). Add it here once
-  // that is resolved: { width: 1200, budget: 600 * 1024 }.
+  // Studio wall Pl. 06. Replaces walnut-guest-bath (original photo 34). A 3:4
+  // photo in a 3:4 plate draws 1.2x the plate width; widest case is the phone
+  // column (50vw of a 430px phone at 3x): about 775 px. Cap 1200.
+  "stenciled-ceiling-guest-bath": { width: 1200, budget: 600 * 1024 },
 };
 
 await mkdir(OUT, { recursive: true });

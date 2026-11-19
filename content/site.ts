@@ -14,7 +14,7 @@
  *    3 → navy-chair-great-room.jpg         29 → black-hex-shower.jpg
  *    4 → bay-window-dining.jpg             31 → navy-double-vanity.jpg
  *    5 → walnut-island-kitchen.jpg         32 → hammered-sink-bath.jpg
- *    6 → orb-chandelier-dining.jpg         34 → walnut-guest-bath.jpg
+ *    6 → orb-chandelier-dining.jpg         34 → walnut-guest-bath.jpg (replaced)
  *    7 → blue-gray-island-kitchen.jpg      37 → blush-guest-bedroom.jpg
  *    9 → gloss-kitchen.jpg                 38 → reclaimed-wood-bedroom.jpg
  *   21 → kitchen-material-board.jpg        39 → bay-window-sitting-room.jpg
@@ -26,12 +26,13 @@
  *
  * Not on the site and deleted from public/images: 1 black-hood-kitchen,
  * 31 navy-double-vanity, 32 hammered-sink-bath, 38 reclaimed-wood-bedroom,
- * 42 cognac-living-room (scripts/prepare-images.mjs would write them again).
+ * 34 walnut-guest-bath, 42 cognac-living-room (scripts/prepare-images.mjs would
+ * write them again).
  *
  * Karen's round 1 photos (assets/source/karen-round1/, prepared by
  * scripts/prepare-karen-round1.mjs, which also turns them upright):
  *   white-oak-ceiling-bedroom.jpg  replaces reclaimed-wood-bedroom in the work slider
- *   subway-tile-secondary-bath.jpg studio wall Pl. 03, and the About stat card
+ *   subway-tile-secondary-bath.jpg studio wall Pl. 03
  *   lantern-pendant-kitchen.jpg    was studio wall Pl. 05 until round 2 (removed
  *                                  from public/images)
  *   glass-pendants-crop.jpg        crop of black-hood-kitchen-island for the Approach "Light" panel
@@ -41,6 +42,9 @@
  * prepared by scripts/prepare-karen-round2.mjs):
  *   lantern-pendant-kitchen-wide.jpg   studio wall Pl. 05 (wider angle, same kitchen)
  *   cognac-linen-living-room-wide.jpg  Cognac and Linen Living Room slide, replaces 42
+ *   stenciled-ceiling-guest-bath.jpg   studio wall Pl. 06, replaces 34 walnut-guest-bath.
+ *                                      Same shot as Pl. 03's round 1 photo; Pl. 03
+ *                                      needs its own (content/placeholders.ts).
  */
 
 const img = (name: string) => `/images/${name}.jpg`;
@@ -163,6 +167,9 @@ type WallPlate = {
   right?: boolean;
   dim?: WallDim;
   callout?: WallCallout;
+  /** "top": the photo's top edge stays in the frame as it drifts (for a ceiling
+   *  that is the point of the photo). Default drift can hide up to 16% of the top. */
+  focus?: "top";
 };
 /** maxWidth keeps a paragraph clear of the photo to its right at narrow widths. */
 type WallText = { kind: "text"; text: string; link?: { href: string; label: string }; x: string; y: string; speed: number; maxWidth: string };
@@ -233,8 +240,9 @@ export const studio = {
     },
     {
       kind: "plate", no: "Pl. 06", title: "Guest Bath with Stenciled Ceiling", city: "Solana Beach",
-      alt: "Guest bathroom in Solana Beach with a white tile shower, wood vanity and round black mirror",
-      src: img("walnut-guest-bath"), ratio: "3/4", x: "86%", y: "77%", w: "11%", speed: 1.65, right: true,
+      alt: "Guest bathroom in Solana Beach with a star-stenciled ceiling, a walk-in shower in vertical white tile, an oak vanity and black fixtures",
+      src: img("stenciled-ceiling-guest-bath"), ratio: "3/4", x: "86%", y: "77%", w: "11%", speed: 1.65, right: true,
+      focus: "top", // the stenciled ceiling is the point of the photo
       dim: { dir: "v", side: "l", label: "3 : 4" },
     },
     {

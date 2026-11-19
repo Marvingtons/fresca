@@ -36,7 +36,7 @@ const MAP = {
   29: "black-hex-shower",
   31: "navy-double-vanity",
   32: "hammered-sink-bath",
-  34: "walnut-guest-bath",
+  // 34 walnut-guest-bath: replaced on Pl. 06 by Karen's round 2 photo (prepare-karen-round2.mjs).
   37: "blush-guest-bedroom",
   38: "reclaimed-wood-bedroom",
   39: "bay-window-sitting-room",

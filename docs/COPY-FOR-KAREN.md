@@ -160,11 +160,11 @@ Keep / Change to: ______________________________
 
 Keep / Change to: ______________________________
 
-**26. Pl. 03 and Pl. 06 look like the same bathroom**
+**26. A photo for Pl. 03, Coastal Secondary Bath**
 
-PL. 03 (Coastal Secondary Bath, San Diego) and PL. 06 (Guest Bath with Stenciled
-Ceiling, Solana Beach) appear to be the same bathroom from two angles. Which
-title and city belong to which photo? Or should one of the two photos be
-replaced with a different project?
+Thank you for confirming Pl. 03 and Pl. 06 are different bathrooms. Your new
+stenciled ceiling photo is now on Pl. 06 (Guest Bath with Stenciled Ceiling,
+Solana Beach). Pl. 03 was showing that same photo, so it needs one of its own.
+Could you send a photo of the Coastal Secondary Bath, and confirm its city?
 
 Answer: ______________________________

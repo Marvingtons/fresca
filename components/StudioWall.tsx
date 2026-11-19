@@ -67,7 +67,10 @@ function WallPiece({ item }: { item: WallItem }) {
       {/* .fr has no overflow clip, so dimension lines and callouts can sit outside the photo. */}
       <div className="fr">
         <div className="pl-frame relative overflow-hidden bg-ground-2" style={{ aspectRatio: item.ratio }}>
-          <div className="pl-img absolute left-0 top-[-10%] h-[120%] w-full">
+          <div
+            data-focus={item.focus}
+            className={`pl-img absolute left-0 ${item.focus === "top" ? "top-0" : "top-[-10%]"} h-[120%] w-full`}
+          >
             <Image
               src={item.src}
               alt={item.alt}
@@ -153,10 +156,14 @@ export default function StudioWall() {
             { clipPath: "inset(0% 0% 0% 0%)", duration: 1.4, ease: "power3.out", scrollTrigger: enter },
           );
           gsap.from(pl.querySelector(".pl-label"), { opacity: 0, y: 8, duration: 0.8, delay: 0.35, ease: "power2.out", scrollTrigger: enter });
+          // A top-anchored photo drifts a shorter way and ends flush with the
+          // frame's top edge, so the top of the photo is never more than ~4% hidden.
+          const img = pl.querySelector<HTMLElement>(".pl-img")!;
+          const top = img.dataset.focus === "top";
           gsap.fromTo(
-            pl.querySelector(".pl-img"),
-            { yPercent: -8 },
-            { yPercent: 8, ease: "none", scrollTrigger: { trigger: pl, start: "top bottom", end: "bottom top", scrub: 0.8 } },
+            img,
+            { yPercent: top ? -4 : -8 },
+            { yPercent: top ? 0 : 8, ease: "none", scrollTrigger: { trigger: pl, start: "top bottom", end: "bottom top", scrub: 0.8 } },
           );
 
           // Dimension line draws in after the photo unmasks, then its label appears.
