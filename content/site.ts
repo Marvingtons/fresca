@@ -54,7 +54,13 @@ export const site = {
   // Karen's tagline and service list, under 155 characters.
   description:
     "Beautiful spaces begin with thoughtful planning. Kitchen, bath and whole home design by Karen Onofrey in Solana Beach and North County San Diego.",
-  ogImage: { url: img("og-image"), width: 1200, height: 629, alt: "White shaker kitchen with a black range hood and marble island" },
+  // Made at build from the hero poster by scripts/make-og-image.mjs.
+  ogImage: {
+    url: "/og-image.jpg",
+    width: 1200,
+    height: 630,
+    alt: "Fresca, interior design in Solana Beach, over a white kitchen with a black range hood, marble island and three glass pendants",
+  },
   location: "Solana Beach, California",
   // label on the page, href for tap-to-call, intl in structured data. Same number.
   phone: { label: "858.750.0665", href: "tel:+18587500665", intl: "+1-858-750-0665" },

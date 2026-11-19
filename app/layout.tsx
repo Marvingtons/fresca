@@ -5,6 +5,7 @@ import SmoothScroll from "@/components/SmoothScroll";
 import { heroFilm } from "@/content/media";
 import { hero, site } from "@/content/site";
 import { INTRO_FRAME, introScript } from "@/lib/intro";
+import { sharing } from "@/lib/metadata";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -32,9 +33,10 @@ const mono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  // Defaults; each page sets its own title, description, canonical and sharing tags
+  // with pageMetadata (lib/metadata.ts).
   title: site.title,
   description: site.description,
-  alternates: { canonical: "/" },
   // Temporary set from public/icon.svg (scripts/make-favicons.mjs) until the logo is final.
   icons: {
     icon: [
@@ -44,21 +46,7 @@ export const metadata: Metadata = {
     ],
     apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
   },
-  openGraph: {
-    type: "website",
-    url: "/",
-    siteName: site.name,
-    title: site.title,
-    description: site.description,
-    locale: "en_US",
-    images: [site.ogImage],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: site.title,
-    description: site.description,
-    images: [site.ogImage.url],
-  },
+  ...sharing,
 };
 
 // The intro's first frame, preloaded by introScript only when the intro plays.

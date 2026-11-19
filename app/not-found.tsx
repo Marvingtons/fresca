@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, site } from "@/content/site";
+import { pageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: notFound.title,
-  robots: { index: false },
-};
+// No canonical or og:url (this page has no address of its own). Next adds the
+// noindex robots tag to not-found pages itself.
+export const metadata: Metadata = pageMetadata({ title: notFound.title, description: site.description });
 
 export default function NotFound() {
   return (

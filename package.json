@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/make-og-image.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -28,6 +29,7 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^8",
     "eslint-config-next": "^15.5.29",
+    "opentype.js": "^2.0.0",
     "postcss": "^8",
     "schema-dts": "^2.1.0",
     "sharp": "^0.35.5",

@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { privacy, site } from "@/content/site";
+import { pageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: privacy.title,
-  description: privacy.description,
-  alternates: { canonical: "/privacy" },
-};
+export const metadata: Metadata = pageMetadata({ title: privacy.title, description: privacy.description, path: privacy.link.href });
 
 export default function PrivacyPage() {
   return (

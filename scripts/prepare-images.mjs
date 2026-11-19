@@ -111,13 +111,4 @@ for (const [key, name] of Object.entries(MAP)) {
   console.log(`${label.padEnd(16)} → images/${name}.jpg  ${info.width}×${info.height}  q${quality}  ${(data.length / 1024).toFixed(0)} KB`);
 }
 
-// Open Graph card: the hero kitchen cropped to 1.91:1, 1200px wide at most.
-const hero = await source(1);
-const meta = await (await pipeline(1, hero.file)).toBuffer({ resolveWithObject: true }).then((r) => r.info);
-const ogH = Math.round(meta.width / 1.91);
-const og = await (await pipeline(1, hero.file))
-  .extract({ left: 0, top: Math.round((meta.height - ogH) / 2), width: meta.width, height: ogH })
-  .resize({ width: 1200, withoutEnlargement: true })
-  .jpeg({ quality: 85, mozjpeg: true })
-  .toFile(path.join(OUT, "og-image.jpg"));
-console.log(`og-image.jpg  ${og.width}×${og.height}  ${(og.size / 1024).toFixed(0)} KB`);
+// The Open Graph card is made from the hero poster by scripts/make-og-image.mjs.
