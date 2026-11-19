@@ -84,7 +84,10 @@ export const cta = { href: "#contact", label: "Book a consultation" };
 // ───────── hero
 
 export const hero = {
-  eyebrow: "Residential interiors · Solana Beach",
+  // Non-breaking space keeps "Solana Beach" together with the dot on phones.
+  eyebrow: "Interior design ·\u00a0Solana Beach",
+  /** Read before the visual headline by screen readers and search engines. */
+  srPrefix: "Interior design in Solana Beach:",
   lines: ["Interiors that", "feel fresh."], // second line is italic
   text: "Beautiful spaces begin with thoughtful planning.",
   introLabel: "Fresca · Interior Design",

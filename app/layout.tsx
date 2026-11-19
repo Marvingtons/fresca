@@ -54,7 +54,7 @@ export const metadata: Metadata = {
 // Structured data for search engines (schema.org LocalBusiness).
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "LocalBusiness",
+  "@type": ["LocalBusiness", "ProfessionalService"],
   name: site.legalName,
   legalName: site.legalName,
   description: site.description,
@@ -68,7 +68,8 @@ const jsonLd = {
     addressRegion: "CA",
     addressCountry: "US",
   },
-  areaServed: ["Solana Beach", "Del Mar", "Carmel Valley", "North County San Diego"],
+  areaServed: ["Solana Beach"],
+  knowsAbout: ["Interior design", "Kitchen design", "Bathroom design", "Whole home design"],
   founder: { "@type": "Person", name: founder.name, jobTitle: founder.role },
   sameAs: [site.instagram.href],
 };

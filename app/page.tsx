@@ -8,10 +8,23 @@ import Navigation from "@/components/Navigation";
 import ProjectShowcase from "@/components/ProjectShowcase";
 import Promises from "@/components/Promises";
 import StudioWall from "@/components/StudioWall";
+import { faq } from "@/content/site";
+
+// FAQ rich results, built from the same items the FAQ section renders.
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faq.items.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: { "@type": "Answer", text: item.a },
+  })),
+};
 
 export default function Home() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c") }} />
       <Navigation />
       <main>
         <Hero />
