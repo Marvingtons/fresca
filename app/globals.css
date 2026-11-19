@@ -50,6 +50,11 @@ html.lenis body {
     @apply text-[11px] uppercase tracking-[.24em];
   }
 
+  /* Missing client content, rendered by components/Copy.tsx. */
+  .placeholder {
+    @apply bg-transparent font-sans text-[0.8em] font-medium normal-case not-italic tracking-normal text-terracotta;
+  }
+
   /* Masked line: the inner span slides up from below the mask. */
   .ln {
     @apply -mb-[.06em] block overflow-hidden pb-[.06em];

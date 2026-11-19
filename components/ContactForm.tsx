@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { contact } from "@/content/site";
+import { contact, privacy } from "@/content/site";
 import type { ContactField } from "@/lib/contact";
 import { HONEYPOT } from "@/lib/honeypot";
 
@@ -141,6 +142,12 @@ export default function ContactForm() {
       <button type="submit" disabled={sending} className="pill pill-light mt-3 cursor-pointer justify-self-start border-0 disabled:cursor-wait disabled:opacity-70">
         {sending ? contact.sending : contact.submit}
       </button>
+      <p className="text-[13px] text-on-dark">
+        {privacy.formNote}{" "}
+        <Link href={privacy.link.href} className="underline underline-offset-2 hover:text-ground">
+          {privacy.link.label}
+        </Link>
+      </p>
       {status === "error" && (
         <p role="alert" className="text-[13px] text-error">
           {contact.error}

@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { about } from "@/content/site";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { MOTION, revealLines } from "@/lib/motion";
+import Copy, { isPlaceholder } from "./Copy";
 import Line from "./LineReveal";
 
 export default function AboutStack() {
@@ -41,7 +42,9 @@ export default function AboutStack() {
               <em>{about.heading[1]}</em>
             </Line>
           </h2>
-          <p className="mb-7 max-w-[420px] text-body">{about.text}</p>
+          <p className="mb-7 max-w-[420px] text-body">
+            <Copy text={about.text} />
+          </p>
           <a className="pill pill-line" href={about.link.href}>
             {about.link.label}
           </a>
@@ -61,7 +64,13 @@ export default function AboutStack() {
               <span>{stat.label}</span>
               <span>{String(i + 1).padStart(2, "0")}</span>
             </div>
-            <span className="absolute bottom-3 left-6 z-[2] font-serif text-[clamp(110px,14vw,220px)] leading-[.9]">{stat.value}</span>
+            {isPlaceholder(stat.value) ? (
+              <span className="absolute bottom-6 left-6 z-[2] rounded bg-ground px-3 py-2 text-xl">
+                <Copy text={stat.value} />
+              </span>
+            ) : (
+              <span className="absolute bottom-3 left-6 z-[2] font-serif text-[clamp(110px,14vw,220px)] leading-[.9]">{stat.value}</span>
+            )}
             <div aria-hidden="true" className="scard-dim pointer-events-none absolute inset-0 z-[3] bg-black opacity-0" />
           </div>
         ))}

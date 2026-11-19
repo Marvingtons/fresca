@@ -1,6 +1,7 @@
 /**
- * Everything still owed by Karen. Nothing here is rendered; it is the checklist
- * for the next round of client questions. Remove an entry once it is answered.
+ * Everything still owed by Karen: the checklist for the next round of client
+ * questions. Markers written into copy as [PLACEHOLDER: ...] render in terracotta
+ * (components/Copy.tsx). Remove an entry once it is answered.
  */
 export const placeholders = [
   // Round 1 photos
@@ -11,6 +12,10 @@ export const placeholders = [
   { where: "navy-chair-great-room (Approach, Plan panel)", field: "photo", value: "[PLACEHOLDER: pending Karen]" },
   // Older DEMO values in content/site.ts that Karen has not confirmed
   { where: "site.url", field: "production domain", value: "[PLACEHOLDER: domain]" },
-  { where: "about.stats", field: "years, rooms, neighborhoods, repeat clients", value: "[PLACEHOLDER: stats]" },
+  { where: "about.stats", field: "years, rooms, neighborhoods, repeat clients", value: "[PLACEHOLDER: years] etc., rendered on the About cards" },
+  { where: "about.text", field: "service area", value: "[PLACEHOLDER: service area]" },
+  { where: "contact.text", field: "response time for inquiries", value: "[PLACEHOLDER: response time]" },
+  { where: "/privacy", field: "Karen (or counsel) to review the privacy page wording", value: "[PLACEHOLDER: review]" },
+  { where: "app/api/contact", field: "inbox for inquiries (CONTACT_TO_EMAIL) and sending domain", value: "[PLACEHOLDER: inbox]" },
   { where: "Studio wall Pl. 07, Bay Window Dining (bay-window-dining)", field: "city", value: "[PLACEHOLDER: location]" },
 ] as const;

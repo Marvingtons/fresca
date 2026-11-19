@@ -19,6 +19,8 @@ const config: Config = {
         gold: "#C9A86A",
         panel: "#141311",
         error: "#E9B4A2",
+        // Placeholder markers only (CLAUDE.md brand terracotta).
+        terracotta: "#B5593A",
       },
       fontFamily: {
         serif: ["var(--serif)"],

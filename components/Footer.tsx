@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useRef } from "react";
-import { contact, footerLinks, site } from "@/content/site";
+import { contact, footerLinks, privacy, site } from "@/content/site";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { MOTION, revealLines } from "@/lib/motion";
 import ContactForm from "./ContactForm";
+import Copy from "./Copy";
 import Line from "./LineReveal";
 
 export default function Footer() {
@@ -40,7 +42,9 @@ export default function Footer() {
               <em>{contact.heading[1]}</em>
             </Line>
           </h2>
-          <p className="max-w-[420px] text-on-dark">{contact.text}</p>
+          <p className="max-w-[420px] text-on-dark">
+            <Copy text={contact.text} />
+          </p>
         </div>
         <ContactForm />
       </div>
@@ -55,6 +59,9 @@ export default function Footer() {
           <a href={site.instagram.href} className={link}>
             {site.instagram.handle}
           </a>
+          <Link href={privacy.link.href} className={link}>
+            {privacy.link.label}
+          </Link>
         </nav>
         <span>
           <a href={site.phone.href} className={link}>
