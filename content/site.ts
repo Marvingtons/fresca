@@ -56,10 +56,21 @@ export const site = {
     "Beautiful spaces begin with thoughtful planning. Kitchen, bath and whole home design by Karen Onofrey in Solana Beach and North County San Diego.",
   ogImage: { url: img("og-image"), width: 1200, height: 629, alt: "White shaker kitchen with a black range hood and marble island" },
   location: "Solana Beach, California",
-  phone: { label: "858.750.0665", href: "tel:+18587500665" },
+  // label on the page, href for tap-to-call, intl in structured data. Same number.
+  phone: { label: "858.750.0665", href: "tel:+18587500665", intl: "+1-858-750-0665" },
   email: "frescainteriordesign@gmail.com",
   instagram: { handle: "fresca.interior.design", href: "https://www.instagram.com/fresca.interior.design/" },
   legalName: "Fresca Interior Design, LLC",
+};
+
+/**
+ * Places served: the cities Karen has named through her projects, plus the wider
+ * region. Shown in the contact section and used as areaServed in the structured
+ * data. Waiting on Karen to confirm or extend (docs/COPY-FOR-KAREN.md).
+ */
+export const serviceArea = {
+  cities: ["Solana Beach", "Del Mar", "Carmel Valley"],
+  region: "North County San Diego",
 };
 
 export const founder = {
@@ -384,9 +395,7 @@ export const contact = {
   eyebrow: "(07) Get in touch",
   heading: ["Let's talk about", "your home."], // second line is italic
   text: "Please tell me about your project. Karen replies personally within two business days.",
-  // Only places Karen has named through her projects. Waiting on her to confirm
-  // or extend (docs/COPY-FOR-KAREN.md).
-  serviceArea: { label: "Service area", text: "Solana Beach, Del Mar, Carmel Valley and North County San Diego." },
+  serviceArea: { label: "Service area", text: `${serviceArea.cities.join(", ")} and ${serviceArea.region}.` },
   fields: { name: "Name", email: "Email", message: "About your project" },
   submit: "Send inquiry",
   sending: "Sending…",

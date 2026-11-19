@@ -9,7 +9,8 @@
     "lint": "next lint",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "copy-lint": "node scripts/copy-lint.mjs"
+    "copy-lint": "node scripts/copy-lint.mjs",
+    "check:schema": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-structured-data.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -28,6 +29,7 @@
     "eslint": "^8",
     "eslint-config-next": "^15.5.29",
     "postcss": "^8",
+    "schema-dts": "^2.1.0",
     "sharp": "^0.35.5",
     "tailwindcss": "^3.4.1",
     "typescript": "^5",

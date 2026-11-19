@@ -132,3 +132,10 @@ The first three are the cities of your projects on the site. "North County San D
 is not from you. Is this the area you work in? Add or remove places.
 
 Keep / Change to: ______________________________
+
+**23. Opening hours**
+
+Search results can show your hours, but the site has none. If you keep set hours
+(or see clients by appointment only), tell me and I'll add them.
+
+Hours: ______________________________
