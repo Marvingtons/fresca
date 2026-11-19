@@ -130,15 +130,6 @@ export default function Approach() {
               <span className="font-serif text-[30px] italic text-gold">{String(i + 1).padStart(2, "0")}</span>
               <h3 className="mb-3.5 mt-2 font-serif text-[clamp(48px,5vw,84px)] font-normal leading-[.95]">{panel.title}</h3>
               <p className="max-w-[340px] text-on-dark">{panel.text}</p>
-              <ul className="ap-spec">
-                {panel.spec.map(([label, value]) => (
-                  <li key={label}>
-                    <span>{label}</span>
-                    <span />
-                    <b>{value}</b>
-                  </li>
-                ))}
-              </ul>
             </div>
             <div className="relative h-[72vw] md:h-[min(62vh,560px)]">
               <div className="absolute right-0 top-0 h-[82%] w-[72%] overflow-hidden rounded">

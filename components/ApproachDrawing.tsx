@@ -17,12 +17,6 @@ function Plan() {
       <path className="dw" pathLength={1} d="M260 190 V150 M260 150 A40 40 0 0 1 300 190" />
       <path className="dw dm" pathLength={1} d="M300 34 V92 M294 34 H306 M294 92 H306" />
       <path className="dw dm" pathLength={1} d="M140 160 H270 M140 154 V166 M270 154 V166" />
-      <text x="308" y="67">
-        42″
-      </text>
-      <text x="185" y="176">
-        10′–0″
-      </text>
       <text className="lbl" x="160" y="118">
         ISLAND
       </text>
@@ -47,12 +41,6 @@ function Elevation() {
       <path className="dw" pathLength={1} d="M160 20 H200 L216 80 H144 Z" />
       <path className="dw dm" pathLength={1} d="M350 110 V190 M344 110 H356 M344 190 H356" />
       <path className="dw dm" pathLength={1} d="M8 86 V110 M2 86 H14 M2 110 H14" />
-      <text x="318" y="154">
-        36″
-      </text>
-      <text x="18" y="101">
-        18″
-      </text>
       <text className="lbl" x="140" y="14">
         KITCHEN · ELEVATION A
       </text>
@@ -79,12 +67,6 @@ function Ceiling() {
       <circle className="dw" pathLength={1} cx="310" cy="50" r="4" />
       <circle className="dw" pathLength={1} cx="310" cy="150" r="4" />
       <path className="dw dm" pathLength={1} d="M160 80 H200 M160 74 V86 M200 74 V86" />
-      <text x="166" y="70">
-        30″
-      </text>
-      <text x="262" y="38">
-        2700 K
-      </text>
       <text className="lbl" x="128" y="168">
         REFLECTED CEILING PLAN
       </text>

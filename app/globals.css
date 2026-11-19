@@ -386,31 +386,6 @@ html:not(.intro) .hero-cycle {
 .drawn .ap-draw text {
   opacity: 1;
 }
-.ap-spec {
-  list-style: none;
-  margin: 22px 0 0;
-  padding: 0;
-  max-width: 340px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--on-dark);
-}
-.ap-spec li {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 6px 0;
-  border-top: 1px solid rgba(244, 242, 235, 0.16);
-}
-.ap-spec li span:nth-child(2) {
-  flex: 1;
-  border-bottom: 1px dotted rgba(244, 242, 235, 0.3);
-  transform: translateY(-3px);
-}
-.ap-spec b {
-  font-weight: 400;
-  color: #c9a86a;
-}
 .ap-ruler {
   position: absolute;
   left: 0;

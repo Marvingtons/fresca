@@ -315,10 +315,6 @@ export const approach = {
       photo: { src: img("navy-chair-great-room"), alt: "Great room with navy swivel chairs and linear fireplace" },
       board: { src: img("color-floor-plan"), alt: "Color floor plan of a two-story home" },
       drawing: "plan" as ApproachDrawingKind,
-      spec: [
-        ["Work aisle", "42 in"],
-        ["Walkway, min.", "36 in"],
-      ],
     },
     {
       title: "Design",
@@ -326,10 +322,6 @@ export const approach = {
       photo: { src: img("blue-gray-island-kitchen"), alt: "Kitchen with blue-gray island and patterned tile backsplash" },
       board: { src: img("kitchen-material-board"), alt: "Kitchen material and elevation board" },
       drawing: "elevation" as ApproachDrawingKind,
-      spec: [
-        ["Counter height", "36 in"],
-        ["Counter to uppers", "18 in"],
-      ],
     },
     {
       title: "Light",
@@ -338,10 +330,6 @@ export const approach = {
       photo: { src: img("glass-pendants-crop"), alt: "Three clear glass pendants over a marble kitchen island" },
       board: { src: img("lighting-ceiling-plan"), alt: "Reflected ceiling and lighting plan" },
       drawing: "ceiling" as ApproachDrawingKind,
-      spec: [
-        ["Pendant above counter", "30–36 in"],
-        ["Color temperature", "2700 K"],
-      ],
     },
   ],
 };
