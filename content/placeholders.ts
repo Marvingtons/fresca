@@ -12,9 +12,6 @@ export const placeholders = [
   { where: "navy-chair-great-room (Approach, Plan panel)", field: "photo", value: "[PLACEHOLDER: pending Karen]" },
   // Older DEMO values in content/site.ts that Karen has not confirmed
   { where: "site.url", field: "production domain", value: "[PLACEHOLDER: domain]" },
-  { where: "about.stats", field: "years, rooms, neighborhoods, repeat clients", value: "[PLACEHOLDER: years] etc., rendered on the About cards" },
-  { where: "about.text", field: "service area", value: "[PLACEHOLDER: service area]" },
-  { where: "contact.text", field: "response time for inquiries", value: "[PLACEHOLDER: response time]" },
   { where: "/privacy", field: "Karen (or counsel) to review the privacy page wording", value: "[PLACEHOLDER: review]" },
   { where: "app/api/contact", field: "inbox for inquiries (CONTACT_TO_EMAIL) and sending domain", value: "[PLACEHOLDER: inbox]" },
   { where: "Studio wall Pl. 07, Bay Window Dining (bay-window-dining)", field: "city", value: "[PLACEHOLDER: location]" },

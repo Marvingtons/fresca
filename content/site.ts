@@ -353,14 +353,8 @@ export const approach = {
 export const about = {
   eyebrow: "(05) About",
   heading: ["About", "Fresca."],
-  text: `Founded by designer ${founder.name}, Fresca works with homeowners across [PLACEHOLDER: service area].`,
+  text: `Founded by designer ${founder.name}.`,
   link: { href: "#work", label: "View projects" },
-  stats: [
-    { label: "Years designing homes", value: "[PLACEHOLDER: years]", image: { src: img("iron-bed-bedroom"), alt: "Bedroom with iron bed and floral bedding" } },
-    { label: "Rooms designed", value: "[PLACEHOLDER: rooms]", image: { src: img("sectional-living-room"), alt: "Living room with sectional and tall windows" } },
-    { label: "Neighborhoods served", value: "[PLACEHOLDER: neighborhoods]", image: { src: img("subway-tile-secondary-bath"), alt: "Secondary bath with white subway tile shower, wood vanity and globe sconce" } },
-    { label: "Clients who came back", value: "[PLACEHOLDER: repeat clients]", image: { src: img("bay-window-sitting-room"), alt: "Sitting room with bay windows and fireplace" } },
-  ],
 };
 
 // ───────── founder quote
@@ -399,11 +393,11 @@ export const faq = {
 export const contact = {
   eyebrow: "(07) Get in touch",
   heading: ["Let's talk about", "your home."], // second line is italic
-  text: "Please tell me about your project. I reply personally within [PLACEHOLDER: response time].",
+  text: "Please tell me about your project. Karen replies personally within two business days.",
   fields: { name: "Name", email: "Email", message: "About your project" },
   submit: "Send inquiry",
   sending: "Sending…",
-  thanks: "Thank you. I’ll be in touch soon.",
+  thanks: "Thank you. I’ll be in touch within two business days.",
   error: "Something went wrong sending your message. Please try again, or email me directly.",
 };
 
