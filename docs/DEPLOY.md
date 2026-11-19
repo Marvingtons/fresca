@@ -56,3 +56,22 @@ largest paint.
 With a one-year TTL, never overwrite a file in place: upload a changed film under a
 new name (for example `fresca-hero-1080-v2.webm`) and update `content/media.ts`, or
 purge the URL under **Caching**, **Configuration**, **Purge Cache**.
+
+## Cloudflare Images (next/image)
+
+Every photo goes through `next/image`, which OpenNext serves with the Worker's
+`IMAGES` binding (`wrangler.jsonc`). The binding is turned on per Worker by that
+config; there is nothing to switch on per zone. The account does need Cloudflare
+Images available: in the dashboard, open **Images** (under Media) and check the
+plan on its overview page.
+
+- **Images Free** (the default) includes **5,000 unique transformations per month**.
+  A unique transformation is one source image at one set of parameters (width);
+  format and quality do not count, and repeats in the same month are counted once.
+  Past 5,000, cached sizes keep working but any new size fails with error 9422.
+- **Images Paid**: the first 5,000 are included, then $0.50 per 1,000 unique
+  transformations per month.
+
+This site has about 30 photos, each requested at a handful of widths, so normal
+traffic should use a few hundred unique transformations a month, well inside the
+free allowance. Check the monthly count on the Images overview after launch.
