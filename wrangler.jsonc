@@ -7,7 +7,7 @@
   // Custom domains: `wrangler deploy` creates the DNS records and certificates.
   // Delete any existing A, AAAA or CNAME on these names first (docs/DEPLOY.md).
   // www is redirected to the apex by a Cloudflare Redirect Rule before it
-  // reaches the Worker.
+  // reaches the Worker, with a fallback in next.config.mjs for pages.
   "routes": [
     { "pattern": "frescainteriordesign.com", "custom_domain": true },
     { "pattern": "www.frescainteriordesign.com", "custom_domain": true }
@@ -23,7 +23,8 @@
   },
   // NEXT_PUBLIC_SITE_URL and NEXT_PUBLIC_MEDIA_BASE are inlined at build time
   // from .env.local or the shell (see .env.example and docs/DEPLOY.md), so they
-  // are not Worker vars. Form secrets: RESEND_API_KEY, CONTACT_TO_EMAIL.
+  // are not Worker vars. Form secrets: RESEND_API_KEY, CONTACT_TO_EMAIL,
+  // CONTACT_FROM_EMAIL (docs/DEPLOY.md, section 7).
   "observability": {
     "enabled": true
   }

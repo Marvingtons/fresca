@@ -52,7 +52,7 @@ Cloudflare, **DNS**, **Records**. Delete any old `A`, `AAAA` or `CNAME` on `@` a
 npm run deploy
 ```
 
-- [ ] 3.3 **Rules**, **Redirect Rules**, **Create rule**, name `www to apex`. When: **Hostname** equals `www.frescainteriordesign.com`. Then: **Dynamic**, expression `concat("https://frescainteriordesign.com", http.request.uri.path)`, status **301**, tick **Preserve query string**. **Deploy**. (Redirect Rules run before the Worker.)
+- [ ] 3.3 **Rules**, **Redirect Rules**, **Create rule**, name `www to apex`. When: **Hostname** equals `www.frescainteriordesign.com`. Then: **Dynamic**, expression `concat("https://frescainteriordesign.com", http.request.uri.path)`, status **301**, tick **Preserve query string**. **Deploy**. (Redirect Rules run before the Worker.) The site also redirects www to the apex itself (`next.config.mjs`, built from `NEXT_PUBLIC_SITE_URL`), as a backup for pages if this rule is missing; the rule is still needed so static files and images redirect too.
 - [ ] 3.4 **Security**, **Security rules**, **Create rule**, **Rate limiting rule**, name `contact form`. Expression: `(http.request.uri.path eq "/api/contact" and http.request.method eq "POST")`. Characteristics: **IP**. Rate: **5** requests per **1 minute**. Action: **Block** for **10 minutes**. **Deploy**. The Free plan only offers a 10-second period and a 10-second block; use 5 per 10 seconds, block 10 seconds there, or move the zone to Pro for the full rule.
 - [ ] 3.5 To undo a bad deploy: `npx wrangler rollback`.
 
@@ -100,8 +100,8 @@ npx wrangler secret put CONTACT_TO_EMAIL
 npx wrangler secret put CONTACT_FROM_EMAIL
 ```
 
-  `CONTACT_TO_EMAIL`: `frescainteriordesign@gmail.com` or `karen@frescainteriordesign.com`. `CONTACT_FROM_EMAIL`: `Fresca website <inquiries@frescainteriordesign.com>`.
-- [ ] 7.4 Until the domain is verified in Resend, the form sends from `onboarding@resend.dev`, which Resend only delivers to the Resend account owner's own address.
+  `RESEND_API_KEY`: the key from 7.3. `CONTACT_TO_EMAIL`: `frescainteriordesign@gmail.com`. `CONTACT_FROM_EMAIL`: `hello@frescainteriordesign.com` (sending domain `frescainteriordesign.com`).
+- [ ] 7.4 Set `CONTACT_FROM_EMAIL` only after 7.2 shows **Verified**: Resend rejects a sender on an unverified domain. Until then leave it unset; the form sends from `onboarding@resend.dev`, which Resend only delivers to the Resend account owner's own address.
 
 ## 8. Cloudflare Images
 

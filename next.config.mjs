@@ -20,9 +20,34 @@ function sitemapLastmod() {
   return JSON.stringify(dates);
 }
 
+/**
+ * www to the apex, 301, path and query kept. Built from NEXT_PUBLIC_SITE_URL, so
+ * it only exists when that is an apex https URL. The Cloudflare Redirect Rule
+ * (docs/DEPLOY.md 3.3) does this at the edge first; this covers pages if the
+ * rule is missing.
+ */
+function wwwToApex() {
+  const raw = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!raw) return [];
+  const { protocol, hostname } = new URL(raw);
+  if (protocol !== "https:" || hostname.startsWith("www.") || hostname === "localhost") return [];
+  return [
+    {
+      source: "/:path*",
+      has: [{ type: "host", value: `www.${hostname}` }],
+      destination: `https://${hostname}/:path*`,
+      // 301 to match the Cloudflare rule and the DEPLOY.md test (permanent: true gives 308).
+      statusCode: 301,
+    },
+  ];
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: { SITEMAP_LASTMOD: sitemapLastmod() },
+  async redirects() {
+    return wwwToApex();
+  },
   images: {
     // Every <Image> asks for quality 85. The image optimizer (Cloudflare Images via
     // OpenNext) rejects any quality not listed here; 75 is Next's default.

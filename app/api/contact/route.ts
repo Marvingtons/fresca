@@ -9,9 +9,10 @@ import { contactSchema, HONEYPOT } from "@/lib/contact";
  * Env (Worker secrets in production, .env.local for local testing):
  *   RESEND_API_KEY      Resend API key
  *   CONTACT_TO_EMAIL    inbox for inquiries (frescainteriordesign@gmail.com)
- *   CONTACT_FROM_EMAIL  optional sender on the site's verified domain. Until the
- *                       domain exists, Resend's onboarding sender is used, which
- *                       only delivers to the Resend account owner's own address.
+ *   CONTACT_FROM_EMAIL  sender, hello@frescainteriordesign.com once the domain is
+ *                       verified in Resend. Until it is set, Resend's onboarding
+ *                       sender is used, which only delivers to the Resend
+ *                       account owner's own address.
  *
  * Missing config or a failed send returns 502, so the form shows its error
  * message. Only a timestamp and the outcome are logged, never the inquiry.

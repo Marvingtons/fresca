@@ -11,7 +11,5 @@ export const placeholders = [
   { where: "mosaic-fireplace-family-room (Coastal Blue Family Room)", field: "title, photo", value: "[PLACEHOLDER: pending Karen]" },
   { where: "navy-chair-great-room (Approach, Plan panel)", field: "photo", value: "[PLACEHOLDER: pending Karen]" },
   // Older DEMO values in content/site.ts that Karen has not confirmed
-  { where: "NEXT_PUBLIC_SITE_URL (.env.example assumes frescainteriordesign.com)", field: "production domain", value: "[PLACEHOLDER: domain]" },
-  { where: "app/api/contact", field: "inbox for inquiries (CONTACT_TO_EMAIL) and sending domain", value: "[PLACEHOLDER: inbox]" },
   { where: "Studio wall Pl. 07, Bay Window Dining (bay-window-dining)", field: "city", value: "[PLACEHOLDER: location]" },
 ] as const;
