@@ -87,8 +87,9 @@ export const cta = { href: "#contact", label: "Book a consultation" };
 // ───────── hero
 
 export const hero = {
-  // Non-breaking space keeps "Solana Beach" together with the dot on phones.
-  eyebrow: "Interior design ·\u00a0Solana Beach",
+  // Shown as "Interior design · Solana Beach"; on phones the two parts stack
+  // without the dot, so nothing wraps mid-phrase.
+  eyebrow: ["Interior design", "Solana Beach"],
   /** Read before the visual headline by screen readers and search engines. */
   srPrefix: "Interior design in Solana Beach:",
   lines: ["Interiors that", "feel fresh."], // second line is italic
