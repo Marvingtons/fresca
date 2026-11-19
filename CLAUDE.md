@@ -10,6 +10,7 @@
 - No "we", "our", "one designer".
 - Section names like "The studio" and "Working with us" are fine.
 - No em dashes anywhere in copy, alt text or metadata. The copy-lint script enforces it.
+- `npm run copy-lint` checks source copy, and the rendered HTML when a build exists. New approved "we"/"us" phrases go in its ALLOWED list.
 - Location is Solana Beach. "San Diego" and "North County" only in service-area phrasing.
 
 ## Brand
