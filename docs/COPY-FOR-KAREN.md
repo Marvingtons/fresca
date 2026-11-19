@@ -139,3 +139,32 @@ Search results can show your hours, but the site has none. If you keep set hours
 (or see clients by appointment only), tell me and I'll add them.
 
 Hours: ______________________________
+
+**24. The one-paragraph answer** (top of the About section; search engines and AI
+assistants will quote it, so it must be exactly right)
+> Fresca Interior Design is a residential design studio in Solana Beach, California, run by Karen Onofrey, Founder and Principal Designer. The studio designs kitchens, baths and whole homes.
+
+It replaces the line "Founded by designer Karen Onofrey." Every fact in it is
+already on the site. Is "residential design studio" how you describe Fresca?
+
+Keep / Change to: ______________________________
+
+**25. FAQ questions, reworded the way people search** (your answers are unchanged)
+
+| Was | Now |
+| --- | --- |
+| What does a design project include? | What's included in an interior design project? |
+| Do you manage the remodel, or only the design? | Do you manage the remodel, or just the design? |
+| How is a project priced? | How do you charge for interior design? |
+| Do you take on single rooms? | Can you design just one room? |
+
+Keep / Change to: ______________________________
+
+**26. Two bathroom photos look like the same room**
+
+"Coastal Secondary Bath" (Pl. 03, San Diego) and "Guest Bath with Stenciled
+Ceiling" (Pl. 06, Solana Beach) show a white tile shower, wood vanity and black
+fixtures that look like one bathroom from two angles, and only the Pl. 03 photo
+shows the stenciled ceiling. Are they one project? Which title and city are right?
+
+Answer: ______________________________

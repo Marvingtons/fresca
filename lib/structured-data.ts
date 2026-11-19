@@ -19,7 +19,7 @@ import type {
   WebPageLeaf,
   WebSite,
 } from "schema-dts";
-import { faq, founder, privacy, serviceArea, showcase, site } from "@/content/site";
+import { about, faq, founder, privacy, serviceArea, showcase, site } from "@/content/site";
 import { siteUrl } from "@/lib/site-url";
 
 const home = `${siteUrl}/`;
@@ -46,7 +46,8 @@ function business(): Business {
     "@id": ids.business,
     name: site.legalName,
     alternateName: site.name,
-    description: site.description,
+    // The About section's answer, word for word.
+    description: about.text,
     url: home,
     telephone: site.phone.intl,
     email: site.email,

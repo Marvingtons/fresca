@@ -80,7 +80,7 @@ export default function Footer() {
         </span>
         {/* Year at render time; suppress the warning if the build year differs. */}
         <span suppressHydrationWarning>
-          © {new Date().getFullYear()} {site.legalName}
+          © {new Date().getFullYear()} {site.legalName} · <span className="whitespace-nowrap">{site.location}</span>
         </span>
       </div>
 

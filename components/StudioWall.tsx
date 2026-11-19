@@ -70,7 +70,7 @@ function WallPiece({ item }: { item: WallItem }) {
           <div className="pl-img absolute left-0 top-[-10%] h-[120%] w-full">
             <Image
               src={item.src}
-              alt={item.title}
+              alt={item.alt}
               fill
               quality={85}
               sizes={`(min-width: 861px) ${parseFloat(item.w)}vw, ${mobileWidth}vw`}

@@ -7,7 +7,8 @@
 // This checks what types can't: one JSON-LD block, in <head>; every @id reference
 // resolves; the fields Google requires or recommends are present; URLs are
 // absolute; FAQ text is word for word what the page shows; project images match
-// the slider's titles and cities; name, phone and email match the page.
+// the slider's titles and cities; the business description is the About answer
+// as shown; name, phone and email match the page.
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -109,6 +110,7 @@ for (const [page, file] of Object.entries(PAGES)) {
     {
       const digits = biz.telephone.replace(/^\+1-/, "").replace(/-/g, ".");
       if (page === "/" && !text.includes(digits)) fail(page, `phone ${digits} is not on the page`);
+      if (page === "/" && !text.includes(biz.description)) fail(page, "business description is not word for word on the page");
       if (!text.includes(biz.email)) fail(page, `email ${biz.email} is not on the page`);
       if (!text.includes(biz.name)) fail(page, `name ${biz.name} is not on the page`);
     }

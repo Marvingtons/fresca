@@ -124,7 +124,8 @@ export const hero = {
   cycle: [img("walnut-island-kitchen"), img("sectional-living-room"), img("iron-bed-bedroom")],
   // The hero still is the film's poster (content/media.ts); this describes it.
   image: {
-    alt: "White shaker kitchen with a black range hood, marble island and three glass pendants",
+    // The Pl. 01 kitchen (Solana Beach).
+    alt: "Kitchen in Solana Beach with white shaker cabinets, a black range hood, a marble island and three glass pendants",
   },
 };
 
@@ -146,6 +147,8 @@ type WallPlate = {
   title: string;
   /** Only locations Karen supplied. Leave out when she hasn't given one. */
   city?: string;
+  /** What the photo shows: the room type, plus the city where Karen gave one. */
+  alt: string;
   /** Optional note shown under the title in the label's small type. */
   caption?: string;
   src: string;
@@ -183,6 +186,7 @@ export const studio = {
     { kind: "word", text: "A fresh", x: "3%", y: "11%", speed: 0.55 },
     {
       kind: "plate", no: "Pl. 01", title: "Modern Coastal Kitchen", city: "Solana Beach",
+      alt: "Kitchen in Solana Beach with white shaker cabinets, a black range hood, a marble island and three glass pendants",
       src: img("black-hood-kitchen-island"), ratio: "4/5", x: "42%", y: "7%", w: "21%", speed: 1.25,
       dim: { dir: "h", label: "2.5 COL · 4 : 5" },
       // maxLen keeps the label clear of "A fresh" below ~1440px wide.
@@ -190,11 +194,14 @@ export const studio = {
     },
     {
       kind: "plate", no: "Pl. 02", title: "Blush Primary Bedroom", city: "Carmel Valley",
+      alt: "Primary bedroom in Carmel Valley with a blush channel-tufted headboard, white quilt and upholstered bench",
       src: img("blush-guest-bedroom"), ratio: "3/4", x: "79%", y: "17%", w: "13%", speed: 1.9, right: true,
     },
     { kind: "word", text: "home,", x: "62%", y: "35%", speed: 0.85, right: true },
     {
       kind: "plate", no: "Pl. 03", title: "Coastal Secondary Bath", city: "San Diego",
+      // No city here: CLAUDE.md keeps "San Diego" to service-area phrasing.
+      alt: "Secondary bathroom with a white subway tile shower, wood vanity, black fixtures and a stenciled ceiling",
       caption: "A look at the completed space before the final layers of furnishings and accessories.",
       src: img("subway-tile-secondary-bath"), ratio: "3/4", x: "7%", y: "35%", w: "15%", speed: 1.45,
       dim: { dir: "v", side: "l", label: "3 : 4" },
@@ -209,6 +216,7 @@ export const studio = {
     },
     {
       kind: "plate", no: "Pl. 04", title: "Two-Story Living Room", city: "Carmel Valley",
+      alt: "Two-story living room in Carmel Valley with tall windows, a linen sectional and wood armchairs",
       src: img("two-story-living-room"), ratio: "4/5", x: "61%", y: "50%", w: "25%", speed: 1.05, right: true,
       dim: { dir: "h", label: "3 COL · 4 : 5" },
       callout: { side: "r", px: "80%", py: "84%", len: "110px", text: "Linen sectional" },
@@ -216,16 +224,19 @@ export const studio = {
     { kind: "word", text: "considered.", italic: true, x: "2%", y: "61%", speed: 0.7 },
     {
       kind: "plate", no: "Pl. 05", title: "Kitchen with Lantern Pendant",
+      alt: "Kitchen with a brass lantern pendant over a black island, white cabinets and a patterned tile backsplash",
       src: img("lantern-pendant-kitchen"), ratio: "1/1", x: "47%", y: "74%", w: "13%", speed: 1.8,
       callout: { side: "l", px: "36%", py: "14%", len: "165px", text: "Lantern pendant" },
     },
     {
       kind: "plate", no: "Pl. 06", title: "Guest Bath with Stenciled Ceiling", city: "Solana Beach",
+      alt: "Guest bathroom in Solana Beach with a white tile shower, wood vanity and round black mirror",
       src: img("walnut-guest-bath"), ratio: "3/4", x: "86%", y: "77%", w: "11%", speed: 1.65, right: true,
       dim: { dir: "v", side: "l", label: "3 : 4" },
     },
     {
       kind: "plate", no: "Pl. 07", title: "Bay Window Dining",
+      alt: "Dining room with a round table in a bay window under a glass pendant chandelier",
       src: img("bay-window-dining"), ratio: "1/1", x: "12%", y: "83%", w: "17%", speed: 1.3,
       dim: { dir: "h", label: "2 COL · 1 : 1" },
     },
@@ -260,33 +271,33 @@ export const showcase = {
     {
       title: "Coastal Blue Family Room",
       city: "Del Mar",
-      image: { src: img("mosaic-fireplace-family-room"), alt: "Family room with mosaic fireplace and blue art" },
+      image: { src: img("mosaic-fireplace-family-room"), alt: "Family room in Del Mar with a mosaic fireplace and blue art" },
     },
     {
       title: "Cognac and Linen Living Room",
       city: "Solana Beach",
       // Photo kept until Karen confirms whether hers replaces it.
-      image: { src: img("cognac-living-room"), alt: "Vaulted living room with cognac leather sofas and woven chairs", fit: { width: 1200, height: 896 } },
+      image: { src: img("cognac-living-room"), alt: "Vaulted living room in Solana Beach with cognac leather sofas and woven chairs", fit: { width: 1200, height: 896 } },
     },
     {
       title: "Canyon View Sleek Modern Kitchen",
       city: "Solana Beach",
-      image: { src: img("gloss-kitchen"), alt: "Modern kitchen with white gloss cabinets and charcoal counters", fit: { width: 1448, height: 1086 } },
+      image: { src: img("gloss-kitchen"), alt: "Modern kitchen in Solana Beach with white gloss cabinets and charcoal counters", fit: { width: 1448, height: 1086 } },
     },
     {
       title: "Primary Bedroom with White Oak Ceiling",
       city: "Del Mar",
-      image: { src: img("white-oak-ceiling-bedroom"), alt: "Primary bedroom with a white oak ceiling, gray upholstered bed and woven bench", fit: { width: 1065, height: 1420 } },
+      image: { src: img("white-oak-ceiling-bedroom"), alt: "Primary bedroom in Del Mar with a white oak ceiling, gray upholstered bed and woven bench", fit: { width: 1065, height: 1420 } },
     },
     {
       title: "Primary Bathroom with Custom Cabinetry",
       city: "Del Mar",
-      image: { src: img("del-mar-primary-bath"), alt: "Primary bathroom with oak vanity cabinetry, black sconces and a freestanding tub", fit: { width: 1072, height: 1430 } },
+      image: { src: img("del-mar-primary-bath"), alt: "Primary bathroom in Del Mar with oak vanity cabinetry, black sconces and a freestanding tub", fit: { width: 1072, height: 1430 } },
     },
     {
       title: "Linen Coastal Bedroom",
       city: "Del Mar",
-      image: { src: img("linen-coastal-bedroom"), alt: "Bedroom with a linen upholstered headboard, rustic nightstand and round shell mirror", fit: { width: 1072, height: 1430 } },
+      image: { src: img("linen-coastal-bedroom"), alt: "Bedroom in Del Mar with a linen upholstered headboard, rustic nightstand and round shell mirror", fit: { width: 1072, height: 1430 } },
     },
   ] as ShowcaseProject[],
   labels: { city: "Location" },
@@ -304,7 +315,7 @@ export const promises = {
     {
       title: "You'll always talk to me",
       text: "I measure your kitchen and I sign off the tile. No account managers, no hand-offs between people who have never seen your house.",
-      image: { src: img("freestanding-tub-bath"), alt: "Freestanding tub in a gray tile alcove" },
+      image: { src: img("freestanding-tub-bath"), alt: "Bathroom with a freestanding tub in a gray tile alcove" },
     },
     {
       title: "Drawn before it's bought",
@@ -315,7 +326,7 @@ export const promises = {
     {
       title: "A budget you can read",
       text: "Every selection lives on one priced list. If you swap a faucet or upgrade a slab, you see the new total before anything moves.",
-      image: { src: img("black-hex-shower"), alt: "Glass shower with white picket tile, matte black fixtures and a black hexagon tile floor" },
+      image: { src: img("black-hex-shower"), alt: "Bathroom with a glass shower, white picket tile, matte black fixtures and a black hexagon tile floor" },
     },
     {
       title: "I'm there for the last walkthrough",
@@ -352,7 +363,7 @@ export const approach = {
       title: "Light",
       text: "Each fixture is placed on a ceiling plan with the room’s daylight in mind, so the space works at noon and at night.",
       // Tight crop of the Pl. 01 pendants, so the lantern kitchen (Pl. 05) isn't shown twice.
-      photo: { src: img("glass-pendants-crop"), alt: "Three clear glass pendants over a marble kitchen island" },
+      photo: { src: img("glass-pendants-crop"), alt: "Three clear glass pendants over the marble island of the Solana Beach kitchen" },
       board: { src: img("lighting-ceiling-plan"), alt: "Reflected ceiling and lighting plan" },
       drawing: "ceiling" as ApproachDrawingKind,
     },
@@ -364,7 +375,13 @@ export const approach = {
 export const about = {
   eyebrow: "(05) About",
   heading: ["About", "Fresca."],
-  text: `Founded by designer ${founder.name}.`,
+  /**
+   * The quotable answer: what Fresca is, who runs it, where, and what it does.
+   * Built only from facts on the site, and used word for word as the business
+   * description in the structured data (lib/structured-data.ts), llms.txt and
+   * llms-full.txt. Waiting on Karen to confirm (docs/COPY-FOR-KAREN.md).
+   */
+  text: `${site.name} is a residential design studio in ${site.location}, run by ${founder.name}, ${founder.role}. The studio designs kitchens, baths and whole homes.`,
 };
 
 // ───────── founder quote
@@ -380,19 +397,19 @@ export const faq = {
   heading: "Before you call",
   items: [
     {
-      q: "What does a design project include?",
+      q: "What's included in an interior design project?",
       a: "A full project includes a measured floor plan, a materials and finishes board, a lighting plan, and a product list with every item specified. Smaller projects can include only the pieces you need.",
     },
     {
-      q: "Do you manage the remodel, or only the design?",
+      q: "Do you manage the remodel, or just the design?",
       a: "I design and document the project, then work alongside your contractor through construction. If you don’t have a contractor yet, I can recommend ones I have worked with before.",
     },
     {
-      q: "How is a project priced?",
+      q: "How do you charge for interior design?",
       a: "Every project is unique, and my approach to pricing reflects that. Design services are offered at an hourly rate or a flat project fee, depending on the scope and needs of your project. My goal is to provide a thoughtful, transparent approach that aligns with your design goals and budget.",
     },
     {
-      q: "Do you take on single rooms?",
+      q: "Can you design just one room?",
       a: "Absolutely! Whether you’re refreshing a single room or redesigning an entire home, I welcome projects of all sizes. My approach is tailored to your specific needs, style, and budget, with the goal of creating a space that feels both beautiful and functional.",
     },
   ],
