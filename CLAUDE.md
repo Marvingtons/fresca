@@ -14,7 +14,9 @@
 - Location is Solana Beach. "San Diego" and "North County" only in service-area phrasing.
 
 ## Brand
-- Ivory #F3EFE8, ink #2A2521, terracotta #B5593A as the only accent.
+- Current site values (tailwind.config.ts): ground #F4F2EB, ink #1D1C1A, accent #2B3A55 (navy).
+- Target brand palette is pending (proposed: ivory #F3EFE8, ink #2A2521, terracotta #B5593A). Don't switch until it's confirmed.
+- Terracotta #B5593A is used today only for [PLACEHOLDER: ...] markers.
 - Fonts and logo are being decided. Don't change them without being asked.
 
 ## Photos
