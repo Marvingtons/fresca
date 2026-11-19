@@ -43,7 +43,6 @@ export type Photo = { src: string; alt: string };
 export const site = {
   name: "Fresca Interior Design",
   shortName: "Fresca",
-  url: "https://frescainteriordesign.com", // DEMO: confirm the production domain (or set NEXT_PUBLIC_SITE_URL)
   title: "Fresca Interior Design | Solana Beach",
   description:
     "Beautiful spaces begin with thoughtful planning. Fresca is a residential interior design studio in Solana Beach designing kitchens, bathrooms and whole homes from the floor plan up.",

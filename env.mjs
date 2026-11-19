@@ -6,7 +6,8 @@ import { z } from "zod";
  * Kept out of the client bundle; components read process.env directly.
  */
 const schema = z.object({
-  // Canonical site URL (optional until the real domain is attached).
+  // Canonical site URL: the single source for canonical, Open Graph, sitemap,
+  // robots and JSON-LD. Required for production builds (checked below).
   NEXT_PUBLIC_SITE_URL: z.union([z.literal(""), z.url()]).optional(),
   // Base URL of the media bucket (hero film and poster). No trailing slash needed.
   NEXT_PUBLIC_MEDIA_BASE: z.url(),
@@ -16,6 +17,11 @@ export function validateEnv() {
   const result = schema.safeParse(process.env);
   if (!result.success) {
     throw new Error(`Invalid environment variables:\n${z.prettifyError(result.error)}`);
+  }
+  if (process.env.NODE_ENV === "production" && !result.data.NEXT_PUBLIC_SITE_URL) {
+    throw new Error(
+      "NEXT_PUBLIC_SITE_URL is not set. Production builds need the site's canonical URL, e.g. https://frescainteriordesign.com (see .env.example).",
+    );
   }
   return result.data;
 }
