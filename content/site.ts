@@ -63,6 +63,9 @@ export const site = {
   legalName: "Fresca Interior Design, LLC",
 };
 
+/** Karen's service list, as in the page description. */
+export const services = ["Kitchen design", "Bath design", "Whole home design"];
+
 /**
  * Places served: the cities Karen has named through her projects, plus the wider
  * region. Shown in the contact section and used as areaServed in the structured

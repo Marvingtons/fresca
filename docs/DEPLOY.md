@@ -75,3 +75,38 @@ plan on its overview page.
 This site has about 30 photos, each requested at a handful of widths, so normal
 traffic should use a few hundred unique transformations a month, well inside the
 free allowance. Check the monthly count on the Images overview after launch.
+
+## One host: www redirects to the apex
+
+The canonical address is the apex, `https://frescainteriordesign.com` (the value of
+`NEXT_PUBLIC_SITE_URL`), with no `www`. Every canonical tag, the sitemap, robots.txt
+and the structured data use it. The `www` host must answer with a permanent
+redirect to the same path on the apex, so search engines see one site.
+
+This is done in Cloudflare, not in the app: a Redirect Rule runs before the Worker,
+so it also covers static files (images, the poster) that never reach Next.
+
+1. Dashboard, open the site's zone, **DNS**, **Records**. Make sure `www` has a
+   **proxied** (orange cloud) record. If there is none, add **Type** `AAAA`, **Name**
+   `www`, **IPv6 address** `100::`, **Proxy status** Proxied. (The address is a
+   placeholder; the redirect answers before anything is fetched.)
+2. **Rules**, **Redirect Rules**, **Create rule**. Rule name: `www to apex`.
+3. **Custom filter expression**: Field **Hostname**, Operator **equals**, Value
+   `www.frescainteriordesign.com`.
+4. **Then**: **URL redirect**, Type **Dynamic**, Expression
+   `concat("https://frescainteriordesign.com", http.request.uri.path)`,
+   Status code **301**, tick **Preserve query string**.
+5. **Deploy**.
+
+Check after deploying (both should print `301` and the apex URL):
+
+```
+curl -sI https://www.frescainteriordesign.com/privacy | grep -iE "^(HTTP|location)"
+curl -sI http://frescainteriordesign.com/ | grep -iE "^(HTTP|location)"
+```
+
+The second line checks HTTP to HTTPS: turn on **SSL/TLS**, **Edge Certificates**,
+**Always Use HTTPS** if it does not redirect.
+
+Trailing slashes are handled by Next: `/privacy/` answers 308 (permanent) to
+`/privacy`. Unknown paths and `/404` answer 404.
