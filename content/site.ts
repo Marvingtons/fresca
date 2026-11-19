@@ -351,7 +351,7 @@ export const approach = {
 // ───────── about stack
 
 export const about = {
-  eyebrow: "(05) About us",
+  eyebrow: "(05) About",
   heading: ["About", "Fresca."],
   text: `Founded by designer ${founder.name}, Fresca works with homeowners across North County and the coast. Karen takes on a small number of projects at a time so each one gets full attention.`,
   link: { href: "#work", label: "View projects" },
@@ -399,7 +399,7 @@ export const faq = {
 export const contact = {
   eyebrow: "(07) Get in touch",
   heading: ["Let's talk about", "your home."], // second line is italic
-  text: "Please tell us about your project. Karen replies personally within two business days.",
+  text: "Please tell me about your project. Karen replies personally within two business days.",
   fields: { name: "Name", email: "Email", message: "About your project" },
   submit: "Send inquiry",
   sending: "Sending…",
