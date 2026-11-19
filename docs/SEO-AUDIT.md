@@ -132,7 +132,7 @@ First paragraph here is the first body paragraph after the hero ("Fresca is a re
 | 20 | AEO | FAQ questions are phrased as site headings ("How is a project priced?") rather than as people ask them. | Low | E |
 | 21 | Images | Plate alt text repeats the title; no alt names a city. | Medium | E |
 | 22 | Performance | On first visits the intro frame, not the poster, is the LCP element; mobile lab LCP is 3.6 s. | Medium | F (report only) |
-| 23 | Content truth | Two lines in the contact section are developer draft, not Karen's: "Karen replies personally within two business days" and the thank-you message. Already open in SITE-AUDIT.md (finding 3). | High (not SEO) | Needs Karen |
+| 23 | Content truth | Resolved: "Karen replies personally within two business days" and the thank-you message are Karen's own wording (confirmed after this audit), not developer draft. | OK | |
 | 24 | OK | hreflang absent, lang="en", trailing slash consistent, 404 is a real 404, no "click here" links, CLS 0, fonts preloaded with swap, home page under 1 MB on mobile. | OK | |
 
 ## 4. Performance check (F), after the fixes
@@ -161,10 +161,10 @@ repeat visit in the same tab (intro skipped), and reduced motion.
 | Term | Title | H1 | First paragraph | Any H2 |
 | --- | --- | --- | --- | --- |
 | interior design | Yes | Yes (hidden prefix) | No | No |
-| Solana Beach | No (trimmed to stay at 60 characters) | Yes (hidden prefix) | Yes | No |
+| Solana Beach | Yes | Yes (hidden prefix) | Yes | No |
 | kitchen | Yes | No | Yes | No |
 | bath | Yes | No | Yes | No |
-| whole home | Yes | No | Yes | No |
+| whole home | No (title is "Kitchen and Bath Design, Solana Beach", 62 characters) | No | Yes | No |
 
 The H2s now name the sections ("The studio", "Selected work", "Working with us",
 "Approach", "About", "FAQ", "Get in touch"). Getting a target term into an H2, or

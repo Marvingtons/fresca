@@ -47,10 +47,8 @@ export type Photo = { src: string; alt: string };
 export const site = {
   name: "Fresca Interior Design",
   shortName: "Fresca",
-  // Under 60 characters: the full "… Design in Solana Beach" ran to 76, so the
-  // tail was trimmed and the brand kept first. Solana Beach is in the H1 and
-  // the description.
-  title: "Fresca Interior Design | Kitchen, Bath and Whole Home Design",
+  // Brand first, then the services and the place (62 characters).
+  title: "Fresca Interior Design | Kitchen and Bath Design, Solana Beach",
   // Karen's tagline and service list, under 155 characters.
   description:
     "Beautiful spaces begin with thoughtful planning. Kitchen, bath and whole home design by Karen Onofrey in Solana Beach and North County San Diego.",

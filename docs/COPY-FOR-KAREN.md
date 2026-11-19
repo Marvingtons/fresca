@@ -160,11 +160,11 @@ Keep / Change to: ______________________________
 
 Keep / Change to: ______________________________
 
-**26. Two bathroom photos look like the same room**
+**26. Pl. 03 and Pl. 06 look like the same bathroom**
 
-"Coastal Secondary Bath" (Pl. 03, San Diego) and "Guest Bath with Stenciled
-Ceiling" (Pl. 06, Solana Beach) show a white tile shower, wood vanity and black
-fixtures that look like one bathroom from two angles, and only the Pl. 03 photo
-shows the stenciled ceiling. Are they one project? Which title and city are right?
+PL. 03 (Coastal Secondary Bath, San Diego) and PL. 06 (Guest Bath with Stenciled
+Ceiling, Solana Beach) appear to be the same bathroom from two angles. Which
+title and city belong to which photo? Or should one of the two photos be
+replaced with a different project?
 
 Answer: ______________________________
