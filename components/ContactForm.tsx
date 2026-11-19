@@ -120,7 +120,7 @@ export default function ContactForm() {
         };
         return (
           <div key={f.name}>
-            <label htmlFor={id} className="mb-1.5 block text-[11px] uppercase tracking-[.22em] text-on-dark">
+            <label htmlFor={id} className="mb-1.5 block text-[11px] uppercase tracking-[.22em] text-on-dark max-md:text-[12px]">
               {contact.fields[f.name]}
             </label>
             {f.multiline ? <textarea rows={3} {...props} className={`${props.className} min-h-[90px] resize-y`} /> : <input type={f.type ?? "text"} {...props} />}

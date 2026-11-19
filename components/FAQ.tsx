@@ -18,7 +18,7 @@ export default function FAQ() {
   return (
     <section id="faq" className="flex flex-wrap gap-x-20 gap-y-10 bg-ground-2 px-pad py-[clamp(96px,14vh,150px)]">
       <div className="flex-[1_1_320px]">
-        <p className="cap text-muted">{faq.eyebrow}</p>
+        <p className="cap text-muted-2">{faq.eyebrow}</p>
         <h2 className="mt-4 font-serif text-[clamp(44px,5vw,80px)] font-normal leading-[.98]">{faq.heading}</h2>
       </div>
       <div ref={list} className="min-w-0 flex-[2_1_560px] border-t border-ink">

@@ -13,6 +13,8 @@ const config: Config = {
         ink: "#1D1C1A",
         body: "#4A4740",
         muted: "#6B665C",
+        // muted, darkened just enough to pass 4.5:1 on ground-2.
+        "muted-2": "#68635A",
         line: "rgba(29,28,26,.14)",
         accent: "#2B3A55",
         "on-dark": "#CFC9BC",

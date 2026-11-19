@@ -29,9 +29,12 @@ export default function FounderQuote() {
   return (
     <section
       ref={root}
-      aria-label="From the founder"
+      aria-labelledby="founder-quote"
       className="flex flex-col items-center px-pad py-[clamp(96px,16vh,180px)] text-center"
     >
+      <h2 id="founder-quote" className="sr-only">
+        From the founder
+      </h2>
       <div aria-hidden="true" className="mb-10 grid h-24 w-24 place-items-center rounded-full bg-accent font-serif text-[40px] italic text-ground">
         {founder.initials}
       </div>

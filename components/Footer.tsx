@@ -29,7 +29,7 @@ export default function Footer() {
     { scope: root },
   );
 
-  const link = "py-2 no-underline hover:text-ground";
+  const link = "inline-flex min-h-[44px] items-center no-underline hover:text-ground";
 
   return (
     <footer ref={root} id="contact" className="overflow-hidden bg-ink px-pad pt-[clamp(96px,14vh,150px)] text-ground">

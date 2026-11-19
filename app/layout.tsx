@@ -92,6 +92,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link rel="preload" as="image" href={heroFilm.poster.webp} type="image/webp" fetchPriority="high" />
       </head>
       <body>
+        <a href="#main" className="skip-link">
+          Skip to content
+        </a>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
         <SmoothScroll>{children}</SmoothScroll>
       </body>

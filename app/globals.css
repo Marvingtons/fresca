@@ -47,7 +47,12 @@ html.lenis body {
 
 @layer components {
   .cap {
-    @apply text-[11px] uppercase tracking-[.24em];
+    @apply text-[11px] uppercase tracking-[.24em] max-md:text-[12px];
+  }
+
+  /* Hidden until focused; the first tab stop on every page. */
+  .skip-link {
+    @apply fixed left-4 top-4 z-[100] -translate-y-[200%] rounded bg-ink px-4 py-3 text-sm text-ground no-underline focus:translate-y-0;
   }
 
   /* Missing client content, rendered by components/Copy.tsx. */

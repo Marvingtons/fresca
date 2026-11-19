@@ -88,6 +88,8 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       if (!el) return;
       e.preventDefault();
       scrollTo(el);
+      // Move focus too (skip link, keyboard users), without a second scroll jump.
+      if (el.hasAttribute("tabindex")) el.focus({ preventScroll: true });
     };
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);

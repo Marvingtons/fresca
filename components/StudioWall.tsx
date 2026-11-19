@@ -44,7 +44,7 @@ function WallPiece({ item }: { item: WallItem }) {
             <br />
             <a
               href={item.link.href}
-              className="mt-[18px] inline-flex text-[11px] uppercase tracking-[.2em] text-ink underline underline-offset-[6px]"
+              className="mt-[6px] inline-flex min-h-[44px] items-center text-[11px] uppercase tracking-[.2em] text-ink underline underline-offset-[6px] max-md:text-[12px]"
             >
               {item.link.label}
             </a>
@@ -105,7 +105,7 @@ function WallPiece({ item }: { item: WallItem }) {
           </span>
         )}
       </div>
-      <span className="pl-label mt-2.5 grid grid-cols-[auto_1fr_auto] gap-x-3 gap-y-[3px] text-[10px] uppercase tracking-[.18em] text-muted">
+      <span className="pl-label mt-2.5 grid grid-cols-[auto_1fr_auto] gap-x-3 gap-y-[3px] text-[10px] uppercase max-md:text-[12px] tracking-[.18em] text-muted">
         <span>{item.no}</span>
         <b className="font-medium text-ink">{item.title}</b>
         <span className="xy col-start-3 row-start-1 font-mono text-[9px] tracking-[.04em] text-ink/45">{coord(item.x, item.y)}</span>

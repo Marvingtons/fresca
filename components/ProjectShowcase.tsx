@@ -158,7 +158,7 @@ export default function ProjectShowcase() {
           <div aria-hidden="true" className="sc-chess-r absolute right-0 top-0 z-[6] h-0 w-1/2 bg-ground" />
 
           <div className="sc-fade absolute inset-x-0 top-0 z-[5] flex items-start justify-between px-[clamp(20px,3vw,48px)] pt-24 max-md:pt-[84px]">
-            <span className="cap">{showcase.eyebrow}</span>
+            <h2 className="cap font-normal">{showcase.eyebrow}</h2>
             <span className="font-serif text-[22px] tabular-nums" aria-live="polite">
               {pad2(shown + 1)} / {pad2(projects.length)}
             </span>
@@ -174,7 +174,7 @@ export default function ProjectShowcase() {
               <dl className="sc-stats sc-fade mt-6 flex flex-wrap gap-x-11 gap-y-5">
                 {p.city && (
                   <div className="min-w-[96px]">
-                    <dt className="text-[10px] uppercase tracking-[.22em] text-on-dark">{labels.city}</dt>
+                    <dt className="text-[10px] uppercase tracking-[.22em] text-on-dark max-md:text-[12px]">{labels.city}</dt>
                     <dd className="mt-1.5 font-serif text-[30px] leading-none">{p.city}</dd>
                   </div>
                 )}

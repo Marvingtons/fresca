@@ -26,7 +26,7 @@ export default function Home() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c") }} />
       <Navigation />
-      <main>
+      <main id="main" tabIndex={-1} className="outline-none">
         <Hero />
         <StudioWall />
         <ProjectShowcase />

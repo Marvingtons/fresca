@@ -20,7 +20,7 @@ export default function PrivacyPage() {
           {privacy.back}
         </Link>
       </header>
-      <main id="main" className="px-pad pb-24 pt-[clamp(48px,10vh,120px)]">
+      <main id="main" tabIndex={-1} className="outline-none px-pad pb-24 pt-[clamp(48px,10vh,120px)]">
         <div className="mx-auto max-w-[680px]">
           <p className="cap text-muted">{privacy.eyebrow}</p>
           <h1 className="mb-12 mt-4 font-serif text-[clamp(44px,6vw,80px)] font-normal leading-[.98]">{privacy.heading}</h1>
