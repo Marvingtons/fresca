@@ -4,19 +4,20 @@ import { contactSchema, HONEYPOT } from "@/lib/contact";
 
 /**
  * Inquiry form. Validates the submission and emails it to Karen through the
- * Resend HTTP API (plain fetch, so nothing native runs on the Worker).
+ * Resend HTTP API (plain fetch, no SDK, nothing native on the Worker).
  *
- * Needs three values, set as Worker secrets in production
- * (`npx wrangler secret put <NAME>`) and in .env.local for local testing:
+ * Env (Worker secrets in production, .env.local for local testing):
  *   RESEND_API_KEY      Resend API key
- *   CONTACT_TO_EMAIL    the inbox inquiries go to
- *   CONTACT_FROM_EMAIL  sender on a domain verified in Resend, e.g.
- *                       "Fresca website <website@yourdomain.com>"
+ *   CONTACT_TO_EMAIL    inbox for inquiries (frescainteriordesign@gmail.com)
+ *   CONTACT_FROM_EMAIL  optional sender on the site's verified domain. Until the
+ *                       domain exists, Resend's onboarding sender is used, which
+ *                       only delivers to the Resend account owner's own address.
  *
- * If any is missing, or the send fails, the visitor gets the form's error
- * message (which points them to Karen's email) instead of a false "Thank you".
- * The inquiry itself is never logged.
+ * Missing config or a failed send returns 502, so the form shows its error
+ * message. Only a timestamp and the outcome are logged, never the inquiry.
  */
+const ONBOARDING_SENDER = "Fresca website <onboarding@resend.dev>";
+
 export async function POST(request: Request) {
   let body: Record<string, unknown>;
   try {
@@ -35,33 +36,37 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, fieldErrors: z.flattenError(result.error).fieldErrors }, { status: 400 });
   }
 
-  const { RESEND_API_KEY: key, CONTACT_TO_EMAIL: to, CONTACT_FROM_EMAIL: from } = process.env;
-  if (!key || !to || !from) {
-    console.error("[contact] email is not configured: set RESEND_API_KEY, CONTACT_TO_EMAIL and CONTACT_FROM_EMAIL");
-    return NextResponse.json({ ok: false }, { status: 503 });
+  const sentAt = new Date().toISOString();
+  const key = process.env.RESEND_API_KEY;
+  const to = process.env.CONTACT_TO_EMAIL;
+  if (!key || !to) {
+    console.error(`[contact] ${sentAt} failed: RESEND_API_KEY or CONTACT_TO_EMAIL not set`);
+    return NextResponse.json({ ok: false }, { status: 502 });
   }
 
   const { name, email, message } = result.data;
+  const oneLineName = name.replace(/[\r\n]+/g, " ");
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from,
+        from: process.env.CONTACT_FROM_EMAIL || ONBOARDING_SENDER,
         to: [to],
         reply_to: email,
-        subject: `New inquiry from ${name.replace(/[\r\n]+/g, " ")}`,
-        text: `${message}\n\n${name}\n${email}`,
+        subject: `Website inquiry from ${oneLineName}`,
+        text: `Name: ${oneLineName}\nEmail: ${email}\nSent: ${sentAt}\n\n${message}\n`,
       }),
     });
     if (!res.ok) {
-      console.error(`[contact] send failed with status ${res.status}`);
+      console.error(`[contact] ${sentAt} failed: Resend status ${res.status}`);
       return NextResponse.json({ ok: false }, { status: 502 });
     }
   } catch {
-    console.error("[contact] send failed: network error");
+    console.error(`[contact] ${sentAt} failed: network error`);
     return NextResponse.json({ ok: false }, { status: 502 });
   }
 
+  console.log(`[contact] ${sentAt} sent`);
   return NextResponse.json({ ok: true });
 }
