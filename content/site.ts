@@ -341,7 +341,6 @@ export const about = {
   eyebrow: "(05) About",
   heading: ["About", "Fresca."],
   text: `Founded by designer ${founder.name}.`,
-  link: { href: "#work", label: "View selected work" },
 };
 
 // ───────── founder quote
