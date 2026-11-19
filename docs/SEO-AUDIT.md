@@ -134,3 +134,38 @@ First paragraph here is the first body paragraph after the hero ("Fresca is a re
 | 22 | Performance | On first visits the intro frame, not the poster, is the LCP element; mobile lab LCP is 3.6 s. | Medium | F (report only) |
 | 23 | Content truth | Two lines in the contact section are developer draft, not Karen's: "Karen replies personally within two business days" and the thank-you message. Already open in SITE-AUDIT.md (finding 3). | High (not SEO) | Needs Karen |
 | 24 | OK | hreflang absent, lang="en", trailing slash consistent, 404 is a real 404, no "click here" links, CLS 0, fonts preloaded with swap, home page under 1 MB on mobile. | OK | |
+
+## 4. Performance check (F), after the fixes
+
+Measured on the production build after groups A to E. Lighthouse 13.6 lab runs,
+plus a Playwright pass recording every LCP candidate, layout shift and byte
+transferred at 390 (3x) and 1440 in three cases: first visit (intro plays),
+repeat visit in the same tab (intro skipped), and reduced motion.
+
+| Check | Result |
+| --- | --- |
+| Lighthouse mobile | Performance 89 to 91 across runs, accessibility 97, best practices 100, SEO 100. LCP 3.5 to 3.8 s (3.6 s before), CLS 0, TBT 50 ms, FCP 0.9 s. |
+| Lighthouse desktop | Performance 99, accessibility 97, best practices 100, SEO 100. LCP 0.8 s, CLS 0, TBT 0 ms. |
+| Lighthouse /privacy | SEO 100. |
+| Is the poster the LCP element? | **No, and it cannot be.** Chrome leaves out elements that cover the whole viewport, treating them as background, and the poster is full-bleed. Even with the H1 hidden, the poster never became an LCP candidate. The LCP element is the **intro frame image** on a first visit and the **H1 text** ("Interiors that") on repeat visits and under reduced motion (32 to 44 ms locally, no network wait). |
+| Poster preload | Yes: `<link rel="preload" as="image" type="image/webp" fetchpriority="high">` in `<head>`, and `fetchpriority="high"` on the `<img>`. It is still the first thing seen, so the preload stays. |
+| Competing preload | On a first visit the intro frame (walnut-island-kitchen) is also preloaded at high priority. It is the LCP image then, and its download is most of the 3.5 to 3.8 s mobile lab LCP. Changing that means changing the intro, which is outside this SEO pass. |
+| Fonts | 4 Latin subsets preloaded (`as="font"`, crossorigin) by next/font, `display: swap`. |
+| Layout shift | CLS 0.000 in every case at both widths. |
+| Page weight, mobile | 875 KiB in Lighthouse's mobile run (under 1 MB). In the 390 px Playwright run with a 3x screen, the first visit moves more (2.8 MB, mostly the intro frames and hero film at high density); reduced motion, 826 KiB. |
+| Page weight, desktop | 1,681 KiB (Lighthouse). |
+| Headings, visually | Before/after screenshots at 390 and 1440 (`.review/seo/`): hero, studio wall, slider, process and Approach are pixel-identical. About, FAQ and contact differ only by the new answer paragraph, the reworded questions, the service area line and the footer location. |
+
+## 5. Keyword placement, after the fixes
+
+| Term | Title | H1 | First paragraph | Any H2 |
+| --- | --- | --- | --- | --- |
+| interior design | Yes | Yes (hidden prefix) | No | No |
+| Solana Beach | No (trimmed to stay at 60 characters) | Yes (hidden prefix) | Yes | No |
+| kitchen | Yes | No | Yes | No |
+| bath | Yes | No | Yes | No |
+| whole home | Yes | No | Yes | No |
+
+The H2s now name the sections ("The studio", "Selected work", "Working with us",
+"Approach", "About", "FAQ", "Get in touch"). Getting a target term into an H2, or
+the services into the H1, needs new heading wording from Karen.
