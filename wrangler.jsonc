@@ -4,6 +4,14 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat"],
+  // Custom domains: `wrangler deploy` creates the DNS records and certificates.
+  // Delete any existing A, AAAA or CNAME on these names first (docs/DEPLOY.md).
+  // www is redirected to the apex by a Cloudflare Redirect Rule before it
+  // reaches the Worker.
+  "routes": [
+    { "pattern": "frescainteriordesign.com", "custom_domain": true },
+    { "pattern": "www.frescainteriordesign.com", "custom_domain": true }
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
