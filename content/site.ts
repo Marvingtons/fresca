@@ -20,22 +20,27 @@
  *   21 → kitchen-material-board.jpg        39 → bay-window-sitting-room.jpg
  *   23 → color-floor-plan.jpg (trimmed)    40 → iron-bed-bedroom.jpg
  *   24 → lighting-fixture-sheet.jpg (trim) 41 → mosaic-fireplace-family-room.jpg
- *                                          42 → cognac-living-room.jpg
+ *                                          42 → cognac-living-room.jpg (replaced, see below)
  *                                          43 → two-story-living-room.jpg
  *                                          44 → sectional-living-room.jpg
  *
  * Not on the site and deleted from public/images: 1 black-hood-kitchen,
- * 31 navy-double-vanity, 32 hammered-sink-bath, 38 reclaimed-wood-bedroom
- * (scripts/prepare-images.mjs would write them again).
+ * 31 navy-double-vanity, 32 hammered-sink-bath, 38 reclaimed-wood-bedroom,
+ * 42 cognac-living-room (scripts/prepare-images.mjs would write them again).
  *
  * Karen's round 1 photos (assets/source/karen-round1/, prepared by
  * scripts/prepare-karen-round1.mjs, which also turns them upright):
  *   white-oak-ceiling-bedroom.jpg  replaces reclaimed-wood-bedroom in the work slider
  *   subway-tile-secondary-bath.jpg studio wall Pl. 03, and the About stat card
- *   lantern-pendant-kitchen.jpg    replaces the orb photo as studio wall Pl. 05
- *                                  (the hero intro still uses orb-chandelier-dining)
+ *   lantern-pendant-kitchen.jpg    was studio wall Pl. 05 until round 2 (removed
+ *                                  from public/images)
  *   glass-pendants-crop.jpg        crop of black-hood-kitchen-island for the Approach "Light" panel
  *   del-mar-primary-bath.jpg, linen-coastal-bedroom.jpg  new work slider projects
+ *
+ * Karen's round 2 photos (assets/source/karen-round2/, 4032 px originals,
+ * prepared by scripts/prepare-karen-round2.mjs):
+ *   lantern-pendant-kitchen-wide.jpg   studio wall Pl. 05 (wider angle, same kitchen)
+ *   cognac-linen-living-room-wide.jpg  Cognac and Linen Living Room slide, replaces 42
  */
 
 const img = (name: string) => `/images/${name}.jpg`;
@@ -222,9 +227,9 @@ export const studio = {
     { kind: "word", text: "considered.", italic: true, x: "2%", y: "61%", speed: 0.7 },
     {
       kind: "plate", no: "Pl. 05", title: "Kitchen with Lantern Pendant",
-      alt: "Kitchen with a brass lantern pendant over a black island, white cabinets and a patterned tile backsplash",
-      src: img("lantern-pendant-kitchen"), ratio: "1/1", x: "47%", y: "74%", w: "13%", speed: 1.8,
-      callout: { side: "l", px: "36%", py: "14%", len: "165px", text: "Lantern pendant" },
+      alt: "Kitchen with a brass cage pendant over a black island, white shaker cabinets, black appliances and a geometric tile backsplash",
+      src: img("lantern-pendant-kitchen-wide"), ratio: "1/1", x: "47%", y: "74%", w: "13%", speed: 1.8,
+      callout: { side: "l", px: "36%", py: "14%", len: "165px", text: "Brass cage pendant" },
     },
     {
       kind: "plate", no: "Pl. 06", title: "Guest Bath with Stenciled Ceiling", city: "Solana Beach",
@@ -274,8 +279,8 @@ export const showcase = {
     {
       title: "Cognac and Linen Living Room",
       city: "Solana Beach",
-      // Photo kept until Karen confirms whether hers replaces it.
-      image: { src: img("cognac-living-room"), alt: "Vaulted living room in Solana Beach with cognac leather sofas and woven chairs", fit: { width: 1200, height: 896 } },
+      // Karen's round 2 photo, full size, so it fills the slide like the others.
+      image: { src: img("cognac-linen-living-room-wide"), alt: "Vaulted living room in Solana Beach with two cognac leather sofas, woven chairs, a patterned rug, a gray fireplace and tall windows" },
     },
     {
       title: "Canyon View Sleek Modern Kitchen",

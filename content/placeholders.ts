@@ -5,9 +5,8 @@
  */
 export const placeholders = [
   // Round 1 photos
-  { where: "Studio wall Pl. 05, Kitchen with Lantern Pendant (lantern-pendant-kitchen)", field: "city", value: "[PLACEHOLDER: location]" },
-  // Pending Karen's answers, left untouched in round 1
-  { where: "cognac-living-room (Cognac and Linen Living Room)", field: "photo: does hers replace ours?", value: "[PLACEHOLDER: pending Karen]" },
+  { where: "Studio wall Pl. 05, Kitchen with Lantern Pendant (lantern-pendant-kitchen-wide)", field: "city", value: "[PLACEHOLDER: location]" },
+  // Pending Karen's answers
   { where: "mosaic-fireplace-family-room (Coastal Blue Family Room)", field: "title, photo", value: "[PLACEHOLDER: pending Karen]" },
   { where: "navy-chair-great-room (Approach, Plan panel)", field: "photo", value: "[PLACEHOLDER: pending Karen]" },
   // Older DEMO values in content/site.ts that Karen has not confirmed

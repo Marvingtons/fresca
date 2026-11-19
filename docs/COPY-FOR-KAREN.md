@@ -116,7 +116,7 @@ Keep / Change to: ______________________________
 
 ## Photo callouts (small labels pointing at a photo)
 
-**21.** "Glass pendants ×3" (Modern Coastal Kitchen), "Linen sectional" (Two-Story Living Room), "Lantern pendant" (Kitchen with Lantern Pendant)
+**21.** "Glass pendants ×3" (Modern Coastal Kitchen), "Linen sectional" (Two-Story Living Room), "Brass cage pendant" (Kitchen with Lantern Pendant)
 
 Keep / Change to: ______________________________
 

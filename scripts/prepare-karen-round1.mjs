@@ -18,7 +18,7 @@ const BUDGET = 600 * 1024;
 const PHOTOS = {
   "white-oak-ceiling-bedroom": 0,
   "subway-tile-secondary-bath": 180, // floor and ceiling were swapped
-  "lantern-pendant-kitchen": 0,
+  // "lantern-pendant-kitchen": 0, replaced on Pl. 05 by round 2 (prepare-karen-round2.mjs)
   "del-mar-primary-bath": 90, // floor was on the right edge
   "linen-coastal-bedroom": 90, // floor was on the right edge
 };

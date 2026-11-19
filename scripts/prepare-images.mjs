@@ -42,7 +42,7 @@ const MAP = {
   39: "bay-window-sitting-room",
   40: "iron-bed-bedroom",
   41: "mosaic-fireplace-family-room",
-  42: "cognac-living-room",
+  // 42 cognac-living-room: replaced by Karen's round 2 photo (prepare-karen-round2.mjs).
   43: "two-story-living-room",
   44: "sectional-living-room",
 };
