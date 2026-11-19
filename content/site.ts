@@ -60,7 +60,6 @@ export const founder = {
   initials: "KO",
   role: "Founder and Principal Designer",
 };
-const firstName = founder.name.split(" ")[0];
 
 // ───────── navigation
 
@@ -206,7 +205,7 @@ export const studio = {
     },
     {
       kind: "text",
-      text: "I carry every project from the first walkthrough to installation day, so the finished room looks the way it did on paper.",
+      text: "As the principal designer, I carry every project from the first walkthrough to installation day, so the finished room looks the way it did on paper.",
       link: { href: "#work", label: "View selected work →" },
       x: "55%",
       y: "88%",
@@ -278,7 +277,7 @@ export const promises = {
     "A successful remodel begins with a thoughtful plan. By addressing design details, selections, and budgets upfront, we create a clear path forward before construction begins.",
   rows: [
     {
-      title: `You'll always talk to ${firstName}`,
+      title: "You'll always talk to me",
       text: "I measure your kitchen and I sign off the tile. No account managers, no hand-offs between people who have never seen your house.",
       image: { src: img("freestanding-tub-bath"), alt: "Freestanding tub in a gray tile alcove" },
     },
@@ -295,7 +294,7 @@ export const promises = {
     },
     {
       title: "I'm there for the last walkthrough",
-      text: `${firstName} checks in on site during construction and walks the finished room with you, punch list in hand.`,
+      text: "I check in on site during construction and walk the finished room with you, punch list in hand.",
       image: { src: img("walnut-island-kitchen"), alt: "Kitchen with a long walnut island and white quartz top" },
     },
   ],
