@@ -56,11 +56,11 @@ function WallPiece({ item }: { item: WallItem }) {
 
   const mobileWidth = item.right ? 50 : 64;
   return (
-    <a
-      href="#work"
+    // A plain figure until project pages exist: plates link nowhere.
+    <figure
       data-speed={item.speed}
       style={at(item.x, item.y, item.w)}
-      className={`pl group ${placed} z-[2] w-[var(--w)] text-ink no-underline ${
+      className={`pl ${placed} z-[2] w-[var(--w)] text-ink ${
         item.right ? "max-md:!w-1/2 max-md:self-end" : "max-md:!w-[64%]"
       } ${item.dim?.dir === "h" ? "max-md:mt-4" : ""} ${item.dim?.dir === "v" && item.dim.side === "l" && !item.right ? "max-md:ml-4" : ""}`}
     >
@@ -74,7 +74,7 @@ function WallPiece({ item }: { item: WallItem }) {
               fill
               quality={85}
               sizes={`(min-width: 861px) ${parseFloat(item.w)}vw, ${mobileWidth}vw`}
-              className="object-cover transition-[filter] duration-500 group-hover:brightness-[.85]"
+              className="object-cover"
             />
           </div>
         </div>
@@ -105,7 +105,7 @@ function WallPiece({ item }: { item: WallItem }) {
           </span>
         )}
       </div>
-      <span className="pl-label mt-2.5 grid grid-cols-[auto_1fr_auto] gap-x-3 gap-y-[3px] text-[10px] uppercase max-md:text-[12px] tracking-[.18em] text-muted">
+      <figcaption className="pl-label mt-2.5 grid grid-cols-[auto_1fr_auto] gap-x-3 gap-y-[3px] text-[10px] uppercase max-md:text-[12px] tracking-[.18em] text-muted">
         <span>{item.no}</span>
         <b className="font-medium text-ink">{item.title}</b>
         <span className="xy col-start-3 row-start-1 font-mono text-[9px] tracking-[.04em] text-ink/45">{coord(item.x, item.y)}</span>
@@ -113,8 +113,8 @@ function WallPiece({ item }: { item: WallItem }) {
         {item.caption && (
           <span className="col-start-2 mt-1 normal-case leading-[1.5] tracking-[.02em]">{item.caption}</span>
         )}
-      </span>
-    </a>
+      </figcaption>
+    </figure>
   );
 }
 

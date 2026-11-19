@@ -262,7 +262,6 @@ export const showcase = {
     },
   ] as ShowcaseProject[],
   labels: { city: "Location" },
-  projectLink: { href: "#work", label: "View project" }, // DEMO: no project pages yet
 };
 
 // ───────── promises (working with us)
@@ -419,4 +418,12 @@ export const privacy = {
       body: [`Email ${site.email} and ask, and your details will be deleted.`],
     },
   ],
+};
+
+// ───────── 404
+
+export const notFound = {
+  title: "Page not found | Fresca Interior Design",
+  heading: "Page not found",
+  home: "Back to the home page",
 };

@@ -183,9 +183,6 @@ export default function ProjectShowcase() {
             <div className="sc-fade flex items-center gap-2.5">
               <Arrow dir="prev" onClick={() => go(-1)} />
               <Arrow dir="next" onClick={() => go(1)} />
-              <a className="pill pill-light" href={showcase.projectLink.href}>
-                {showcase.projectLink.label}
-              </a>
             </div>
           </div>
         </div>
