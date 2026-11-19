@@ -129,7 +129,7 @@ export default function Hero() {
         <div className="hero-final absolute inset-0 scale-[1.06]">
           <picture>
             <source srcSet={heroFilm.poster.webp} type="image/webp" />
-            {/* eslint-disable-next-line @next/next/no-img-element -- remote poster, preloaded in the layout */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- poster in public/media, preloaded in the layout */}
             <img
               src={heroFilm.poster.jpg}
               alt={hero.image.alt}
