@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { getImageProps } from "next/image";
 import { Hanken_Grotesk, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import SmoothScroll from "@/components/SmoothScroll";
 import { heroFilm } from "@/content/media";
-import { founder, site } from "@/content/site";
-import { introScript } from "@/lib/intro";
+import { founder, hero, site } from "@/content/site";
+import { INTRO_FRAME, introScript } from "@/lib/intro";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -74,6 +75,9 @@ const jsonLd = {
   sameAs: [site.instagram.href],
 };
 
+// The intro's first frame, preloaded by introScript only when the intro plays.
+const { props: introFrame } = getImageProps({ src: hero.cycle[0], alt: "", ...INTRO_FRAME });
+
 export const viewport: Viewport = {
   themeColor: "#F4F2EB",
 };
@@ -83,7 +87,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     // `intro` may be added to <html> before hydration by introScript.
     <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: introScript }} />
+        <script dangerouslySetInnerHTML={{ __html: introScript(introFrame) }} />
         {/* The hero poster is the LCP image. */}
         <link rel="preload" as="image" href={heroFilm.poster.webp} type="image/webp" fetchPriority="high" />
       </head>

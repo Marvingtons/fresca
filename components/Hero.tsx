@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { heroFilm } from "@/content/media";
 import { hero } from "@/content/site";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
-import { INTRO_KEY, introIsPlaying } from "@/lib/intro";
+import { INTRO_FRAME, INTRO_KEY, introIsPlaying } from "@/lib/intro";
 import { MOTION } from "@/lib/motion";
 import HeroFilm from "./HeroFilm";
 import Line from "./LineReveal";
@@ -116,12 +116,10 @@ export default function Hero() {
         {hero.cycle.map((src, i) => (
           <div key={src} className="hero-cycle absolute inset-0">
             {/* Each frame is a full-size photo clipped to the small intro window, so it
-                needs full-width resolution. The first one paints before hydration and is
-                the page's LCP, so it is preloaded (repeat visits skip the intro but are
-                in the same session, so it's cached). */}
-            {(i === 0 || laterFrames) && (
-              <Image src={src} alt="" fill priority={i === 0} sizes="100vw" quality={85} className="object-cover" />
-            )}
+                needs full-width resolution. The first one paints before hydration; it is
+                lazy (so never fetched while display:none) and preloaded by introScript
+                only when the intro plays. */}
+            {(i === 0 || laterFrames) && <Image src={src} alt="" {...INTRO_FRAME} className="object-cover" />}
           </div>
         ))}
         {/* Poster (the film's first frame, and the LCP image) with the film over it. The

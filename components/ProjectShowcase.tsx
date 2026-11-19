@@ -8,6 +8,19 @@ import { MOTION, prefersReducedMotion } from "@/lib/motion";
 
 const { projects, labels } = showcase;
 const pad2 = (n: number) => String(n).padStart(2, "0");
+const wrap = (n: number) => (n + projects.length) % projects.length;
+/** Slides worth having in the DOM when `n` is showing: it and its neighbours. */
+const around = (n: number) => [n, wrap(n + 1), wrap(n - 1)];
+
+/**
+ * `sizes` for a slide. A `fit` photo is shown whole and never past its source
+ * size, so it displays at the smallest of: its own width, the width its aspect
+ * ratio allows inside a full-height panel, and the viewport.
+ */
+function slideSizes(fit?: { width: number; height: number }) {
+  if (!fit) return "100vw";
+  return `min(${fit.width}px, ${((fit.width / fit.height) * 100).toFixed(1)}vh, 100vw)`;
+}
 
 function Arrow({ dir, onClick }: { dir: "prev" | "next"; onClick: () => void }) {
   return (
@@ -32,6 +45,9 @@ export default function ProjectShowcase() {
   const busy = useRef(false);
   const [shown, setShown] = useState(0); // project whose text is displayed
   const [ghost, setGhost] = useState(0); // project behind the opening frame
+  // Slides rendered so far: only the current one and its neighbours load, and
+  // once loaded a slide stays so going back is instant.
+  const [loaded, setLoaded] = useState(() => new Set(around(0)));
 
   const { contextSafe } = useGSAP(
     () => {
@@ -60,7 +76,8 @@ export default function ProjectShowcase() {
   // Prev/next: the incoming photo wipes across while the title swaps through its mask.
   const go = contextSafe((dir: 1 | -1) => {
     if (busy.current) return;
-    const n = (cur.current + dir + projects.length) % projects.length;
+    const n = wrap(cur.current + dir);
+    setLoaded((prev) => (around(n).every((i) => prev.has(i)) ? prev : new Set([...prev, ...around(n)])));
     const prev = slides.current[cur.current];
     const next = slides.current[n];
     cur.current = n;
@@ -116,22 +133,24 @@ export default function ProjectShowcase() {
           ))}
 
           <div className="sc-media absolute inset-0 overflow-hidden will-change-[clip-path]">
-            {projects.map((project, i) => (
-              <Image
-                key={project.title}
-                ref={(el) => {
-                  slides.current[i] = el;
-                }}
-                src={project.image.src}
-                alt={project.image.alt}
-                fill
-                quality={85}
-                // A `fit` photo is shown whole, never larger than its source, centered on
-                // the panel color (which also hides the slide underneath).
-                sizes={project.image.fit ? `min(100vw, ${project.image.fit.width}px)` : "100vw"}
-                className={`sc-img ${project.image.fit ? "bg-panel object-scale-down" : "object-cover"} ${i === 0 ? "opacity-100" : "opacity-0"}`}
-              />
-            ))}
+            {projects.map((project, i) =>
+              loaded.has(i) ? (
+                <Image
+                  key={project.title}
+                  ref={(el) => {
+                    slides.current[i] = el;
+                  }}
+                  src={project.image.src}
+                  alt={project.image.alt}
+                  fill
+                  quality={85}
+                  // A `fit` photo is shown whole, never larger than its source, centered on
+                  // the panel color (which also hides the slide underneath).
+                  sizes={slideSizes(project.image.fit)}
+                  className={`sc-img ${project.image.fit ? "bg-panel object-scale-down" : "object-cover"} ${i === 0 ? "opacity-100" : "opacity-0"}`}
+                />
+              ) : null,
+            )}
             <div className="sc-shade absolute inset-0 z-[3] bg-[rgba(14,13,12,.42)]" />
           </div>
 

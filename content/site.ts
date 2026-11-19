@@ -91,14 +91,9 @@ export const hero = {
   lines: ["Interiors that", "feel fresh."], // second line is italic
   text: "Beautiful spaces begin with thoughtful planning.",
   introLabel: "Fresca · Interior Design",
-  /** Photos that flash in the small frame during the intro, in order. */
-  cycle: [
-    img("walnut-island-kitchen"),
-    img("cognac-living-room"),
-    img("black-hex-shower"),
-    img("orb-chandelier-dining"),
-    img("navy-chair-great-room"),
-  ],
+  /** Photos that flash in the small frame during the intro, in order. None of
+   *  them appears further down the page. */
+  cycle: [img("walnut-island-kitchen"), img("sectional-living-room"), img("iron-bed-bedroom")],
   // The hero still is the film's poster (content/media.ts); this describes it.
   image: {
     alt: "White shaker kitchen with a black range hood, marble island and three glass pendants",
@@ -243,12 +238,12 @@ export const showcase = {
       title: "Cognac and Linen Living Room",
       city: "Solana Beach",
       // Photo kept until Karen confirms whether hers replaces it.
-      image: { src: img("cognac-living-room"), alt: "Vaulted living room with cognac leather sofas and woven chairs" },
+      image: { src: img("cognac-living-room"), alt: "Vaulted living room with cognac leather sofas and woven chairs", fit: { width: 1200, height: 896 } },
     },
     {
       title: "Canyon View Sleek Modern Kitchen",
       city: "Solana Beach",
-      image: { src: img("gloss-kitchen"), alt: "Modern kitchen with white gloss cabinets and charcoal counters" },
+      image: { src: img("gloss-kitchen"), alt: "Modern kitchen with white gloss cabinets and charcoal counters", fit: { width: 1448, height: 1086 } },
     },
     {
       title: "Primary Bedroom with White Oak Ceiling",
@@ -293,12 +288,12 @@ export const promises = {
     {
       title: "A budget you can read",
       text: "Every selection lives on one priced list. If you swap a faucet or upgrade a slab, you see the new total before anything moves.",
-      image: { src: img("walnut-guest-bath"), alt: "Bathroom with walnut vanity, glass shower and round mirror" },
+      image: { src: img("black-hex-shower"), alt: "Glass shower with white picket tile, matte black fixtures and a black hexagon tile floor" },
     },
     {
       title: "I'm there for the last walkthrough",
       text: "I check in on site during construction and walk the finished room with you, punch list in hand.",
-      image: { src: img("walnut-island-kitchen"), alt: "Kitchen with a long walnut island and white quartz top" },
+      image: { src: img("bay-window-sitting-room"), alt: "Sitting room with bay windows and fireplace" },
     },
   ],
 };
