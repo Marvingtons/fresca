@@ -105,7 +105,7 @@ function WallPiece({ item }: { item: WallItem }) {
           </span>
         )}
       </div>
-      <figcaption className="pl-label mt-2.5 grid grid-cols-[auto_1fr_auto] gap-x-3 gap-y-[3px] text-[10px] uppercase max-md:text-[12px] tracking-[.18em] text-muted">
+      <figcaption className={`pl-label mt-2.5 grid md:w-[max(100%,180px)] ${item.right ? "md:ml-[min(0px,calc(100%-180px))]" : ""} grid-cols-[auto_1fr_auto] gap-x-3 gap-y-[3px] text-[10px] uppercase max-md:text-[12px] tracking-[.18em] text-muted`}>
         <span>{item.no}</span>
         <b className="font-medium text-ink">{item.title}</b>
         <span className="xy col-start-3 row-start-1 font-mono text-[9px] tracking-[.04em] text-ink/45">{coord(item.x, item.y)}</span>
@@ -123,6 +123,14 @@ export default function StudioWall() {
 
   useGSAP(
     () => {
+      // The caption fades as it slides under the fixed header (any motion setting:
+      // it is tied to scroll position, not an animation that plays on its own).
+      gsap.to(".wall-caption", {
+        opacity: 0,
+        ease: "none",
+        scrollTrigger: { trigger: ".wall-caption", start: "top 150px", end: "top 80px", scrub: true },
+      });
+
       const mm = gsap.matchMedia();
       mm.add(MOTION, () => {
         revealLines(root.current!);
@@ -214,7 +222,7 @@ export default function StudioWall() {
       </div>
       {/* The spec's hidden h2 keeps its default margins (they space the mobile column). */}
       <h2 className="sr-only mx-0 my-5">{studio.srHeading}</h2>
-      <div className="cap absolute inset-x-0 top-[3%] flex justify-between text-muted max-md:-order-1">
+      <div className="wall-caption cap absolute inset-x-0 top-[3%] flex justify-between text-muted max-md:-order-1">
         <span className="whitespace-nowrap">{studio.caption[0]}</span>
         <span className="text-right">
           {studio.caption[1]}
