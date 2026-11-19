@@ -24,6 +24,10 @@
  *                                          43 → two-story-living-room.jpg
  *                                          44 → sectional-living-room.jpg
  *
+ * Not on the site and deleted from public/images: 1 black-hood-kitchen,
+ * 31 navy-double-vanity, 32 hammered-sink-bath, 38 reclaimed-wood-bedroom
+ * (scripts/prepare-images.mjs would write them again).
+ *
  * Karen's round 1 photos (assets/source/karen-round1/, prepared by
  * scripts/prepare-karen-round1.mjs, which also turns them upright):
  *   white-oak-ceiling-bedroom.jpg  replaces reclaimed-wood-bedroom in the work slider
@@ -52,7 +56,6 @@ export const site = {
   email: "frescainteriordesign@gmail.com",
   instagram: { handle: "fresca.interior.design", href: "https://www.instagram.com/fresca.interior.design/" },
   legalName: "Fresca Interior Design, LLC",
-  copyright: "© 2026 Fresca Interior Design, LLC",
 };
 
 export const founder = {
@@ -146,7 +149,7 @@ export const studio = {
   drift: 0.24,
   /** Registration marks on grid intersections, centered on the point. */
   marks: [
-    { x: "calc(25% - 7px)", y: "calc(10% - 7px)" },
+    { x: "calc(25% - 7px)", y: "calc(5% - 7px)" }, // clear of "A fresh"
     { x: "calc(91.667% - 7px)", y: "calc(45% - 7px)" },
     { x: "calc(50% - 7px)", y: "calc(65% - 7px)" },
     { x: "calc(8.333% - 7px)", y: "calc(95% - 7px)" },
@@ -204,7 +207,7 @@ export const studio = {
     {
       kind: "text",
       text: "As the principal designer, I carry every project from the first walkthrough to installation day, so the finished room looks the way it did on paper.",
-      link: { href: "#work", label: "View selected work →" },
+      link: { href: "#work", label: "View selected work" },
       x: "55%",
       y: "88%",
       speed: 1.15,
@@ -337,7 +340,7 @@ export const about = {
   eyebrow: "(05) About",
   heading: ["About", "Fresca."],
   text: `Founded by designer ${founder.name}.`,
-  link: { href: "#work", label: "View projects" },
+  link: { href: "#work", label: "View selected work" },
 };
 
 // ───────── founder quote

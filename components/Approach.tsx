@@ -123,7 +123,7 @@ export default function Approach() {
           <div
             key={panel.title}
             data-panel
-            className="grid grid-cols-1 items-end gap-7 md:grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)] md:motion-safe:flex-[0_0_min(78vw,980px)]"
+            className="grid grid-cols-1 items-end gap-7 min-[768px]:grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)] md:motion-safe:flex-[0_0_min(78vw,980px)]"
           >
             <div>
               <ApproachDrawing kind={panel.drawing} />
@@ -131,7 +131,7 @@ export default function Approach() {
               <h3 className="mb-3.5 mt-2 font-serif text-[clamp(48px,5vw,84px)] font-normal leading-[.95]">{panel.title}</h3>
               <p className="max-w-[340px] text-on-dark">{panel.text}</p>
             </div>
-            <div className="relative h-[72vw] md:h-[min(62vh,560px)]">
+            <div className="relative h-[72vw] min-[768px]:h-[min(62vh,560px)]">
               <div className="absolute right-0 top-0 h-[82%] w-[72%] overflow-hidden rounded">
                 <Image src={panel.photo.src} alt={panel.photo.alt} fill quality={85} sizes="(min-width: 861px) 32vw, 72vw" className="object-cover" />
               </div>

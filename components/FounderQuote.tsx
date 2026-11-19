@@ -38,7 +38,7 @@ export default function FounderQuote() {
       <div aria-hidden="true" className="mb-10 grid h-24 w-24 place-items-center rounded-full bg-accent font-serif text-[40px] italic text-ground">
         {founder.initials}
       </div>
-      <blockquote className="max-w-[1100px] font-serif text-[clamp(36px,4.6vw,76px)] leading-[1.04]">
+      <blockquote className="max-w-[1100px] text-balance font-serif text-[clamp(36px,4.6vw,76px)] leading-[1.04]">
         {words.map((word, i) => (
           <span key={i}>
             <span className="w">{word}</span>

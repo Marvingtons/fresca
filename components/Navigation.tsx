@@ -43,11 +43,8 @@ export default function Navigation() {
     [start],
   );
 
-  // React 18 has no `inert` prop; keep the attribute in sync by hand.
+  // While open: focus the close button and close on Escape.
   useEffect(() => {
-    const menu = menuRef.current;
-    if (!menu) return;
-    menu.inert = !open;
     if (!open) return;
     const t = window.setTimeout(() => closeBtnRef.current?.focus(), 300);
     const onKey = (e: KeyboardEvent) => {
@@ -86,9 +83,7 @@ export default function Navigation() {
       <div
         ref={menuRef}
         id="menu"
-        // Rendered inert on the server too, before the effect above runs. React 18
-        // only renders the attribute from a string, though the types say boolean.
-        {...({ inert: "" } as object)}
+        inert={!open}
         className={`fixed inset-0 z-[60] flex flex-col bg-ink px-pad pb-8 pt-5 text-ground transition-[clip-path] duration-[900ms] ease-curtain ${
           open ? "[clip-path:inset(0_0_0_0)]" : "[clip-path:inset(0_0_100%_0)]"
         }`}

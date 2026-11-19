@@ -72,7 +72,10 @@ export default function Footer() {
             {site.email}
           </a>
         </span>
-        <span>{site.copyright}</span>
+        {/* Year at render time; suppress the warning if the build year differs. */}
+        <span suppressHydrationWarning>
+          © {new Date().getFullYear()} {site.legalName}
+        </span>
       </div>
 
       <p aria-hidden="true" className="f-word mt-5 translate-y-[12%] text-center font-serif text-[27vw] italic leading-[.78] tracking-[-.02em]">
