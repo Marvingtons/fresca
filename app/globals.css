@@ -139,6 +139,51 @@ html.intro {
   opacity: 0.5;
 }
 
+/* Menu overlay: the panel fades in, then the links rise in turn, then the
+   contact table. Closing fades everything out together in 200ms. */
+.menu-panel {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 200ms ease, visibility 0s linear 200ms;
+}
+.menu-panel[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 300ms ease, visibility 0s;
+}
+.menu-panel .menu-item,
+.menu-panel .menu-table,
+.menu-panel .menu-foot > * {
+  opacity: 0;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+.menu-panel .menu-item {
+  transform: translateY(12px);
+}
+.menu-panel[data-open="true"] .menu-item {
+  opacity: 1;
+  transform: none;
+  transition: opacity 500ms ease, transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: calc(240ms + var(--i, 0) * 60ms);
+}
+.menu-panel[data-open="true"] .menu-table,
+.menu-panel[data-open="true"] .menu-foot > * {
+  opacity: 1;
+  transition: opacity 500ms ease 480ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu-panel,
+  .menu-panel[data-open="true"],
+  .menu-panel .menu-item,
+  .menu-panel .menu-table,
+  .menu-panel .menu-foot > *,
+  .menu-panel[data-open="true"] .menu-item,
+  .menu-panel[data-open="true"] .menu-table,
+  .menu-panel[data-open="true"] .menu-foot > * {
+    transition: none;
+  }
+}
+
 html.intro .site-header {
   opacity: 0;
   visibility: hidden;

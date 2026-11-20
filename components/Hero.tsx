@@ -157,10 +157,10 @@ export default function Hero() {
       <div className="hero-content absolute inset-x-0 bottom-[12%] flex flex-col items-center px-pad text-center text-white">
         <h1 className="font-cormorant text-[clamp(44px,7.2vw,112px)] font-medium leading-[.95] tracking-[-.01em]">
           <span className="sr-only">{hero.srPrefix} </span>
-          <Line reveal={false} className="hero-ln">
+          <Line reveal={false} className="hero-ln -mb-[.22em] pb-[.22em]">
             {hero.lines[0]}
           </Line>{" "}
-          <Line reveal={false} className="hero-ln">
+          <Line reveal={false} className="hero-ln -mb-[.22em] pb-[.22em]">
             <em className="font-medium">{hero.lines[1]}</em>
           </Line>
         </h1>
