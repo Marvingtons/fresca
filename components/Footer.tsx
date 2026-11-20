@@ -1,38 +1,17 @@
-"use client";
-
 import Link from "next/link";
-import { useRef } from "react";
 import { contact, footerLinks, privacy, site } from "@/content/site";
-import { gsap, useGSAP } from "@/lib/gsap";
-import { MOTION, revealLines } from "@/lib/motion";
 import ContactForm from "./ContactForm";
 import Copy from "./Copy";
 import Line from "./LineReveal";
+import { FooterMotion } from "./SectionMotion";
 
 export default function Footer() {
-  const root = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION, () => {
-        revealLines(root.current!);
-        // The giant wordmark rises into place.
-        gsap.fromTo(
-          ".f-word",
-          { yPercent: 40 },
-          { yPercent: 4, ease: "none", scrollTrigger: { trigger: root.current, start: "center bottom", end: "bottom bottom", scrub: true } },
-        );
-      });
-      return () => mm.revert();
-    },
-    { scope: root },
-  );
 
   const link = "inline-flex min-h-[44px] items-center no-underline hover:text-ground";
 
   return (
-    <footer ref={root} id="contact" className="overflow-hidden bg-ink px-pad pt-[clamp(96px,14vh,150px)] text-ground">
+    <footer id="contact" className="overflow-hidden bg-ink px-pad pt-[clamp(96px,14vh,150px)] text-ground">
       <div className="flex flex-wrap justify-between gap-x-20 gap-y-12">
         <div className="flex-[1_1_420px]">
           <hgroup>
@@ -87,6 +66,7 @@ export default function Footer() {
       <p aria-hidden="true" className="f-word mt-5 translate-y-[12%] text-center font-serif text-[27vw] italic leading-[.78] tracking-[-.02em]">
         {site.shortName}
       </p>
+      <FooterMotion />
     </footer>
   );
 }

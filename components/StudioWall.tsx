@@ -1,11 +1,8 @@
-"use client";
-
-import { useRef, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 import { studio, type WallItem } from "@/content/site";
-import { gsap, useGSAP } from "@/lib/gsap";
-import { DESKTOP_MOTION, MOTION, revealLines } from "@/lib/motion";
 import Line from "./LineReveal";
 import Photo from "./Photo";
+import { StudioWallMotion } from "./SectionMotion";
 
 const at = (x: string, y: string, w?: string) => ({ "--x": x, "--y": y, "--w": w }) as CSSProperties;
 
@@ -92,67 +89,11 @@ function WallPiece({ item }: { item: WallItem }) {
 }
 
 export default function StudioWall() {
-  const root = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
-      // The caption fades as it slides under the fixed header (any motion setting:
-      // it is tied to scroll position, not an animation that plays on its own).
-      gsap.to(".wall-caption", {
-        opacity: 0,
-        ease: "none",
-        scrollTrigger: { trigger: ".wall-caption", start: "top 150px", end: "top 80px", scrub: true },
-      });
-
-      const mm = gsap.matchMedia();
-      mm.add(MOTION, () => {
-        revealLines(root.current!);
-
-        // Plates unmask from the bottom, then their label arrives; the photo drifts inside its frame.
-        gsap.utils.toArray<HTMLElement>(".pl").forEach((pl) => {
-          const enter = { trigger: pl, start: "top 92%" };
-          gsap.fromTo(
-            pl.querySelector(".pl-frame"),
-            { clipPath: "inset(100% 0% 0% 0%)" },
-            { clipPath: "inset(0% 0% 0% 0%)", duration: 1.4, ease: "power3.out", scrollTrigger: enter },
-          );
-          gsap.from(pl.querySelector(".pl-label"), { opacity: 0, y: 8, duration: 0.8, delay: 0.35, ease: "power2.out", scrollTrigger: enter });
-          // A top-anchored photo drifts a shorter way and ends flush with the
-          // frame's top edge, so the top of the photo is never more than ~4% hidden.
-          const img = pl.querySelector<HTMLElement>(".pl-img")!;
-          const top = img.dataset.focus === "top";
-          gsap.fromTo(
-            img,
-            { yPercent: top ? -4 : -8 },
-            { yPercent: top ? 0 : 8, ease: "none", scrollTrigger: { trigger: pl, start: "top bottom", end: "bottom top", scrub: 0.8 } },
-          );
-
-        });
-
-        gsap.utils.toArray<HTMLElement>(".art-p").forEach((el) => {
-          gsap.from(el, { opacity: 0, y: 20, duration: 1, ease: "power2.out", scrollTrigger: { trigger: el, start: "top 88%" } });
-        });
-      });
-
-      // Desktop: every word, plate and paragraph drifts up at its own speed.
-      mm.add(DESKTOP_MOTION, () => {
-        gsap.utils.toArray<HTMLElement>("[data-speed]").forEach((el) => {
-          const speed = parseFloat(el.dataset.speed ?? "1");
-          gsap.to(el, {
-            y: () => -window.innerHeight * studio.drift * speed,
-            ease: "none",
-            scrollTrigger: { trigger: root.current, start: "top bottom", end: "bottom top", scrub: 0.8, invalidateOnRefresh: true },
-          });
-        });
-      });
-      return () => mm.revert();
-    },
-    { scope: root },
-  );
 
   return (
     <section
-      ref={root}
+     
       id="about"
       aria-label="The studio"
       style={{ "--wall-h": studio.height } as CSSProperties}
@@ -169,6 +110,7 @@ export default function StudioWall() {
       {studio.items.map((item, i) => (
         <WallPiece key={i} item={item} />
       ))}
+      <StudioWallMotion drift={studio.drift} />
     </section>
   );
 }

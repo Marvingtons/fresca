@@ -1,39 +1,14 @@
-"use client";
-
-import { useRef } from "react";
 import { cta, promises } from "@/content/site";
-import { gsap, useGSAP } from "@/lib/gsap";
-import { MOTION, revealLines } from "@/lib/motion";
 import Line from "./LineReveal";
 import Photo from "./Photo";
 import PlanIllustration from "./PlanIllustration";
+import { PromisesMotion } from "./SectionMotion";
 
 export default function Promises() {
-  const root = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION, () => {
-        revealLines(root.current!);
-        // As each row rises the number darkens. Photos are never faded or veiled: an
-        // earlier scrubbed veil left them part-washed whenever a row stopped short
-        // of the trigger's end.
-        gsap.utils.toArray<HTMLElement>(".promise-row").forEach((row) => {
-          gsap.fromTo(
-            row.querySelector(".promise-n"),
-            { color: "#b5afa3" },
-            { color: "#1D1C1A", ease: "none", scrollTrigger: { trigger: row, start: "top 85%", end: "top 35%", scrub: 0.8 } },
-          );
-        });
-      });
-      return () => mm.revert();
-    },
-    { scope: root },
-  );
 
   return (
-    <section ref={root} id="process" className="px-pad py-[clamp(96px,14vh,160px)]">
+    <section id="process" className="px-pad py-[clamp(96px,14vh,160px)]">
       <div className="flex flex-wrap items-end justify-between gap-x-20 gap-y-8 border-b border-line pb-14">
         <div className="min-w-0 flex-[1_1_560px]">
           {/* The eyebrow names the section, so it is the H2; the display line is its subheading. */}
@@ -85,6 +60,7 @@ export default function Promises() {
           )}
         </div>
       ))}
+      <PromisesMotion />
     </section>
   );
 }

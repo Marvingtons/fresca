@@ -1,13 +1,10 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
-
 /**
  * The plan drawing for the "Drawn before it's bought" row, inlined from
  * public/illustrations/fresca-plan-illustration.svg so it takes the site's colours:
  * walls and furniture in var(--ink), door swings and callouts in var(--accent),
  * on the section's own background. Draws on once when it enters the viewport
- * (timings in app/globals.css, .plan-*); renders complete with reduced motion.
+ * (PromisesMotion adds .drawn; timings in app/globals.css, .plan-*); renders
+ * complete with reduced motion.
  *
  * Two drawings share the plan, each with a viewBox cropped to its content and
  * rendered at the full width of the media box: from 1024px the schedule sits
@@ -114,29 +111,10 @@ function Callout({ n }: { n: number }) {
 }
 
 export default function PlanIllustration() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [drawn, setDrawn] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setDrawn(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.35 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  const cls = `plan h-auto w-full ${drawn ? "drawn" : ""}`;
+  const cls = "plan h-auto w-full";
 
   return (
-    <div ref={ref}>
+    <div data-plan>
       {/* 1024px and up: schedule beside the plan, item and finish on two lines. */}
       <svg {...svgProps} viewBox="58 54 546 391" className={`${cls} hidden min-[1024px]:block`}>
         <Plan />

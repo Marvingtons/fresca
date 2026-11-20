@@ -1,105 +1,17 @@
-"use client";
-
-import { useRef } from "react";
 import { approach } from "@/content/site";
-import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
-import { DESKTOP_MOTION } from "@/lib/motion";
 import ApproachDrawing from "./ApproachDrawing";
 import Photo from "./Photo";
+import { ApproachMotion } from "./SectionMotion";
 
-const MOBILE_MOTION = "(max-width: 860px) and (prefers-reduced-motion: no-preference)";
-const REDUCED = "(prefers-reduced-motion: reduce)";
-const FOOT = 120; // ruler scale: 120px = 1 ft
 
 // Pinned horizontal layout only on desktop with motion (`md:motion-safe:`);
 // otherwise the panels stack vertically.
 export default function Approach() {
-  const root = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      const panels = gsap.utils.toArray<HTMLElement>("[data-panel]");
-
-      mm.add(DESKTOP_MOTION, () => {
-        const track = root.current!.querySelector<HTMLElement>(".ap-track")!;
-        const ruler = root.current!.querySelector<HTMLElement>(".ap-ruler")!;
-        const readout = root.current!.querySelector<HTMLElement>(".ap-read")!;
-        const dist = () => track.scrollWidth - window.innerWidth;
-        gsap.set(track, { y: 0, yPercent: -50 });
-
-        // Ruler labels every 2 ft along the track; rebuilt whenever triggers refresh.
-        const buildRuler = () => {
-          ruler.textContent = "";
-          for (let px = 0; px < track.scrollWidth; px += FOOT * 2) {
-            const label = document.createElement("span");
-            label.style.left = `${px}px`;
-            label.textContent = `${px / FOOT}′`;
-            ruler.appendChild(label);
-          }
-        };
-        buildRuler();
-        ScrollTrigger.addEventListener("refreshInit", buildRuler);
-
-        // Playhead readout in feet and inches; panels draw once their left edge passes 72%.
-        const update = () => {
-          const x = Number(gsap.getProperty(track, "x"));
-          const pos = Math.max(0, (window.innerWidth / 2 - x) / FOOT);
-          let feet = Math.floor(pos);
-          let inches = Math.round((pos - feet) * 12);
-          if (inches === 12) {
-            feet++;
-            inches = 0;
-          }
-          readout.textContent = `${feet}′–${inches}″`;
-          panels.forEach((p) => {
-            if (p.getBoundingClientRect().left < window.innerWidth * 0.72) p.classList.add("drawn");
-          });
-        };
-
-        // The headline halves split apart while the track scales in, then the track scrolls sideways.
-        gsap
-          .timeline({
-            scrollTrigger: {
-              trigger: root.current,
-              start: "top top",
-              end: () => `+=${dist() + window.innerHeight * 1.4}`,
-              pin: true,
-              scrub: 1,
-              invalidateOnRefresh: true,
-              onUpdate: update,
-            },
-          })
-          .to(".ap-l", { xPercent: -40, yPercent: -160, ease: "none", duration: 1 }, 0)
-          .to(".ap-r", { xPercent: 30, yPercent: 160, ease: "none", duration: 1 }, 0)
-          .to(".ap-l, .ap-r", { opacity: 0, ease: "power1.in", duration: 0.45 }, 0)
-          // No opacity here: a scrubbed fade left the photos part-transparent mid-scroll.
-          .fromTo(track, { scale: 0.5, x: () => window.innerWidth * 0.3 }, { scale: 1, x: 0, ease: "power2.out", duration: 1.1 }, 0.35)
-          .fromTo(".ap-head-r", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 1.1)
-          .to(track, { x: () => -dist(), ease: "none", duration: 3 }, 1.35);
-
-        return () => ScrollTrigger.removeEventListener("refreshInit", buildRuler);
-      });
-
-      // Mobile: each drawing plays once its panel is 75% of the way up the screen.
-      mm.add(MOBILE_MOTION, () => {
-        panels.forEach((p) => {
-          ScrollTrigger.create({ trigger: p, start: "top 75%", once: true, onEnter: () => p.classList.add("drawn") });
-        });
-      });
-
-      // Reduced motion: drawings are simply shown.
-      mm.add(REDUCED, () => {
-        panels.forEach((p) => p.classList.add("drawn"));
-      });
-      return () => mm.revert();
-    },
-    { scope: root },
-  );
 
   return (
     <section
-      ref={root}
+     
       id="approach"
       aria-label="My approach"
       className="blueprint relative py-24 text-ground md:motion-safe:h-svh md:motion-safe:overflow-hidden md:motion-safe:py-0"
@@ -149,6 +61,7 @@ export default function Approach() {
         {/* Moves and scales with the track. Labels are generated in JS. */}
         <div className="ap-ruler" aria-hidden="true" />
       </div>
+      <ApproachMotion />
     </section>
   );
 }

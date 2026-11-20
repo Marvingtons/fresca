@@ -1,20 +1,9 @@
-"use client";
-
-import { useRef, type SyntheticEvent } from "react";
 import { faq } from "@/content/site";
 
+// One answer open at a time: <details name> makes the group exclusive in the
+// browser itself, so this section needs no JavaScript. (Browsers without it
+// simply allow several open.)
 export default function FAQ() {
-  const list = useRef<HTMLDivElement>(null);
-
-  // One answer open at a time.
-  const onToggle = (e: SyntheticEvent<HTMLDetailsElement>) => {
-    const opened = e.currentTarget;
-    if (!opened.open) return;
-    list.current?.querySelectorAll("details").forEach((d) => {
-      if (d !== opened) d.open = false;
-    });
-  };
-
   return (
     <section id="faq" className="flex flex-wrap gap-x-20 gap-y-10 bg-ground-2 px-pad py-[clamp(96px,14vh,150px)]">
       <div className="flex-[1_1_320px]">
@@ -23,9 +12,9 @@ export default function FAQ() {
           <p className="mt-4 font-serif text-[clamp(44px,5vw,80px)] font-normal leading-[.98]">{faq.heading}</p>
         </hgroup>
       </div>
-      <div ref={list} className="min-w-0 flex-[2_1_560px] border-t border-ink">
+      <div className="min-w-0 flex-[2_1_560px] border-t border-ink">
         {faq.items.map((item, i) => (
-          <details key={item.q} open={i === 0} onToggle={onToggle} className="group border-b border-line">
+          <details key={item.q} name="faq" open={i === 0} className="group border-b border-line">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 [&::-webkit-details-marker]:hidden">
               <h3 className="font-serif text-[clamp(22px,2vw,30px)] font-normal leading-[1.2]">{item.q}</h3>
               <span

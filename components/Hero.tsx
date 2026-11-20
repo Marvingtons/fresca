@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { heroFilm } from "@/content/media";
 import { hero, site } from "@/content/site";
-import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { useMotion } from "@/lib/gsap";
 import { INTRO_KEY, INTRO_SIZES, introIsPlaying } from "@/lib/intro";
 import { MOTION } from "@/lib/motion";
 import HeroFilm from "./HeroFilm";
@@ -26,15 +26,17 @@ export default function Hero() {
     else setIntroDone(true);
   }, []);
 
-  useGSAP(
-    () => {
+  useMotion(
+    ({ gsap, ScrollTrigger }) => {
       if (introIsPlaying() && !laterFrames) return; // build the intro once every frame is in the DOM
+      if (!introIsPlaying()) setIntroDone(true); // the intro was skipped by its timeout (lib/intro.ts)
       const mm = gsap.matchMedia();
       mm.add(MOTION, () => {
         // Intro: photos cycle in a small frame while the counter runs, then it opens to full screen.
         if (introIsPlaying()) {
           window.scrollTo(0, 0);
           const html = document.documentElement;
+          html.setAttribute("data-intro-run", ""); // stops the fallback in lib/intro.ts
           const header = document.querySelector(".site-header");
           const imgs = gsap.utils.toArray<HTMLElement>(".hero-media img");
           const counter = { v: 0 };

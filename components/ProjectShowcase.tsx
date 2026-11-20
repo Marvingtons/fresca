@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { showcase } from "@/content/site";
-import { gsap, useGSAP } from "@/lib/gsap";
+import { type Motion, useMotion } from "@/lib/gsap";
 import { MOTION, prefersReducedMotion } from "@/lib/motion";
 import Photo from "./Photo";
 
@@ -47,8 +47,8 @@ export default function ProjectShowcase() {
   // once loaded a slide stays so going back is instant.
   const [loaded, setLoaded] = useState(() => new Set(around(0)));
 
-  const { contextSafe } = useGSAP(
-    () => {
+  const { run } = useMotion(
+    ({ gsap }) => {
       const mm = gsap.matchMedia();
       mm.add(MOTION, () => {
         // The clipped frame opens to the full photo, then the caption row arrives.
@@ -65,7 +65,7 @@ export default function ProjectShowcase() {
   );
 
   // Prev/next: the incoming photo wipes across while the title swaps through its mask.
-  const go = contextSafe((dir: 1 | -1) => {
+  const go = (dir: 1 | -1) => {
     if (busy.current) return;
     const n = wrap(cur.current + dir);
     setLoaded((prev) => (around(n).every((i) => prev.has(i)) ? prev : new Set([...prev, ...around(n)])));
@@ -73,13 +73,16 @@ export default function ProjectShowcase() {
     const next = slides.current[n];
     cur.current = n;
 
-    if (prefersReducedMotion()) {
-      gsap.set(prev, { opacity: 0 });
-      gsap.set(next, { opacity: 1 });
+    // Reduced motion, or GSAP not loaded yet: a plain swap.
+    const swap = () => {
+      if (prev) prev.style.opacity = "0";
+      if (next) next.style.opacity = "1";
       setShown(n);
-      return;
-    }
+    };
+    if (prefersReducedMotion() || !run(({ gsap }) => wipe(gsap, prev, next, n, dir))) swap();
+  };
 
+  const wipe = (gsap: Motion["gsap"], prev: HTMLImageElement | null, next: HTMLImageElement | null, n: number, dir: 1 | -1) => {
     busy.current = true;
     gsap.set(next, { opacity: 1, zIndex: 2, clipPath: dir > 0 ? "inset(0 0 0 100%)" : "inset(0 100% 0 0)" });
     gsap.to(next, {
@@ -103,7 +106,7 @@ export default function ProjectShowcase() {
       },
     });
     gsap.fromTo(".sc-city", { opacity: 1 }, { opacity: 0, duration: 0.3, yoyo: true, repeat: 1, repeatDelay: 0.25 });
-  });
+  };
 
   const p = projects[shown];
 
