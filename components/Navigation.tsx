@@ -53,6 +53,8 @@ const contactRows = [
 export default function Navigation() {
   const [open, setOpen] = useState(false);
   // The link shown at full strength: the hovered or focused one, else the current section's.
+  // Faded text is ink at 55% for the large link words (3.4:1) and 68% for 11px type (5:1),
+  // the lowest steps that pass WCAG AA contrast on ivory with a little margin.
   const [current, setCurrent] = useState(-1);
   const [pointed, setPointed] = useState<number | null>(null);
   const headerRef = useRef<HTMLElement>(null);
@@ -219,14 +221,16 @@ export default function Navigation() {
                       onMouseEnter={() => setPointed(i)}
                       onFocus={() => setPointed(i)}
                       onBlur={() => setPointed(null)}
-                      className={`grid h-16 w-max grid-cols-[48px_auto] items-center no-underline transition-opacity duration-200 motion-reduce:transition-none min-[1024px]:h-[84px] ${
-                        i === active ? "opacity-100" : "opacity-50"
-                      }`}
+                      className="grid h-16 w-max grid-cols-[48px_auto] items-center no-underline min-[1024px]:h-[84px]"
                     >
-                      <span className="text-[11px] leading-none tracking-[.16em]">{String(i + 1).padStart(2, "0")}</span>
                       <span
-                        className={`font-cormorant text-[clamp(40px,9vw,56px)] font-medium leading-none min-[1024px]:text-[64px] ${
-                          i === active ? "italic" : ""
+                        className={`text-[11px] leading-none tracking-[.16em] transition-opacity duration-200 motion-reduce:transition-none ${
+                          i === active ? "opacity-100" : "opacity-[.68]"
+                        }`}
+                      >{String(i + 1).padStart(2, "0")}</span>
+                      <span
+                        className={`font-cormorant text-[clamp(40px,9vw,56px)] font-medium leading-none transition-opacity duration-200 motion-reduce:transition-none min-[1024px]:text-[64px] ${
+                          i === active ? "italic opacity-100" : "opacity-[.55]"
                         }`}
                       >
                         {link.label}
@@ -240,7 +244,7 @@ export default function Navigation() {
             <dl className="menu-table w-full border-b border-[rgba(42,37,33,.14)] min-[1024px]:max-w-[420px] min-[1024px]:justify-self-end">
               {contactRows.map((row) => (
                 <div key={row.label} className="grid grid-cols-[120px_1fr] items-baseline border-t border-[rgba(42,37,33,.14)] py-[18px]">
-                  <dt className="text-[11px] uppercase leading-none tracking-[.16em] opacity-50">{row.label}</dt>
+                  <dt className="text-[11px] uppercase leading-none tracking-[.16em] opacity-[.68]">{row.label}</dt>
                   <dd className="text-[13px] leading-[1.4]">
                     {row.href ? (
                       <a
@@ -259,7 +263,7 @@ export default function Navigation() {
           </div>
         </div>
 
-        <div className="menu-foot flex flex-col justify-center gap-2 border-t border-[rgba(42,37,33,.14)] px-6 text-[11px] uppercase leading-none tracking-[.14em] opacity-[.55] md:px-12 min-[1024px]:flex-row min-[1024px]:items-center min-[1024px]:justify-between">
+        <div className="menu-foot flex flex-col justify-center gap-2 border-t border-[rgba(42,37,33,.14)] px-6 text-[11px] uppercase leading-none tracking-[.14em] opacity-[.68] md:px-12 min-[1024px]:flex-row min-[1024px]:items-center min-[1024px]:justify-between">
           <p>{site.legalName}</p>
           <p>
             {founder.name}, {founder.role}
