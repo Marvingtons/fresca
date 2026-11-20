@@ -13,14 +13,11 @@ const wrap = (n: number) => (n + projects.length) % projects.length;
 const around = (n: number) => [n, wrap(n + 1), wrap(n - 1)];
 
 /**
- * `sizes` for a slide. A `fit` photo is shown whole and never past its source
- * size, so it displays at the smallest of: its own width, the width its aspect
- * ratio allows inside a full-height panel, and the viewport.
+ * Every slide is cropped into one 4:3 frame. The frame is never wider than
+ * FRAME_MAX, the widest 4:3 crop the narrowest source (1065px) can fill, so no
+ * photo is shown larger than its own pixels (CLAUDE.md).
  */
-function slideSizes(fit?: { width: number; height: number }) {
-  if (!fit) return "100vw";
-  return `min(${fit.width}px, ${((fit.width / fit.height) * 100).toFixed(1)}vh, 100vw)`;
-}
+const FRAME_MAX = 1065;
 
 function Arrow({ dir, onClick }: { dir: "prev" | "next"; onClick: () => void }) {
   return (
@@ -44,7 +41,6 @@ export default function ProjectShowcase() {
   const cur = useRef(0);
   const busy = useRef(false);
   const [shown, setShown] = useState(0); // project whose text is displayed
-  const [ghost, setGhost] = useState(0); // project behind the opening frame
   // Slides rendered so far: only the current one and its neighbours load, and
   // once loaded a slide stays so going back is instant.
   const [loaded, setLoaded] = useState(() => new Set(around(0)));
@@ -60,11 +56,8 @@ export default function ProjectShowcase() {
         // The clipped frame opens to the full panel, then the details arrive.
         gsap
           .timeline({ scrollTrigger: { trigger: root.current, start: "top top", end: "bottom bottom", scrub: 0.8 } })
-          .fromTo(".sc-media", { clipPath: "inset(24% 28% 24% 28% round 4px)" }, { clipPath: "inset(0% 0% 0% 0% round 0px)", duration: 3, ease: "power2.out" }, 0)
+          .fromTo(".sc-media", { clipPath: "inset(24% 28% 24% 28%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 3, ease: "power2.out" }, 0)
           .fromTo(".sc-img", { scale: 1.4 }, { scale: 1, duration: 3, ease: "power2.out" }, 0)
-          .fromTo(".sc-ghost-2", { scale: 0.65 }, { scale: 1.5, duration: 3, ease: "power2.out" }, 0)
-          .fromTo(".sc-ghost-1", { scale: 0.65 }, { scale: 1.25, duration: 3, ease: "power2.out" }, 0.1)
-          .fromTo(".sc-shade", { opacity: 0 }, { opacity: 1, duration: 1 }, 1.6)
           .fromTo(".sc-title-mask", { yPercent: -40, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1 }, 1.9)
           .fromTo(".sc-fade", { opacity: 0, y: -24 }, { opacity: 1, y: 0, duration: 1, stagger: 0.15 }, 2.1);
       });
@@ -81,7 +74,6 @@ export default function ProjectShowcase() {
     const prev = slides.current[cur.current];
     const next = slides.current[n];
     cur.current = n;
-    setGhost(n);
 
     if (prefersReducedMotion()) {
       gsap.set(prev, { opacity: 0 });
@@ -116,23 +108,17 @@ export default function ProjectShowcase() {
   });
 
   const p = projects[shown];
-  const ghostSrc = projects[ghost].image.src;
 
   return (
     <section ref={root} id="work" aria-label="Selected projects" className="relative h-[280vh]">
-      <div className="sticky top-0 h-svh p-1.5">
-        <div className="relative h-full overflow-hidden rounded-lg bg-panel text-ground">
-          {[1, 2].map((g) => (
-            <div
-              key={g}
-              aria-hidden="true"
-              className={`sc-ghost-${g} absolute left-[28%] top-[24%] h-[52%] w-[44%] overflow-hidden rounded opacity-35`}
-            >
-              <Image src={ghostSrc} alt="" fill quality={85} sizes="44vw" className="object-cover" />
-            </div>
-          ))}
-
-          <div className="sc-media absolute inset-0 overflow-hidden will-change-[clip-path]">
+      <div className="sticky top-0 h-svh">
+        <div className="sc-text relative h-full overflow-hidden bg-panel text-ground">
+          {/* One 4:3 photo rectangle, centered in the space below the fixed header
+              (--hh: 72px, 88px on desktop), as large as the screen and FRAME_MAX allow. */}
+          <div
+            style={{ width: `min(${FRAME_MAX}px, calc(100vw - 2 * var(--pad)), calc((100svh - var(--hh) - 64px) * 4 / 3))` }}
+            className="sc-media absolute left-1/2 top-[calc(50%+var(--hh)/2)] aspect-[4/3] -translate-x-1/2 -translate-y-1/2 overflow-hidden will-change-[clip-path] [--hh:72px] md:[--hh:88px]"
+          >
             {projects.map((project, i) =>
               loaded.has(i) ? (
                 <Image
@@ -144,14 +130,12 @@ export default function ProjectShowcase() {
                   alt={project.image.alt}
                   fill
                   quality={85}
-                  // A `fit` photo is shown whole, never larger than its source, centered on
-                  // the panel color (which also hides the slide underneath).
-                  sizes={slideSizes(project.image.fit)}
-                  className={`sc-img ${project.image.fit ? "bg-panel object-scale-down" : "object-cover"} ${i === 0 ? "opacity-100" : "opacity-0"}`}
+                  sizes={`min(${FRAME_MAX}px, 100vw)`}
+                  style={project.image.focus ? { objectPosition: project.image.focus } : undefined}
+                  className={`sc-img object-cover ${i === 0 ? "opacity-100" : "opacity-0"}`}
                 />
               ) : null,
             )}
-            <div className="sc-shade absolute inset-0 z-[3] bg-[rgba(14,13,12,.42)]" />
           </div>
 
           <div aria-hidden="true" className="sc-chess-l absolute left-0 top-0 z-[6] h-0 w-1/2 bg-ground" />

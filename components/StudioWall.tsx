@@ -64,7 +64,7 @@ function WallPiece({ item }: { item: WallItem }) {
         item.right ? "max-md:!w-1/2 max-md:self-end" : "max-md:!w-[64%]"
       } ${item.dim?.dir === "h" ? "max-md:mt-4" : ""} ${item.dim?.dir === "v" && item.dim.side === "l" && !item.right ? "max-md:ml-4" : ""}`}
     >
-      {/* .fr has no overflow clip, so dimension lines and callouts can sit outside the photo. */}
+      {/* .fr has no overflow clip, so dimension lines can sit outside the photo. */}
       <div className="fr">
         <div className="pl-frame relative overflow-hidden bg-ground-2" style={{ aspectRatio: item.ratio }}>
           <div
@@ -85,26 +85,6 @@ function WallPiece({ item }: { item: WallItem }) {
           <span className={`dim ${item.dim.dir} ${item.dim.side ?? ""}`} aria-hidden="true">
             <i className="dl" />
             <em>{item.dim.label}</em>
-          </span>
-        )}
-        {item.callout && (
-          <span
-            className={`co ${item.callout.side}`}
-            style={
-              {
-                "--px": item.callout.px,
-                "--py": item.callout.py,
-                "--len": item.callout.len,
-                "--len-max": item.callout.maxLen,
-                // Share of the wall to the right of the dot, so a right-hand label can stay on screen.
-                "--room": 1 - (parseFloat(item.x) + (parseFloat(item.callout.px) / 100) * parseFloat(item.w)) / 100,
-              } as CSSProperties
-            }
-            aria-hidden="true"
-          >
-            <span className="ll" />
-            <i />
-            <span className="t">{item.callout.text}</span>
           </span>
         )}
       </div>
@@ -174,13 +154,6 @@ export default function StudioWall() {
             gsap.from(dim.querySelector(".dl"), { ...(vertical ? { scaleY: 0 } : { scaleX: 0 }), duration: 1.1, delay: 0.5, ease: "power3.inOut", scrollTrigger: annotate });
             gsap.from(dim, { opacity: 0, duration: 0.4, delay: 0.45, scrollTrigger: annotate });
             gsap.from(dim.querySelector("em"), { opacity: 0, duration: 0.5, delay: 1.1, scrollTrigger: annotate });
-          }
-          // Callout: the dot pops in, the leader line draws, then the label slides in.
-          const co = pl.querySelector<HTMLElement>(".co");
-          if (co) {
-            gsap.from(co.querySelector("i"), { scale: 0, duration: 0.5, delay: 0.8, ease: "back.out(2)", scrollTrigger: annotate });
-            gsap.from(co.querySelector(".ll"), { scaleX: 0, duration: 0.9, delay: 1, ease: "power3.inOut", scrollTrigger: annotate });
-            gsap.from(co.querySelector(".t"), { opacity: 0, x: co.classList.contains("l") ? 8 : -8, duration: 0.6, delay: 1.6, ease: "power2.out", scrollTrigger: annotate });
           }
         });
 

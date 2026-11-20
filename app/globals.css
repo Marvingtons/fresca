@@ -189,7 +189,7 @@ html.intro .site-header {
   visibility: hidden;
 }
 html.intro .hero-media {
-  clip-path: inset(37% 41.5% 37% 41.5% round 3px);
+  clip-path: inset(37% 41.5% 37% 41.5%);
 }
 html.intro .hero-media img {
   opacity: 0;
@@ -338,60 +338,6 @@ html:not(.intro) .hero-cycle {
   top: 50%;
   transform: translate(-50%, -50%) rotate(-90deg);
 }
-.co {
-  position: absolute;
-  z-index: 3;
-  left: var(--px);
-  top: var(--py);
-  pointer-events: none;
-}
-.co i {
-  position: absolute;
-  left: -5px;
-  top: -5px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 0 1px var(--ink);
-}
-.co .ll {
-  position: absolute;
-  top: 0;
-  height: 1px;
-  width: var(--len);
-  background: var(--ink);
-}
-.co.l .ll {
-  right: 0;
-  transform-origin: 100% 50%;
-}
-.co.r {
-  /* Keep the label on screen at narrow desktop widths: the line plus a ~100px
-     label must fit in the share of the wall to the right of the dot (--room). */
-  --len-fit: min(var(--len), calc((100vw - 2 * var(--pad)) * var(--room) - 116px));
-}
-.co.r .ll {
-  left: 0;
-  width: var(--len-fit);
-  transform-origin: 0 50%;
-}
-.co .t {
-  position: absolute;
-  top: -7px;
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink);
-  white-space: nowrap;
-}
-.co.l .t {
-  right: calc(var(--len) + 8px);
-}
-.co.r .t {
-  left: calc(var(--len-fit) + 8px);
-}
 
 /* Plate labels: on narrow plates (v5 widths go down to 11% of the wall) the grid
    coordinate moves under the city instead of squeezing the title. */
@@ -412,18 +358,6 @@ html:not(.intro) .hero-cycle {
     grid-column: 1;
   }
 }
-/* Left-hand callouts can cap their leader (--len-max) so the label clears
-   whatever sits to their left at narrower widths. */
-.co.l {
-  --len-fit: min(var(--len), var(--len-max, var(--len)));
-}
-.co.l .ll {
-  width: var(--len-fit);
-}
-.co.l .t {
-  right: calc(var(--len-fit) + 8px);
-}
-
 /* ───────── approach blueprint (v6) */
 .blueprint {
   background-color: var(--accent);
@@ -535,7 +469,6 @@ html:not(.intro) .hero-cycle {
   .art-grid,
   .art-cols,
   .art-ruler,
-  .co,
   .pl .xy {
     display: none;
   }
@@ -564,4 +497,107 @@ html:not(.intro) .hero-cycle {
     opacity: 1;
     transition: none;
   }
+}
+
+/* ───────── plan drawing ("Drawn before it's bought", components/PlanIllustration.tsx).
+   Colours from the site variables; draw-on runs once when .drawn is added:
+   walls 0-900ms, furniture 600-1200ms, door swings and callouts 1200-1500ms,
+   schedule rows from 1350ms at an 80ms stagger. Done by about 1.9s. */
+.plan .w {
+  stroke: var(--ink);
+  stroke-width: 1.4;
+}
+.plan .win {
+  stroke-width: 0.8;
+}
+.plan .t {
+  stroke: var(--ink);
+  stroke-width: 0.7;
+  opacity: 0.55;
+}
+.plan .island {
+  stroke-width: 1.4;
+  opacity: 1;
+}
+.plan .dim {
+  stroke: var(--ink);
+  stroke-width: 0.5;
+  opacity: 0.5;
+}
+.plan .swing {
+  stroke: var(--accent);
+  stroke-width: 0.7;
+}
+.plan .callout {
+  fill: var(--accent);
+}
+.plan .num {
+  font-family: var(--outfit);
+  font-size: 8px;
+  fill: var(--ground);
+}
+.plan .lab {
+  font-family: var(--outfit);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  fill: var(--ink);
+  opacity: 0.6;
+}
+.plan .lab.item {
+  letter-spacing: 0.04em;
+  opacity: 0.9;
+}
+.plan .lab.foot {
+  letter-spacing: 0.04em;
+  opacity: 0.5;
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* Structural selectors, not [pathLength]: Chrome does not re-style SVG children
+     matched by that camel-case attribute when .drawn is added. */
+  .plan-walls > *,
+  .plan-furniture > :not(.rug) {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .plan-walls > * {
+    transition: stroke-dashoffset 900ms cubic-bezier(0.45, 0, 0.2, 1);
+  }
+  .plan-furniture > :not(.rug) {
+    transition: stroke-dashoffset 600ms cubic-bezier(0.45, 0, 0.2, 1) 600ms;
+  }
+  .plan .rug,
+  .plan-notes,
+  .plan-row {
+    opacity: 0;
+  }
+  .plan .rug {
+    transition: opacity 600ms ease 600ms;
+  }
+  .plan-notes {
+    transition: opacity 300ms ease 1200ms;
+  }
+  .plan-row {
+    transition: opacity 300ms ease calc(1350ms + var(--r, 0) * 80ms);
+  }
+  .plan.drawn .plan-walls > *,
+  .plan.drawn .plan-furniture > :not(.rug) {
+    stroke-dashoffset: 0;
+  }
+  .plan.drawn .rug {
+    opacity: 0.55;
+  }
+  .plan.drawn .plan-notes,
+  .plan.drawn .plan-row {
+    opacity: 1;
+  }
+}
+
+/* Slider text sits on the photo with no wash over it: a soft shadow on the
+   type only keeps it readable on bright rooms. */
+.sc-text h2,
+.sc-text h3,
+.sc-text span,
+.sc-text dt,
+.sc-text dd {
+  text-shadow: 0 1px 2px rgba(14, 13, 12, 0.35), 0 2px 18px rgba(14, 13, 12, 0.55);
 }

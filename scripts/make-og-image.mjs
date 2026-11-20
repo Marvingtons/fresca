@@ -57,15 +57,19 @@ function line(f, text, size, cx, baseline, tracking = 0) {
 
 const overlay = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#12110f" stop-opacity=".30"/>
-      <stop offset=".45" stop-color="#12110f" stop-opacity=".38"/>
-      <stop offset="1" stop-color="#12110f" stop-opacity=".72"/>
-    </linearGradient>
+    <!-- No wash over the photo: a soft shadow under the type only. -->
+    <filter id="s" x="-20%" y="-60%" width="140%" height="220%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="22" result="wide"/>
+      <feComponentTransfer in="wide" result="wideA"><feFuncA type="linear" slope="1.1"/></feComponentTransfer>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="tight"/>
+      <feComponentTransfer in="tight" result="tightA"><feFuncA type="linear" slope=".6"/></feComponentTransfer>
+      <feMerge><feMergeNode in="wideA"/><feMergeNode in="tightA"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
-  <rect width="${W}" height="${H}" fill="url(#g)"/>
+  <g filter="url(#s)">
   ${line(serif, WORDMARK, 168, W / 2, 430)}
   ${line(sans, LINE, 22, W / 2, 500, 0.24)}
+  </g>
 </svg>`;
 
 await sharp(SOURCE)

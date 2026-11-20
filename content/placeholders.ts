@@ -10,6 +10,7 @@ export const placeholders = [
   { where: "Studio wall Pl. 03, Coastal Secondary Bath (subway-tile-secondary-bath)", field: "photo: same shot now on Pl. 06", value: "[PLACEHOLDER: pending Karen]" },
   { where: "mosaic-fireplace-family-room (Coastal Blue Family Room)", field: "title, photo", value: "[PLACEHOLDER: pending Karen]" },
   { where: "navy-chair-great-room (Approach, Plan panel)", field: "photo", value: "[PLACEHOLDER: pending Karen]" },
+  { where: "Working with us, row 2 plan drawing (components/PlanIllustration.tsx)", field: "schedule labels (Island, white oak / Sofa, linen, 84\" / Bed, upholstered), 24'-0\" dimension, \"Signed before ordering\"", value: "[PLACEHOLDER: plan schedule labels, ask Karen for three real selections]" },
   // Older DEMO values in content/site.ts that Karen has not confirmed
   { where: "Studio wall Pl. 07, Bay Window Dining (bay-window-dining)", field: "city", value: "[PLACEHOLDER: location]" },
 ] as const;

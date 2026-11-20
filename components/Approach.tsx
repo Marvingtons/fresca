@@ -73,7 +73,8 @@ export default function Approach() {
           .to(".ap-l", { xPercent: -40, yPercent: -160, ease: "none", duration: 1 }, 0)
           .to(".ap-r", { xPercent: 30, yPercent: 160, ease: "none", duration: 1 }, 0)
           .to(".ap-l, .ap-r", { opacity: 0, ease: "power1.in", duration: 0.45 }, 0)
-          .fromTo(track, { scale: 0.5, opacity: 0, x: () => window.innerWidth * 0.3 }, { scale: 1, opacity: 1, x: 0, ease: "power2.out", duration: 1.1 }, 0.35)
+          // No opacity here: a scrubbed fade left the photos part-transparent mid-scroll.
+          .fromTo(track, { scale: 0.5, x: () => window.innerWidth * 0.3 }, { scale: 1, x: 0, ease: "power2.out", duration: 1.1 }, 0.35)
           .fromTo(".ap-head-r", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 1.1)
           .to(track, { x: () => -dist(), ease: "none", duration: 3 }, 1.35);
 
@@ -133,14 +134,14 @@ export default function Approach() {
               <h3 className="mb-3.5 mt-2 font-serif text-[clamp(48px,5vw,84px)] font-normal leading-[.95]">{panel.title}</h3>
               <p className="max-w-[340px] text-on-dark">{panel.text}</p>
             </div>
-            <div className="relative h-[72vw] min-[768px]:h-[min(62vh,560px)]">
-              <div className="absolute right-0 top-0 h-[82%] w-[72%] overflow-hidden rounded">
+            {/* Photo 4:5 and drawing 16:10 in every panel, both plain rectangles. The
+                drawing overlaps the photo's lower left; the bottom padding is its overhang. */}
+            <div className="relative pb-[16%] w-full md:motion-safe:max-w-[calc(min(62vh,560px)/1.06)] md:motion-safe:justify-self-end">
+              <div className="relative ml-auto aspect-[4/5] w-[72%] overflow-hidden">
                 <Image src={panel.photo.src} alt={panel.photo.alt} fill quality={85} sizes="(min-width: 861px) 32vw, 72vw" className="object-cover" />
               </div>
-              <div className="absolute bottom-0 left-0 aspect-[16/10] w-[56%] rounded bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,.25)]">
-                <div className="relative h-full w-full">
-                  <Image src={panel.board.src} alt={panel.board.alt} fill quality={85} sizes="(min-width: 861px) 25vw, 56vw" className="object-contain" />
-                </div>
+              <div className="absolute bottom-0 left-0 aspect-[16/10] w-[56%] overflow-hidden">
+                <Image src={panel.board.src} alt={panel.board.alt} fill quality={85} sizes="(min-width: 861px) 25vw, 56vw" className="object-cover" />
               </div>
             </div>
           </div>

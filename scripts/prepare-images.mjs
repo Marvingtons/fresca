@@ -30,7 +30,7 @@ const MAP = {
   9: "gloss-kitchen",
   21: "kitchen-material-board",
   23: "color-floor-plan",
-  24: "lighting-fixture-sheet",
+  // 24 lighting-fixture-sheet: replaced by the plan drawing (components/PlanIllustration.tsx).
   25: "lighting-ceiling-plan",
   26: "freestanding-tub-bath",
   29: "black-hex-shower",

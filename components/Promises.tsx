@@ -6,6 +6,7 @@ import { cta, promises } from "@/content/site";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { MOTION, revealLines } from "@/lib/motion";
 import Line from "./LineReveal";
+import PlanIllustration from "./PlanIllustration";
 
 export default function Promises() {
   const root = useRef<HTMLElement>(null);
@@ -15,13 +16,15 @@ export default function Promises() {
       const mm = gsap.matchMedia();
       mm.add(MOTION, () => {
         revealLines(root.current!);
-        // As each row rises: the veil lifts, the photo settles and the number darkens.
+        // As each row rises the number darkens. Photos are never faded or veiled: an
+        // earlier scrubbed veil left them part-washed whenever a row stopped short
+        // of the trigger's end.
         gsap.utils.toArray<HTMLElement>(".promise-row").forEach((row) => {
-          gsap
-            .timeline({ scrollTrigger: { trigger: row, start: "top 85%", end: "top 35%", scrub: 0.8 } })
-            .fromTo(row.querySelector(".veil"), { opacity: 1 }, { opacity: 0, ease: "power2.out" }, 0)
-            .fromTo(row.querySelector(".promise-media img"), { scale: 1.18 }, { scale: 1, ease: "power2.out" }, 0)
-            .fromTo(row.querySelector(".promise-n"), { color: "#b5afa3" }, { color: "#1D1C1A", ease: "none" }, 0);
+          gsap.fromTo(
+            row.querySelector(".promise-n"),
+            { color: "#b5afa3" },
+            { color: "#1D1C1A", ease: "none", scrollTrigger: { trigger: row, start: "top 85%", end: "top 35%", scrub: 0.8 } },
+          );
         });
       });
       return () => mm.revert();
@@ -63,16 +66,20 @@ export default function Promises() {
             <h3 className="mb-3 font-serif text-[clamp(30px,2.8vw,44px)] font-normal leading-[1.05]">{row.title}</h3>
             <p className="max-w-[440px] text-body">{row.text}</p>
           </div>
-          <div className={`promise-media relative aspect-[16/10] overflow-hidden max-md:col-span-full ${row.board ? "bg-white" : "bg-ground-2"}`}>
-            <Image
-              src={row.image.src}
-              alt={row.image.alt}
-              fill
-              quality={85}
-              sizes="(min-width: 861px) 38vw, 100vw"
-              className={row.board ? "object-contain p-2.5" : "object-cover"}
-            />
-            <div className="veil absolute inset-0 bg-ground opacity-0" />
+          <div className="promise-media relative aspect-[16/10] overflow-hidden max-md:col-span-full">
+            {"plan" in row ? (
+              <PlanIllustration />
+            ) : (
+              <Image
+                src={row.image.src}
+                alt={row.image.alt}
+                fill
+                quality={85}
+                sizes="(min-width: 861px) 38vw, 100vw"
+                style={row.image.focus ? { objectPosition: row.image.focus } : undefined}
+                className="object-cover"
+              />
+            )}
           </div>
         </div>
       ))}

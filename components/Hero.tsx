@@ -40,7 +40,7 @@ export default function Hero() {
           const counter = { v: 0 };
 
           // Take over from the pre-paint CSS (html.intro) with matching inline states.
-          gsap.set(".hero-media", { clipPath: "inset(37% 41.5% 37% 41.5% round 3px)" });
+          gsap.set(".hero-media", { clipPath: "inset(37% 41.5% 37% 41.5%)" });
           gsap.set(imgs, { autoAlpha: 0 });
           gsap.set(imgs[0], { autoAlpha: 1 });
           gsap.set(".hero-ln > span", { y: 0, yPercent: 110 });
@@ -70,8 +70,8 @@ export default function Hero() {
             // values, which would make the frame open from the bottom-left corner.
             .fromTo(
               ".hero-media",
-              { clipPath: "inset(37% 41.5% 37% 41.5% round 3px)" },
-              { clipPath: "inset(0% 0% 0% 0% round 0px)", duration: 1.5 },
+              { clipPath: "inset(37% 41.5% 37% 41.5%)" },
+              { clipPath: "inset(0% 0% 0% 0%)", duration: 1.5 },
               2.1,
             )
             .fromTo(".hero-final", { scale: 1.35 }, { scale: 1.06, duration: 1.9, ease: "power3.out" }, 2.1)

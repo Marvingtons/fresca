@@ -19,7 +19,7 @@
  *    9 → gloss-kitchen.jpg                 38 → reclaimed-wood-bedroom.jpg
  *   21 → kitchen-material-board.jpg        39 → bay-window-sitting-room.jpg
  *   23 → color-floor-plan.jpg (trimmed)    40 → iron-bed-bedroom.jpg
- *   24 → lighting-fixture-sheet.jpg (trim) 41 → mosaic-fireplace-family-room.jpg
+ *   24 → (removed: plan drawing instead)  41 → mosaic-fireplace-family-room.jpg
  *                                          42 → cognac-living-room.jpg (replaced, see below)
  *                                          43 → two-story-living-room.jpg
  *                                          44 → sectional-living-room.jpg
@@ -146,8 +146,6 @@ export const hero = {
 type WallWord = { kind: "word"; text: string; italic?: boolean; x: string; y: string; speed: number; right?: boolean };
 /** Dimension line: horizontal above the frame, or vertical on its left/right. */
 type WallDim = { dir: "h" | "v"; side?: "l" | "r"; label: string };
-/** Callout: a dot at px/py on the photo with a leader line of `len` to a label. */
-type WallCallout = { side: "l" | "r"; px: string; py: string; len: string; maxLen?: string; text: string };
 type WallPlate = {
   kind: "plate";
   no: string;
@@ -166,7 +164,6 @@ type WallPlate = {
   speed: number;
   right?: boolean;
   dim?: WallDim;
-  callout?: WallCallout;
   /** "top": the photo's top edge stays in the frame as it drifts (for a ceiling
    *  that is the point of the photo). Default drift can hide up to 16% of the top. */
   focus?: "top";
@@ -197,10 +194,9 @@ export const studio = {
     {
       kind: "plate", no: "Pl. 01", title: "Modern Coastal Kitchen", city: "Solana Beach",
       alt: "Kitchen in Solana Beach with white shaker cabinets, a black range hood, a marble island and three glass pendants",
-      src: img("black-hood-kitchen-island"), ratio: "4/5", x: "42%", y: "7%", w: "21%", speed: 1.25,
-      dim: { dir: "h", label: "2.5 COL · 4 : 5" },
-      // maxLen keeps the label clear of "A fresh" below ~1440px wide.
-      callout: { side: "l", px: "50%", py: "26%", len: "260px", maxLen: "calc(29vw - 150px)", text: "Glass pendants ×3" },
+      src: img("black-hood-kitchen-island"), ratio: "4/3", x: "42%", y: "7%", w: "21%", speed: 1.25,
+      dim: { dir: "h", label: "2.5 COL · 4 : 3" },
+      caption: "Glass pendants ×3",
     },
     {
       kind: "plate", no: "Pl. 02", title: "Blush Primary Bedroom", city: "Carmel Valley",
@@ -227,16 +223,16 @@ export const studio = {
     {
       kind: "plate", no: "Pl. 04", title: "Two-Story Living Room", city: "Carmel Valley",
       alt: "Two-story living room in Carmel Valley with tall windows, a linen sectional and wood armchairs",
-      src: img("two-story-living-room"), ratio: "4/5", x: "61%", y: "50%", w: "25%", speed: 1.05, right: true,
-      dim: { dir: "h", label: "3 COL · 4 : 5" },
-      callout: { side: "r", px: "80%", py: "84%", len: "110px", text: "Linen sectional" },
+      src: img("two-story-living-room"), ratio: "3/4", x: "61%", y: "50%", w: "25%", speed: 1.05, right: true,
+      dim: { dir: "h", label: "3 COL · 3 : 4" },
+      caption: "Linen sectional",
     },
     { kind: "word", text: "considered.", italic: true, x: "2%", y: "61%", speed: 0.7 },
     {
       kind: "plate", no: "Pl. 05", title: "Kitchen with Lantern Pendant",
       alt: "Kitchen with a brass cage pendant over a black island, white shaker cabinets, black appliances and a geometric tile backsplash",
-      src: img("lantern-pendant-kitchen-wide"), ratio: "1/1", x: "47%", y: "74%", w: "13%", speed: 1.8,
-      callout: { side: "l", px: "36%", py: "14%", len: "165px", text: "Brass cage pendant" },
+      src: img("lantern-pendant-kitchen-wide"), ratio: "4/3", x: "47%", y: "74%", w: "13%", speed: 1.8,
+      caption: "Brass cage pendant",
     },
     {
       kind: "plate", no: "Pl. 06", title: "Guest Bath with Stenciled Ceiling", city: "Solana Beach",
@@ -248,8 +244,8 @@ export const studio = {
     {
       kind: "plate", no: "Pl. 07", title: "Bay Window Dining",
       alt: "Dining room with a round table in a bay window under a glass pendant chandelier",
-      src: img("bay-window-dining"), ratio: "1/1", x: "12%", y: "83%", w: "17%", speed: 1.3,
-      dim: { dir: "h", label: "2 COL · 1 : 1" },
+      src: img("bay-window-dining"), ratio: "3/4", x: "12%", y: "83%", w: "17%", speed: 1.3,
+      dim: { dir: "h", label: "2 COL · 3 : 4" },
     },
     {
       kind: "text",
@@ -266,14 +262,14 @@ export const studio = {
 // ───────── project showcase
 
 /**
- * `fit` marks a photo that is too small or too tall to fill the full-bleed
- * slide: it is shown whole (object-contain) and never wider or taller than
- * its source pixels, instead of being cropped and enlarged.
+ * Every slide is cropped into one 4:3 frame that is never wider than the
+ * smallest source can fill (components/ProjectShowcase.tsx), so no photo is
+ * enlarged. `focus` is the object-position for the crop.
  */
 export type ShowcaseProject = {
   title: string;
   city?: string;
-  image: Photo & { fit?: { width: number; height: number } };
+  image: Photo & { focus?: string };
 };
 
 export const showcase = {
@@ -293,28 +289,31 @@ export const showcase = {
     {
       title: "Canyon View Sleek Modern Kitchen",
       city: "Solana Beach",
-      image: { src: img("gloss-kitchen"), alt: "Modern kitchen in Solana Beach with white gloss cabinets and charcoal counters", fit: { width: 1448, height: 1086 } },
+      image: { src: img("gloss-kitchen"), alt: "Modern kitchen in Solana Beach with white gloss cabinets and charcoal counters" },
     },
     {
       title: "Primary Bedroom with White Oak Ceiling",
       city: "Del Mar",
-      image: { src: img("white-oak-ceiling-bedroom"), alt: "Primary bedroom in Del Mar with a white oak ceiling, gray upholstered bed and woven bench", fit: { width: 1065, height: 1420 } },
+      image: { src: img("white-oak-ceiling-bedroom"), alt: "Primary bedroom in Del Mar with a white oak ceiling, gray upholstered bed and woven bench", focus: "50% 70%" },
     },
     {
       title: "Primary Bathroom with Custom Cabinetry",
       city: "Del Mar",
-      image: { src: img("del-mar-primary-bath"), alt: "Primary bathroom in Del Mar with oak vanity cabinetry, black sconces and a freestanding tub", fit: { width: 1072, height: 1430 } },
+      image: { src: img("del-mar-primary-bath"), alt: "Primary bathroom in Del Mar with oak vanity cabinetry, black sconces and a freestanding tub", focus: "50% 70%" },
     },
     {
       title: "Linen Coastal Bedroom",
       city: "Del Mar",
-      image: { src: img("linen-coastal-bedroom"), alt: "Bedroom in Del Mar with a linen upholstered headboard, rustic nightstand and round shell mirror", fit: { width: 1072, height: 1430 } },
+      image: { src: img("linen-coastal-bedroom"), alt: "Bedroom in Del Mar with a linen upholstered headboard, rustic nightstand and round shell mirror", focus: "50% 55%" },
     },
   ] as ShowcaseProject[],
   labels: { city: "Location" },
 };
 
 // ───────── promises (working with us)
+
+/** A row shows a photo (`focus` is its object-position in the 16:10 frame) or the plan drawing. */
+type PromiseRow = { title: string; text: string } & ({ image: Photo & { focus?: string } } | { plan: true });
 
 export const promises = {
   eyebrow: "(03) Working with us",
@@ -331,20 +330,20 @@ export const promises = {
     {
       title: "Drawn before it's bought",
       text: "Floor plans, mood boards, and a schedule of selections and specifications are created and signed before a single item is ordered.",
-      image: { src: img("lighting-fixture-sheet"), alt: "Lighting fixture selection sheet organized by room" },
-      board: true,
+      // An inline line drawing (components/PlanIllustration.tsx) instead of a photo.
+      plan: true,
     },
     {
       title: "A budget you can read",
       text: "Every selection lives on one priced list. If you swap a faucet or upgrade a slab, you see the new total before anything moves.",
-      image: { src: img("black-hex-shower"), alt: "Bathroom with a glass shower, white picket tile, matte black fixtures and a black hexagon tile floor" },
+      image: { src: img("black-hex-shower"), alt: "Bathroom with a glass shower, white picket tile, matte black fixtures and a black hexagon tile floor", focus: "50% 62%" }, // fixtures and the hex floor both in the 16:10 crop
     },
     {
       title: "I'm there for the last walkthrough",
       text: "I check in on site during construction and walk the finished room with you, punch list in hand.",
       image: { src: img("bay-window-sitting-room"), alt: "Sitting room with bay windows and fireplace" },
     },
-  ],
+  ] as PromiseRow[],
 };
 
 // ───────── approach (pinned horizontal)
