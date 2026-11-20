@@ -77,10 +77,10 @@ Never overwrite a media file in place: upload a changed film under a new name (e
 ## 6. R2 media domain
 
 - [ ] 6.1 **R2 Object Storage**, open the bucket holding `fresca-hero-1080.webm`, **Settings**, **Custom Domains**, **Add**, `media.frescainteriordesign.com`, **Connect Domain**. Wait for **Active**.
-- [ ] 6.2 Check the five files load (each prints `200`):
+- [ ] 6.2 Check the three films load (each prints `200`):
 
 ```
-for f in fresca-hero-1080.webm fresca-hero-1080.mp4 fresca-hero-720.mp4 fresca-hero-poster.webp fresca-hero-poster.jpg; do curl -s -o /dev/null -w "%{http_code} $f\n" https://media.frescainteriordesign.com/$f; done
+for f in fresca-hero-1080.webm fresca-hero-1080.mp4 fresca-hero-720.mp4; do curl -s -o /dev/null -w "%{http_code} $f\n" https://media.frescainteriordesign.com/$f; done
 ```
 
   The site loads the three films from here; the poster is served from the site itself (`public/media/`) as the first paint.

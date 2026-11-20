@@ -126,6 +126,7 @@ export default function Hero() {
             wrapper carries the intro zoom and the parallax so both layers move as one. */}
         <div className="hero-final absolute inset-0 scale-[1.06]">
           <picture>
+            <source srcSet={heroFilm.poster.avif} type="image/avif" />
             <source srcSet={heroFilm.poster.webp} type="image/webp" />
             {/* eslint-disable-next-line @next/next/no-img-element -- poster in public/media, preloaded in the layout */}
             <img

@@ -81,9 +81,8 @@ export default function RootLayout({ children, ld }: Readonly<{ children: React.
     // `intro` may be added to <html> before hydration by introScript.
     <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable} ${cormorant.variable} ${outfit.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: introScript(introFrame) }} />
-        {/* The hero poster is the LCP image. */}
-        <link rel="preload" as="image" href={heroFilm.poster.webp} type="image/webp" fetchPriority="high" />
+        {/* Also preloads the LCP image: the intro's first frame, or the hero poster. */}
+        <script dangerouslySetInnerHTML={{ __html: introScript(introFrame, heroFilm.poster.avif) }} />
         {ld}
       </head>
       <body>

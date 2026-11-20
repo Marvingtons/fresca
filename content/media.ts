@@ -17,8 +17,10 @@ export type FilmSource = { src: string; type: string };
 export const heroFilm = {
   /** First frame of the film. Shown before, and instead of, the video. */
   poster: {
-    webp: "/media/fresca-hero-poster.webp",
-    jpg: "/media/fresca-hero-poster.jpg",
+    // Graded with the photos (scripts/grade-images.mjs): AVIF 78 KB, WebP 90 KB.
+    avif: "/media/fresca-hero-poster-v2.avif",
+    webp: "/media/fresca-hero-poster-v2.webp",
+    jpg: "/media/fresca-hero-poster-v2.jpg",
     width: 1920,
     height: 1080,
   },

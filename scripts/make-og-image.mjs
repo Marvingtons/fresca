@@ -12,7 +12,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const SOURCE = path.join(ROOT, "public/media/fresca-hero-poster.jpg");
+const SOURCE = path.join(ROOT, "public/media/fresca-hero-poster-v2.jpg");
 const OUT = path.join(ROOT, "public/og-image.jpg");
 const W = 1200;
 const H = 630;

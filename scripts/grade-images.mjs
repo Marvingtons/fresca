@@ -9,7 +9,9 @@
 //   public/images/<GRADE>/<name>-<width>.webp   WebP quality 82
 //   public/images/<GRADE>/<name>.jpg            JPEG fallback (and JSON-LD contentUrl)
 //   content/images.json                         sizes, read by components/Photo.tsx
-//   assets/export/fresca-hero-poster-v2.*       the hero poster, same grade, 1920x1080
+//   public/media/fresca-hero-poster-v2.*        the hero poster, same grade, 1920x1080, served
+//                                               from the site as the LCP image (a copy also
+//                                               goes to assets/export/ for the media bucket)
 //
 // Only photos named in content/site.ts are exported. Files are cached for a year
 // (public/_headers), so bump GRADE whenever the grade or a master changes.
@@ -31,7 +33,8 @@ export const GRADE = "g1";
 const SRC = path.resolve("assets/prepared");
 const OUT = path.resolve("public/images", GRADE);
 const EXPORT = path.resolve("assets/export");
-const POSTER = path.resolve("public/media/fresca-hero-poster.jpg");
+const POSTER = path.join(SRC, "fresca-hero-poster.jpg");
+const POSTER_OUT = path.resolve("public/media");
 const WIDTHS = [480, 768, 1200, 1600, 2000];
 const FALLBACK_WIDTH = 1600;
 const BOARDS = new Set(["color-floor-plan", "kitchen-material-board", "lighting-ceiling-plan"]);
@@ -128,16 +131,19 @@ for (const name of used) {
 
 await writeFile("content/images.json", `${JSON.stringify({ grade: GRADE, images: manifest }, null, 2)}\n`);
 
-// Hero poster: same grade, 1920x1080, for upload to the media bucket.
+// Hero poster: same grade, 1920x1080. If it changes, rename it (v3) and update
+// content/media.ts: /media/* is cached for a year.
 {
   const wb = await whiteBalance(POSTER);
   const master = await raw((await grade(POSTER, wb)).resize(1920, 1080, { fit: "cover" }));
-  const base = path.join(EXPORT, "fresca-hero-poster-v2");
-  await from(master).webp({ quality: 82, effort: 6 }).toFile(`${base}.webp`);
-  await from(master).avif({ quality: 60, effort: 6 }).toFile(`${base}.avif`);
-  await from(master).jpeg({ quality: 82, mozjpeg: true }).toFile(`${base}.jpg`);
+  for (const dir of [POSTER_OUT, EXPORT]) {
+    const base = path.join(dir, "fresca-hero-poster-v2");
+    await from(master).webp({ quality: 82, effort: 6 }).toFile(`${base}.webp`);
+    await from(master).avif({ quality: 60, effort: 6 }).toFile(`${base}.avif`);
+    await from(master).jpeg({ quality: 82, mozjpeg: true }).toFile(`${base}.jpg`);
+  }
   const note = wb ? `white balance R x${wb[0].toFixed(3)} B x${wb[2].toFixed(3)}` : "";
-  console.log(`hero poster → assets/export/fresca-hero-poster-v2.{webp,avif,jpg}  ${note}`);
+  console.log(`hero poster → public/media/ and assets/export/fresca-hero-poster-v2.{webp,avif,jpg}  ${note}`);
   if (sheet) pairs.push([`hero poster${note ? `  (${note})` : ""}`, await sharp(POSTER).resize(400).png().toBuffer(), await from(master).resize(400).png().toBuffer()]);
 }
 

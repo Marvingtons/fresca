@@ -51,6 +51,10 @@ function WallPiece({ item }: { item: WallItem }) {
   }
 
   const mobileWidth = item.right ? 50 : 64;
+  const ratio = (r: string) => {
+    const [w, h] = r.split("/").map(Number);
+    return w / h;
+  };
   return (
     // A plain figure until project pages exist: plates link nowhere.
     <figure
@@ -63,7 +67,13 @@ function WallPiece({ item }: { item: WallItem }) {
           data-focus={item.focus}
           className={`pl-img absolute left-0 ${item.focus === "top" ? "top-0" : "top-[-10%]"} h-[120%] w-full`}
         >
-          <Photo src={item.src} alt={item.alt} sizes={`(min-width: 861px) ${parseFloat(item.w)}vw, ${mobileWidth}vw`} />
+          {/* The photo layer is 120% of the frame's height (parallax room). */}
+          <Photo
+            src={item.src}
+            alt={item.alt}
+            sizes={`(min-width: 861px) ${parseFloat(item.w)}vw, ${mobileWidth}vw`}
+            box={ratio(item.ratio) / 1.2}
+          />
         </div>
       </div>
       {/* Plate number, title, location, then a hairline. */}

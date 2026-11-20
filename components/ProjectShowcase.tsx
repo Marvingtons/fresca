@@ -128,6 +128,7 @@ export default function ProjectShowcase() {
                   src={project.image.src}
                   alt={project.image.alt}
                   sizes={`min(${FRAME_MAX}px, 100vw)`}
+                  box={4 / 3}
                   style={project.image.focus ? { objectPosition: project.image.focus } : undefined}
                   className={`sc-img ${i === 0 ? "opacity-100" : "opacity-0"}`}
                 />

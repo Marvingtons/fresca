@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import bundleAnalyzer from "@next/bundle-analyzer";
 import { validateEnv } from "./env.mjs";
 import { SITEMAP_ROUTES } from "./lib/sitemap-routes.mjs";
 
@@ -58,4 +59,7 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// ANALYZE=true npm run build writes .next/analyze/*.json (docs/PERF.md, ten largest modules).
+const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === "true", openAnalyzer: false, analyzerMode: "json" });
+
+export default withBundleAnalyzer(nextConfig);

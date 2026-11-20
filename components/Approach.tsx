@@ -138,10 +138,10 @@ export default function Approach() {
                 drawing overlaps the photo's lower left; the bottom padding is its overhang. */}
             <div className="relative pb-[16%] w-full md:motion-safe:max-w-[calc(min(62vh,560px)/1.06)] md:motion-safe:justify-self-end">
               <div className="relative ml-auto aspect-[4/5] w-[72%] overflow-hidden">
-                <Photo src={panel.photo.src} alt={panel.photo.alt} sizes="(min-width: 861px) 32vw, 72vw" />
+                <Photo src={panel.photo.src} alt={panel.photo.alt} sizes="(min-width: 861px) min(36vw, 380px), (min-width: 768px) 40vw, 66vw" box={4 / 5} />
               </div>
               <div className="absolute bottom-0 left-0 aspect-[16/10] w-[56%] overflow-hidden">
-                <Photo src={panel.board.src} alt={panel.board.alt} sizes="(min-width: 861px) 25vw, 56vw" />
+                <Photo src={panel.board.src} alt={panel.board.alt} sizes="(min-width: 861px) min(28vw, 296px), (min-width: 768px) 31vw, 52vw" box={16 / 10} />
               </div>
             </div>
           </div>

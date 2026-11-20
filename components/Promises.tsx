@@ -78,6 +78,7 @@ export default function Promises() {
                 src={row.image.src}
                 alt={row.image.alt}
                 sizes="(min-width: 861px) 38vw, 100vw"
+                box={16 / 10}
                 style={row.image.focus ? { objectPosition: row.image.focus } : undefined}
               />
             </div>
