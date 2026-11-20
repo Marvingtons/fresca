@@ -3,9 +3,10 @@ import type { Config } from "tailwindcss";
 const config: Config = {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
-    // The design has a single breakpoint: ≤860px is mobile, md: is desktop.
-    // Use max-md: for mobile-only overrides.
-    screens: { md: "861px" },
+    // The page layout has a single breakpoint: ≤860px is mobile, md: is desktop.
+    // Use max-md: for mobile-only overrides. sm: is for the header call to action
+    // (the short label under 640px).
+    screens: { sm: "640px", md: "861px" },
     extend: {
       colors: {
         ground: "#F4F2EB",
@@ -28,18 +29,15 @@ const config: Config = {
         serif: ["var(--serif)"],
         sans: ["var(--sans)"],
         mono: ["var(--mono)"],
+        // Header and hero only, for now.
+        cormorant: ["var(--cormorant)"],
+        outfit: ["var(--outfit)"],
       },
       spacing: {
         pad: "var(--pad)",
       },
       transitionTimingFunction: {
         curtain: "cubic-bezier(.76,0,.24,1)",
-      },
-      keyframes: {
-        cue: { from: { top: "-100%" }, to: { top: "100%" } },
-      },
-      animation: {
-        cue: "cue 2s cubic-bezier(.6,0,.2,1) infinite",
       },
     },
   },

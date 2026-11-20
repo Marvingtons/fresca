@@ -97,12 +97,11 @@ export const founder = {
 
 // ───────── navigation
 
+// Header links (desktop row and the drawer under 1024px), in this order.
 export const navLinks = [
-  { href: "#about", label: "Studio" },
-  { href: "#work", label: "Projects" },
-  { href: "#process", label: "Process" },
+  { href: "#work", label: "Work" },
+  { href: "#approach", label: "Approach" },
   { href: "#about-us", label: "About" },
-  { href: "#faq", label: "FAQ" },
   { href: "#contact", label: "Contact" },
 ];
 
@@ -113,13 +112,14 @@ export const footerLinks = [
   { href: "#faq", label: "FAQ" },
 ];
 
-export const cta = { href: "#contact", label: "Book a consultation" };
+// `short` replaces the label in the header under 640px.
+export const cta = { href: "#contact", label: "Book a consultation", short: "Enquire" };
 
 // ───────── hero
 
 export const hero = {
-  // Shown as "Interior design · Solana Beach"; on phones the two parts stack
-  // without the dot, so nothing wraps mid-phrase.
+  // No longer shown in the hero (which shows site.location under the tagline);
+  // still used by the OG image (scripts/make-og-image.mjs) and llms.txt.
   eyebrow: ["Interior design", "Solana Beach"],
   /** Read before the visual headline by screen readers and search engines. */
   srPrefix: "Interior design in Solana Beach:",

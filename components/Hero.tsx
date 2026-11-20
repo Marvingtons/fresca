@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { heroFilm } from "@/content/media";
-import { hero } from "@/content/site";
+import { hero, site } from "@/content/site";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { INTRO_FRAME, INTRO_KEY, introIsPlaying } from "@/lib/intro";
 import { MOTION } from "@/lib/motion";
@@ -139,7 +139,8 @@ export default function Hero() {
           </picture>
           <HeroFilm ready={introDone} />
         </div>
-        <div className="hero-shade absolute inset-0 bg-[rgba(18,17,15,.38)]" />
+        {/* Clear over the top 45% so the upper photo stays bright; darkens toward the type. */}
+        <div className="hero-shade absolute inset-0 bg-[linear-gradient(to_bottom,rgba(20,18,16,0)_45%,rgba(20,18,16,.72)_100%)]" />
       </div>
 
       <div
@@ -152,29 +153,19 @@ export default function Hero() {
         </span>
       </div>
 
-      <div className="hero-content absolute inset-x-0 bottom-0 flex flex-col items-center px-pad pb-[9vh] text-center text-white">
-        {/* The spec's `.hero-content p` rule outranks `.cap` here: 16px, white/86. */}
-        <p className="cap hero-fade mb-5 max-w-[480px] !text-base text-white/[.86]">
-          {hero.eyebrow[0]}
-          <span className="max-md:hidden"> · </span>
-          <br className="md:hidden" />
-          {hero.eyebrow[1]}
-        </p>
-        <h1 className="font-serif text-[clamp(52px,7.4vw,124px)] font-normal leading-[.95] tracking-[-.015em]">
+      {/* The block's bottom edge sits 12% of the hero height above the bottom. */}
+      <div className="hero-content absolute inset-x-0 bottom-[12%] flex flex-col items-center px-pad text-center text-white">
+        <h1 className="font-cormorant text-[clamp(44px,7.2vw,112px)] font-medium leading-[.95] tracking-[-.01em]">
           <span className="sr-only">{hero.srPrefix} </span>
           <Line reveal={false} className="hero-ln">
             {hero.lines[0]}
           </Line>{" "}
           <Line reveal={false} className="hero-ln">
-            <em>{hero.lines[1]}</em>
+            <em className="font-medium">{hero.lines[1]}</em>
           </Line>
         </h1>
-        <p className="hero-fade mt-[22px] max-w-[420px] text-base text-white/[.86]">{hero.text}</p>
-      </div>
-
-      <div aria-hidden="true" className="cap hero-fade absolute bottom-7 left-pad flex items-center gap-3 text-white">
-        <i className="relative block h-9 w-px overflow-hidden bg-white/40 after:absolute after:left-0 after:top-[-100%] after:h-full after:w-px after:animate-cue after:bg-white after:content-['']" />
-        Scroll
+        <p className="hero-fade mt-5 max-w-[34ch] font-outfit text-base font-light text-white/[.86] sm:text-[17px]">{hero.text}</p>
+        <p className="hero-fade mt-4 font-outfit text-[12px] font-normal uppercase tracking-[.18em] text-white/70">{site.location}</p>
       </div>
     </section>
   );

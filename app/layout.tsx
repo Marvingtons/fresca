@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { getImageProps } from "next/image";
-import { Hanken_Grotesk, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
+import { Cormorant_Garamond, Hanken_Grotesk, IBM_Plex_Mono, Instrument_Serif, Outfit } from "next/font/google";
 import SmoothScroll from "@/components/SmoothScroll";
 import { heroFilm } from "@/content/media";
 import { hero, site } from "@/content/site";
@@ -29,6 +29,22 @@ const mono = IBM_Plex_Mono({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-plex-mono",
+});
+
+// Header and hero type.
+const cormorant = Cormorant_Garamond({
+  weight: "500",
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-cormorant",
+});
+
+const outfit = Outfit({
+  weight: ["300", "400"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-outfit",
 });
 
 export const metadata: Metadata = {
@@ -63,7 +79,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children, ld }: Readonly<{ children: React.ReactNode; ld: React.ReactNode }>) {
   return (
     // `intro` may be added to <html> before hydration by introScript.
-    <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable} ${cormorant.variable} ${outfit.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: introScript(introFrame) }} />
         {/* The hero poster is the LCP image. */}

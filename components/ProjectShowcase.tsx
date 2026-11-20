@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { showcase } from "@/content/site";
-import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { gsap, useGSAP } from "@/lib/gsap";
 import { MOTION, prefersReducedMotion } from "@/lib/motion";
 
 const { projects, labels } = showcase;
@@ -51,10 +51,6 @@ export default function ProjectShowcase() {
 
   const { contextSafe } = useGSAP(
     () => {
-      // While the slider fills the screen, the header drops its difference blend for
-      // a dark scrim, so the wordmark stays readable over light photos.
-      ScrollTrigger.create({ trigger: root.current, start: "top top", end: "bottom top", toggleClass: { targets: ".site-header", className: "on-media" } });
-
       const mm = gsap.matchMedia();
       mm.add(MOTION, () => {
         // Ground-colored blocks collapse as the section arrives.
