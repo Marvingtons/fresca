@@ -358,15 +358,15 @@ export const approach = {
     {
       title: "Plan",
       text: "I start with how you move through the house: where you cook, gather and put things down. The floor plan comes before any finish.",
+      // `photo` is not shown at the moment: the cards are drawing and text only. Kept
+      // for the photo slot marked TODO in components/Approach.tsx.
       photo: { src: img("navy-chair-great-room"), alt: "Great room with navy swivel chairs and linear fireplace" },
-      board: { src: img("color-floor-plan"), alt: "Color floor plan of a two-story home" },
       drawing: "plan" as ApproachDrawingKind,
     },
     {
       title: "Design",
       text: "Cabinetry, stone, tile and paint are chosen together on one board, so every surface agrees with the one beside it.",
       photo: { src: img("blue-gray-island-kitchen"), alt: "Kitchen with blue-gray island and patterned tile backsplash" },
-      board: { src: img("kitchen-material-board"), alt: "Kitchen material and elevation board" },
       drawing: "elevation" as ApproachDrawingKind,
     },
     {
@@ -374,7 +374,6 @@ export const approach = {
       text: "Each fixture is placed on a ceiling plan with the room’s daylight in mind, so the space works at noon and at night.",
       // Tight crop of the Pl. 01 pendants, so the lantern kitchen (Pl. 05) isn't shown twice.
       photo: { src: img("glass-pendants-crop"), alt: "Three clear glass pendants over the marble island of the Solana Beach kitchen" },
-      board: { src: img("lighting-ceiling-plan"), alt: "Reflected ceiling and lighting plan" },
       drawing: "ceiling" as ApproachDrawingKind,
     },
   ],
@@ -392,6 +391,16 @@ export const about = {
    * llms-full.txt. Waiting on Karen to confirm (docs/COPY-FOR-KAREN.md).
    */
   text: `${site.name} is a residential design studio in ${site.location}, run by ${founder.name}, ${founder.role}. The studio designs kitchens, baths and whole homes.`,
+  /**
+   * 4:5 portrait slot. Stand-in until Karen sends a portrait: the Pl. 06 guest
+   * bath, same file as the studio wall. `placeholder` shows under it in
+   * terracotta (content/placeholders.ts).
+   */
+  portrait: {
+    src: img("stenciled-ceiling-guest-bath"),
+    alt: "Guest bathroom in Solana Beach with a star-stenciled ceiling, a walk-in shower in vertical white tile, an oak vanity and black fixtures",
+    placeholder: "[PLACEHOLDER: About portrait of Karen, 4:5]",
+  },
 };
 
 // ───────── founder quote

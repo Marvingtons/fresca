@@ -4,20 +4,19 @@ import Link from "next/link";
 import { useRef } from "react";
 import { contact, footerLinks, privacy, site } from "@/content/site";
 import { gsap, useGSAP } from "@/lib/gsap";
-import { MOTION, revealLines } from "@/lib/motion";
+import { MOTION } from "@/lib/motion";
 import ContactForm from "./ContactForm";
 import Copy from "./Copy";
-import Line from "./LineReveal";
+import Reveal from "./Reveal";
 
 export default function Footer() {
   const root = useRef<HTMLElement>(null);
 
+  // The giant wordmark rises into place.
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
       mm.add(MOTION, () => {
-        revealLines(root.current!);
-        // The giant wordmark rises into place.
         gsap.fromTo(
           ".f-word",
           { yPercent: 40 },
@@ -36,21 +35,23 @@ export default function Footer() {
       <div className="flex flex-wrap justify-between gap-x-20 gap-y-12">
         <div className="flex-[1_1_420px]">
           <hgroup>
-            <h2 className="cap text-on-dark">{contact.eyebrow}</h2>
-            <p className="mb-6 mt-[18px] font-serif text-[clamp(52px,6.4vw,110px)] font-normal leading-[.94]">
-              <Line>{contact.heading[0]}</Line>{" "}
-              <Line>
-                <em>{contact.heading[1]}</em>
-              </Line>
-            </p>
+            <Reveal as="h2" variant="fade" className="cap text-on-dark">
+              {contact.eyebrow}
+            </Reveal>
+            <Reveal as="p" variant="lines" className="mb-6 mt-[18px] font-serif text-[clamp(52px,6.4vw,110px)] font-normal leading-[.94]">
+              {contact.heading[0]} <br />
+              <em>{contact.heading[1]}</em>
+            </Reveal>
           </hgroup>
-          <p className="max-w-[420px] text-on-dark">
-            <Copy text={contact.text} />
-          </p>
-          <p className="mt-5 max-w-[420px] text-sm text-on-dark">
-            <span className="cap mr-2 text-ground">{contact.serviceArea.label}</span>
-            {contact.serviceArea.text}
-          </p>
+          <Reveal variant="fade" stagger>
+            <p className="max-w-[420px] text-on-dark">
+              <Copy text={contact.text} />
+            </p>
+            <p className="mt-5 max-w-[420px] text-sm text-on-dark">
+              <span className="cap mr-2 text-ground">{contact.serviceArea.label}</span>
+              {contact.serviceArea.text}
+            </p>
+          </Reveal>
         </div>
         <ContactForm />
       </div>
