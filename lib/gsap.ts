@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 import type { gsap as Gsap } from "gsap";
 import type { ScrollTrigger as ScrollTriggerType } from "gsap/ScrollTrigger";
 
@@ -43,8 +43,13 @@ export function useMotion(
   { scope, dependencies = [] }: { scope?: RefObject<Element | null> | string; dependencies?: unknown[] } = {},
 ) {
   const ctx = useRef<gsap.Context | null>(null);
+  // Always the latest setup (and the props it closes over), without re-running
+  // the effect. Updated after render, not during it. (useEffectEvent would do
+  // this, but the React build bundled with Next 15 does not have it.)
   const latest = useRef(setup);
-  latest.current = setup;
+  useLayoutEffect(() => {
+    latest.current = setup;
+  });
 
   useEffect(() => {
     let cancelled = false;

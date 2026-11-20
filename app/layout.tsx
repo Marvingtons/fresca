@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
-import { photoSrcSet } from "@/components/Photo";
+import { photoSrcSet } from "@/lib/photos";
 import SmoothScroll from "@/components/SmoothScroll";
 import { heroFilm } from "@/content/media";
 import { hero, site } from "@/content/site";

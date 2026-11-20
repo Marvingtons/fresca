@@ -1,9 +1,9 @@
 import { Fragment } from "react";
 
 /** Matches a "[PLACEHOLDER: ...]" marker inside a copy string. */
-export const PLACEHOLDER = /(\[PLACEHOLDER:[^\]]*\])/;
+const PLACEHOLDER = /(\[PLACEHOLDER:[^\]]*\])/;
 
-export const isPlaceholder = (text: string) => PLACEHOLDER.test(text);
+const isPlaceholder = (text: string) => PLACEHOLDER.test(text);
 
 /**
  * Renders a copy string, showing any [PLACEHOLDER: ...] marker in terracotta so

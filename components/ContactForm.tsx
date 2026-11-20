@@ -33,8 +33,11 @@ export default function ContactForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const thanksRef = useRef<HTMLParagraphElement>(null);
   const [errors, setErrors] = useState<Errors>({});
-  const [touched, setTouched] = useState<Partial<Record<ContactField, boolean>>>({});
+  // Fields visited so far: only read in handlers, so a ref (no re-render).
+  const touched = useRef<Partial<Record<ContactField, boolean>>>({});
   const [status, setStatus] = useState<Status>("idle");
+  // Set synchronously, so a double click cannot submit twice before `status` re-renders.
+  const submitting = useRef(false);
 
   useEffect(() => {
     if (status === "sent") thanksRef.current?.focus();
@@ -44,20 +47,22 @@ export default function ContactForm() {
 
   // Inline validation: check a field once it has been visited, and keep it live after that.
   const revalidate = async (field: ContactField, force = false) => {
-    if (!force && !touched[field]) return;
+    if (!force && !touched.current[field]) return;
     const message = (await fieldErrors(values()))[field];
     setErrors((prev) => ({ ...prev, [field]: message }));
   };
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (status === "sending") return;
+    if (submitting.current) return;
+    submitting.current = true;
     const data = values();
     const found = await fieldErrors(data);
-    setTouched({ name: true, email: true, message: true });
+    touched.current = { name: true, email: true, message: true };
     setErrors(found);
     const firstInvalid = FIELDS.find((f) => found[f.name]);
     if (firstInvalid) {
+      submitting.current = false;
       formRef.current?.querySelector<HTMLElement>(`[name="${firstInvalid.name}"]`)?.focus();
       return;
     }
@@ -83,6 +88,7 @@ export default function ContactForm() {
     } catch {
       setStatus("error");
     }
+    submitting.current = false; // only reached on failure: the form can be sent again
   }
 
   if (status === "sent") {
@@ -111,7 +117,7 @@ export default function ContactForm() {
           "aria-invalid": error ? true : undefined,
           "aria-describedby": error ? `${id}-error` : undefined,
           onBlur: () => {
-            setTouched((t) => ({ ...t, [f.name]: true }));
+            touched.current[f.name] = true;
             revalidate(f.name, true);
           },
           onChange: () => revalidate(f.name),

@@ -113,7 +113,7 @@ export default function Hero() {
 
   return (
     <section ref={root} id="top" className="relative h-svh min-h-[560px] overflow-hidden bg-ground">
-      <div className="hero-media absolute inset-0 overflow-hidden will-change-[clip-path]">
+      <div className="hero-media absolute inset-0 overflow-hidden">
         {/* Intro-only photos: display:none (and so never loaded) once the intro has played. */}
         {hero.cycle.map((src, i) => (
           <div key={src} className="hero-cycle absolute inset-0">

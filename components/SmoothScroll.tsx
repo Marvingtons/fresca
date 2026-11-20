@@ -34,6 +34,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
     let cancelled = false;
     let lenis: Lenis | null = null;
     let removeTick = () => {};
+    let offScroll = () => {};
     let timer: number | undefined;
     let refresh = () => {};
     const onLoadCapture = (e: Event) => {
@@ -48,7 +49,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
         const { default: LenisClass } = await import("lenis");
         if (cancelled) return;
         lenis = new LenisClass({ lerp: 0.09, autoRaf: false });
-        lenis.on("scroll", ScrollTrigger.update);
+        offScroll = lenis.on("scroll", ScrollTrigger.update);
         // Lenis runs on GSAP's ticker: one requestAnimationFrame loop for both.
         const tick = (time: number) => lenis!.raf(time * 1000);
         gsap.ticker.add(tick);
@@ -60,6 +61,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
 
       // Recalculate trigger positions once fonts and images have settled.
       refresh = () => {
+        if (cancelled) return;
         window.clearTimeout(timer);
         timer = window.setTimeout(() => ScrollTrigger.refresh(), 150);
       };
@@ -75,6 +77,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       window.removeEventListener("load", refresh);
       document.removeEventListener("load", onLoadCapture, true);
       removeTick();
+      offScroll();
       lenis?.destroy();
       lenisRef.current = null;
     };

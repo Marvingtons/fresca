@@ -46,7 +46,8 @@ function usePastHero(headerRef: React.RefObject<HTMLElement | null>) {
 function currentSection() {
   const y = window.innerHeight * 0.4;
   return navLinks.findIndex((link) => {
-    const r = document.querySelector(link.href)?.getBoundingClientRect();
+    // Menu links are in-page anchors (#id); anything else matches nothing.
+    const r = link.href.startsWith("#") ? document.getElementById(link.href.slice(1))?.getBoundingClientRect() : undefined;
     return !!r && r.top <= y && r.bottom > y;
   });
 }
@@ -118,7 +119,7 @@ export default function Navigation() {
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, closeMenu]);
+  }, [open, closeMenu]); // closeMenu is a stable useCallback, so this re-subscribes only on open
 
   // Ink type whenever the header sits on ivory: past the hero, or over the open menu.
   const ink = solid || open;

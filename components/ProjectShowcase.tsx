@@ -120,7 +120,7 @@ export default function ProjectShowcase() {
         <div style={{ width: `min(${FRAME_MAX}px, calc(100vw - 2 * var(--pad)), calc((100svh - var(--hh) - ${CHROME}px) * 4 / 3))` }}>
           <h2 className="cap sc-fade mb-4 text-muted">{showcase.eyebrow}</h2>
 
-          <div className="sc-media relative aspect-[4/3] overflow-hidden will-change-[clip-path]">
+          <div className="sc-media relative aspect-[4/3] overflow-hidden">
             {projects.map((project, i) =>
               loaded.has(i) ? (
                 <Photo
