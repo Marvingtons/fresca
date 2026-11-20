@@ -29,7 +29,7 @@ const config: Config = {
         serif: ["var(--serif)"],
         sans: ["var(--sans)"],
         mono: ["var(--mono)"],
-        // Header and hero only, for now.
+        // serif = Cormorant Garamond, sans and mono = Outfit (app/globals.css).
         cormorant: ["var(--cormorant)"],
         outfit: ["var(--outfit)"],
       },

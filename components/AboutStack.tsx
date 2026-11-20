@@ -51,7 +51,7 @@ export default function AboutStack() {
           ))}
         </blockquote>
         <figcaption className="mt-7">
-          <b className="block font-semibold">{founder.name}</b>
+          <b className="block font-normal">{founder.name}</b>
           <span className="text-sm text-muted">{founder.role}</span>
         </figcaption>
       </figure>

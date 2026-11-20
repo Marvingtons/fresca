@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Hanken_Grotesk, IBM_Plex_Mono, Instrument_Serif, Outfit } from "next/font/google";
+import { Cormorant_Garamond, Outfit } from "next/font/google";
 import { photoSrcSet } from "@/components/Photo";
 import SmoothScroll from "@/components/SmoothScroll";
 import { heroFilm } from "@/content/media";
@@ -9,29 +9,8 @@ import { sharing } from "@/lib/metadata";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
-const serif = Instrument_Serif({
-  weight: "400",
-  style: ["normal", "italic"],
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-instrument",
-});
-
-const sans = Hanken_Grotesk({
-  weight: ["400", "500", "600"],
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-hanken",
-});
-
-const mono = IBM_Plex_Mono({
-  weight: "400",
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-plex-mono",
-});
-
-// Header and hero type.
+// The site's only two families, self-hosted by next/font (latin subset, swap,
+// preloaded). Serif headings and the hero: Cormorant Garamond 500.
 const cormorant = Cormorant_Garamond({
   weight: "500",
   style: ["normal", "italic"],
@@ -40,6 +19,7 @@ const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
 });
 
+// Body, labels and captions: Outfit 300 and 400.
 const outfit = Outfit({
   weight: ["300", "400"],
   subsets: ["latin"],
@@ -79,7 +59,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children, ld }: Readonly<{ children: React.ReactNode; ld: React.ReactNode }>) {
   return (
     // `intro` may be added to <html> before hydration by introScript.
-    <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable} ${cormorant.variable} ${outfit.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${cormorant.variable} ${outfit.variable}`} suppressHydrationWarning>
       <head>
         {/* Also preloads the LCP image: the intro's first frame, or the hero poster. */}
         <script dangerouslySetInnerHTML={{ __html: introScript(introFrame, heroFilm.poster.avif) }} />

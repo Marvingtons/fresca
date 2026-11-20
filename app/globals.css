@@ -11,11 +11,13 @@
   --line: rgba(29, 28, 26, 0.14);
   --accent: #2b3a55;
   --on-dark: #cfc9bc;
-  --serif: var(--font-instrument), Georgia, serif;
-  --mono: var(--font-plex-mono), ui-monospace, monospace;
-  --sans: var(--font-hanken), system-ui, sans-serif;
+  /* Two families only (docs/PERF.md): Cormorant Garamond 500 roman and italic,
+     Outfit 300 and 400. --serif, --sans and --mono are kept as role names. */
   --cormorant: var(--font-cormorant), Georgia, serif;
   --outfit: var(--font-outfit), system-ui, sans-serif;
+  --serif: var(--cormorant);
+  --sans: var(--outfit);
+  --mono: var(--outfit);
   --pad: clamp(16px, 2.2vw, 32px);
 }
 
