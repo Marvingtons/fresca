@@ -218,137 +218,9 @@ html:not(.intro) .hero-cycle {
   display: none;
 }
 
-/* ───────── studio wall annotations (v6): 12-col grid, ruler, dimension
-   lines and callouts. Ported verbatim from reference/fresca-v6-source.html. */
-.art-grid {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: linear-gradient(to right, rgba(29, 28, 26, 0.07) 1px, transparent 1px);
-  background-size: calc(100% / 12) 100%;
-  border-right: 1px solid rgba(29, 28, 26, 0.07);
-}
-.art-cols {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  pointer-events: none;
-}
-.art-cols span {
-  padding: 8px 0 0 6px;
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  color: rgba(29, 28, 26, 0.4);
-}
-.art-ruler {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: calc(var(--pad) * -1);
-  width: var(--pad);
-  pointer-events: none;
-  background: repeating-linear-gradient(to bottom, rgba(29, 28, 26, 0.22) 0 1px, transparent 1px 1%) right top / 5px 100% no-repeat;
-}
-.art-ruler span {
-  position: absolute;
-  right: 8px;
-  transform: translateY(-50%);
-  font-family: var(--mono);
-  font-size: 8.5px;
-  color: rgba(29, 28, 26, 0.45);
-}
-.art-ruler span::after {
-  content: "";
-  position: absolute;
-  right: -8px;
-  top: 50%;
-  width: 9px;
-  height: 1px;
-  background: rgba(29, 28, 26, 0.45);
-}
-.fr {
-  position: relative;
-}
-.dim {
-  position: absolute;
-  z-index: 3;
-  color: rgba(29, 28, 26, 0.55);
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  pointer-events: none;
-}
-.dim .dl {
-  position: absolute;
-  background: currentColor;
-}
-.dim em {
-  position: absolute;
-  font-style: normal;
-  background: var(--ground);
-  padding: 0 6px;
-}
-.dim.h {
-  left: 0;
-  right: 0;
-  top: -22px;
-  height: 9px;
-  border-left: 1px solid;
-  border-right: 1px solid;
-}
-.dim.h .dl {
-  left: 0;
-  right: 0;
-  top: 4px;
-  height: 1px;
-  transform-origin: 0 50%;
-}
-.dim.h em {
-  left: 50%;
-  top: 4px;
-  transform: translate(-50%, -50%);
-}
-.dim.v {
-  top: 0;
-  bottom: 0;
-  width: 9px;
-  border-top: 1px solid;
-  border-bottom: 1px solid;
-}
-.dim.v.l {
-  left: -22px;
-}
-.dim.v.r {
-  right: -22px;
-}
-.dim.v .dl {
-  top: 0;
-  bottom: 0;
-  left: 4px;
-  width: 1px;
-  transform-origin: 50% 0;
-}
-.dim.v em {
-  left: 4px;
-  top: 50%;
-  transform: translate(-50%, -50%) rotate(-90deg);
-}
-
-/* Plate labels: on narrow plates (v5 widths go down to 11% of the wall) the grid
-   coordinate moves under the city instead of squeezing the title. */
+/* Plate labels: on the narrowest plates everything stacks in one column. */
 .pl {
   container-type: inline-size;
-}
-@container (max-width: 230px) {
-  .pl .xy {
-    grid-column: 2;
-    grid-row: auto;
-  }
 }
 @container (max-width: 100px) {
   .pl .pl-label {
@@ -465,20 +337,6 @@ html:not(.intro) .hero-cycle {
   background: #c9a86a;
 }
 
-@media (max-width: 860px) {
-  .art-grid,
-  .art-cols,
-  .art-ruler,
-  .pl .xy {
-    display: none;
-  }
-  .dim.v.l {
-    left: -16px;
-  }
-  .dim.v.r {
-    right: -16px;
-  }
-}
 /* Ruler and playhead belong to the pinned desktop track only (mobile, and
    reduced motion, where the panels stack). */
 @media (max-width: 860px), (prefers-reduced-motion: reduce) {
@@ -551,6 +409,13 @@ html:not(.intro) .hero-cycle {
   letter-spacing: 0.04em;
   opacity: 0.5;
 }
+/* Schedule under the plan (below 1024px): the drawing is narrower, so its type is larger. */
+.plan-below .lab {
+  font-size: 11px;
+}
+.plan-below .num {
+  font-size: 9px;
+}
 @media (prefers-reduced-motion: no-preference) {
   /* Structural selectors, not [pathLength]: Chrome does not re-style SVG children
      matched by that camel-case attribute when .drawn is added. */
@@ -590,14 +455,4 @@ html:not(.intro) .hero-cycle {
   .plan.drawn .plan-row {
     opacity: 1;
   }
-}
-
-/* Slider text sits on the photo with no wash over it: a soft shadow on the
-   type only keeps it readable on bright rooms. */
-.sc-text h2,
-.sc-text h3,
-.sc-text span,
-.sc-text dt,
-.sc-text dd {
-  text-shadow: 0 1px 2px rgba(14, 13, 12, 0.35), 0 2px 18px rgba(14, 13, 12, 0.55);
 }

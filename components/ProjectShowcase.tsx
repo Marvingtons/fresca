@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useRef, useState } from "react";
 import { showcase } from "@/content/site";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { MOTION, prefersReducedMotion } from "@/lib/motion";
+import Photo from "./Photo";
 
-const { projects, labels } = showcase;
+const { projects } = showcase;
 const pad2 = (n: number) => String(n).padStart(2, "0");
 const wrap = (n: number) => (n + projects.length) % projects.length;
 /** Slides worth having in the DOM when `n` is showing: it and its neighbours. */
@@ -18,6 +18,8 @@ const around = (n: number) => [n, wrap(n + 1), wrap(n - 1)];
  * photo is shown larger than its own pixels (CLAUDE.md).
  */
 const FRAME_MAX = 1065;
+/** Height kept free around the frame: eyebrow above, caption row below, breathing room. */
+const CHROME = 216;
 
 function Arrow({ dir, onClick }: { dir: "prev" | "next"; onClick: () => void }) {
   return (
@@ -25,7 +27,7 @@ function Arrow({ dir, onClick }: { dir: "prev" | "next"; onClick: () => void }) 
       type="button"
       onClick={onClick}
       aria-label={dir === "prev" ? "Previous project" : "Next project"}
-      className="grid h-12 w-12 cursor-pointer place-items-center rounded-full border border-ground/50 bg-transparent text-ground transition-colors duration-300 hover:bg-ground hover:text-ink"
+      className="grid h-11 w-11 cursor-pointer place-items-center rounded-full border border-ink/40 bg-transparent text-ink transition-colors duration-300 hover:bg-ink hover:text-ground"
     >
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
         <path d={dir === "prev" ? "M10 3 5 8l5 5" : "m6 3 5 5-5 5"} />
@@ -49,11 +51,7 @@ export default function ProjectShowcase() {
     () => {
       const mm = gsap.matchMedia();
       mm.add(MOTION, () => {
-        // Ground-colored blocks collapse as the section arrives.
-        gsap.fromTo(".sc-chess-l", { height: "65vh" }, { height: 0, ease: "power2.out", scrollTrigger: { trigger: root.current, start: "top bottom", end: "top 30%", scrub: 0.8 } });
-        gsap.fromTo(".sc-chess-r", { height: "25vh" }, { height: 0, ease: "power2.out", scrollTrigger: { trigger: root.current, start: "top bottom", end: "top 45%", scrub: 0.8 } });
-
-        // The clipped frame opens to the full panel, then the details arrive.
+        // The clipped frame opens to the full photo, then the caption row arrives.
         gsap
           .timeline({ scrollTrigger: { trigger: root.current, start: "top top", end: "bottom bottom", scrub: 0.8 } })
           .fromTo(".sc-media", { clipPath: "inset(24% 28% 24% 28%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 3, ease: "power2.out" }, 0)
@@ -104,69 +102,58 @@ export default function ProjectShowcase() {
         gsap.fromTo(titleRef.current, { yPercent: 110 }, { yPercent: 0, duration: 0.8, ease: "power3.out" });
       },
     });
-    gsap.fromTo(".sc-stats dd", { opacity: 1 }, { opacity: 0, duration: 0.3, yoyo: true, repeat: 1, repeatDelay: 0.25 });
+    gsap.fromTo(".sc-city", { opacity: 1 }, { opacity: 0, duration: 0.3, yoyo: true, repeat: 1, repeatDelay: 0.25 });
   });
 
   const p = projects[shown];
 
   return (
     <section ref={root} id="work" aria-label="Selected projects" className="relative h-[280vh]">
-      <div className="sticky top-0 h-svh">
-        <div className="sc-text relative h-full overflow-hidden bg-panel text-ground">
-          {/* One 4:3 photo rectangle, centered in the space below the fixed header
-              (--hh: 72px, 88px on desktop), as large as the screen and FRAME_MAX allow. */}
-          <div
-            style={{ width: `min(${FRAME_MAX}px, calc(100vw - 2 * var(--pad)), calc((100svh - var(--hh) - 64px) * 4 / 3))` }}
-            className="sc-media absolute left-1/2 top-[calc(50%+var(--hh)/2)] aspect-[4/3] -translate-x-1/2 -translate-y-1/2 overflow-hidden will-change-[clip-path] [--hh:72px] md:[--hh:88px]"
-          >
+      {/* The page ground shows around the slide: no backdrop, nothing drawn over the photo.
+          Header height --hh: 72px, 88px on desktop. */}
+      <div className="sticky top-0 flex h-svh items-center justify-center pt-[var(--hh)] [--hh:72px] md:[--hh:88px]">
+        {/* Eyebrow, one 4:3 slide, caption row: all the width of the slide, which is as
+            large as the screen and FRAME_MAX allow. */}
+        <div style={{ width: `min(${FRAME_MAX}px, calc(100vw - 2 * var(--pad)), calc((100svh - var(--hh) - ${CHROME}px) * 4 / 3))` }}>
+          <h2 className="cap sc-fade mb-4 text-muted">{showcase.eyebrow}</h2>
+
+          <div className="sc-media relative aspect-[4/3] overflow-hidden will-change-[clip-path]">
             {projects.map((project, i) =>
               loaded.has(i) ? (
-                <Image
+                <Photo
                   key={project.title}
                   ref={(el) => {
                     slides.current[i] = el;
                   }}
                   src={project.image.src}
                   alt={project.image.alt}
-                  fill
-                  quality={85}
                   sizes={`min(${FRAME_MAX}px, 100vw)`}
                   style={project.image.focus ? { objectPosition: project.image.focus } : undefined}
-                  className={`sc-img object-cover ${i === 0 ? "opacity-100" : "opacity-0"}`}
+                  className={`sc-img ${i === 0 ? "opacity-100" : "opacity-0"}`}
                 />
               ) : null,
             )}
           </div>
 
-          <div aria-hidden="true" className="sc-chess-l absolute left-0 top-0 z-[6] h-0 w-1/2 bg-ground" />
-          <div aria-hidden="true" className="sc-chess-r absolute right-0 top-0 z-[6] h-0 w-1/2 bg-ground" />
-
-          <div className="sc-fade absolute inset-x-0 top-0 z-[5] flex items-start justify-between px-[clamp(20px,3vw,48px)] pt-24 max-md:pt-[84px]">
-            <h2 className="cap font-normal">{showcase.eyebrow}</h2>
-            <span className="font-serif text-[22px] tabular-nums" aria-live="polite">
-              {pad2(shown + 1)} / {pad2(projects.length)}
-            </span>
-          </div>
-
-          <div className="absolute inset-x-0 bottom-0 z-[5] flex flex-wrap items-end justify-between gap-7 px-[clamp(20px,3vw,48px)] pb-[clamp(24px,4vh,44px)]">
-            <div>
-              <div className="sc-title-mask overflow-hidden">
-                <h3 ref={titleRef} className="max-w-[780px] font-serif text-[clamp(44px,6vw,96px)] font-normal leading-[.95]">
-                  {p.title}
-                </h3>
-              </div>
-              <dl className="sc-stats sc-fade mt-6 flex flex-wrap gap-x-11 gap-y-5">
-                {p.city && (
-                  <div className="min-w-[96px]">
-                    <dt className="text-[10px] uppercase tracking-[.22em] text-on-dark max-md:text-[12px]">{labels.city}</dt>
-                    <dd className="mt-1.5 font-serif text-[30px] leading-none">{p.city}</dd>
-                  </div>
-                )}
-              </dl>
+          {/* Caption row. Phones: title on its own line, then location with the counter
+              and arrows. Desktop: title over location on the left, counter and arrows right. */}
+          <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-1">
+            <div className="sc-title-mask overflow-hidden max-md:col-span-2 max-md:min-h-[65px]">
+              <h3 ref={titleRef} className="font-cormorant text-[28px] font-medium leading-[1.15]">
+                {p.title}
+              </h3>
             </div>
-            <div className="sc-fade flex items-center gap-2.5">
-              <Arrow dir="prev" onClick={() => go(-1)} />
-              <Arrow dir="next" onClick={() => go(1)} />
+            <p className="sc-city sc-fade col-start-1 font-outfit text-[12px] uppercase tracking-[.16em] text-ink/55 md:row-start-2">
+              {p.city}
+            </p>
+            <div className="sc-fade col-start-2 flex items-center gap-4 md:row-span-2 md:row-start-1">
+              <span className="font-outfit text-[12px] tabular-nums" aria-live="polite">
+                {pad2(shown + 1)} / {pad2(projects.length)}
+              </span>
+              <div className="flex items-center gap-2">
+                <Arrow dir="prev" onClick={() => go(-1)} />
+                <Arrow dir="next" onClick={() => go(1)} />
+              </div>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-// Copy the photos the design uses into public/images/ with descriptive names,
+// Copy the photos the design uses into assets/prepared/ with descriptive names,
 // flattened to RGB JPEG.
 //
 //   node scripts/prepare-images.mjs ["/path/to/FRESCA PHOTOS"]
@@ -15,7 +15,7 @@ import sharp from "sharp";
 
 const SRC = process.argv[2] ?? path.join(homedir(), "Downloads", "FRESCA PHOTOS");
 const UPSCALED = path.resolve("reference/upscaled");
-const OUT = path.resolve("public/images");
+const OUT = path.resolve("assets/prepared");
 const BUDGET = 600 * 1024;
 
 // Keep in sync with the IMAGE MAP comment in content/site.ts.

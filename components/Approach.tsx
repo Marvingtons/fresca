@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useRef } from "react";
 import { approach } from "@/content/site";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { DESKTOP_MOTION } from "@/lib/motion";
 import ApproachDrawing from "./ApproachDrawing";
+import Photo from "./Photo";
 
 const MOBILE_MOTION = "(max-width: 860px) and (prefers-reduced-motion: no-preference)";
 const REDUCED = "(prefers-reduced-motion: reduce)";
@@ -138,10 +138,10 @@ export default function Approach() {
                 drawing overlaps the photo's lower left; the bottom padding is its overhang. */}
             <div className="relative pb-[16%] w-full md:motion-safe:max-w-[calc(min(62vh,560px)/1.06)] md:motion-safe:justify-self-end">
               <div className="relative ml-auto aspect-[4/5] w-[72%] overflow-hidden">
-                <Image src={panel.photo.src} alt={panel.photo.alt} fill quality={85} sizes="(min-width: 861px) 32vw, 72vw" className="object-cover" />
+                <Photo src={panel.photo.src} alt={panel.photo.alt} sizes="(min-width: 861px) 32vw, 72vw" />
               </div>
               <div className="absolute bottom-0 left-0 aspect-[16/10] w-[56%] overflow-hidden">
-                <Image src={panel.board.src} alt={panel.board.alt} fill quality={85} sizes="(min-width: 861px) 25vw, 56vw" className="object-cover" />
+                <Photo src={panel.board.src} alt={panel.board.alt} sizes="(min-width: 861px) 25vw, 56vw" />
               </div>
             </div>
           </div>

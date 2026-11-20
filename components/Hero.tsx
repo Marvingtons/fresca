@@ -1,14 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { heroFilm } from "@/content/media";
 import { hero, site } from "@/content/site";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
-import { INTRO_FRAME, INTRO_KEY, introIsPlaying } from "@/lib/intro";
+import { INTRO_KEY, INTRO_SIZES, introIsPlaying } from "@/lib/intro";
 import { MOTION } from "@/lib/motion";
 import HeroFilm from "./HeroFilm";
 import Line from "./LineReveal";
+import Photo from "./Photo";
 import { useSmoothScroll } from "./SmoothScroll";
 
 export default function Hero() {
@@ -119,7 +119,7 @@ export default function Hero() {
                 needs full-width resolution. The first one paints before hydration; it is
                 lazy (so never fetched while display:none) and preloaded by introScript
                 only when the intro plays. */}
-            {(i === 0 || laterFrames) && <Image src={src} alt="" {...INTRO_FRAME} className="object-cover" />}
+            {(i === 0 || laterFrames) && <Photo src={src} alt="" sizes={INTRO_SIZES} />}
           </div>
         ))}
         {/* Poster (the film's first frame, and the LCP image) with the film over it. The

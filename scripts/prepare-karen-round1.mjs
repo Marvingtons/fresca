@@ -1,4 +1,4 @@
-// Karen's round 1 photos (iPhone, ~1430px long edge) → public/images/.
+// Karen's round 1 photos (iPhone, ~1430px long edge) → assets/prepared/.
 //
 //   node scripts/prepare-karen-round1.mjs
 //
@@ -10,7 +10,7 @@ import path from "node:path";
 import sharp from "sharp";
 
 const SRC = path.resolve("assets/source/karen-round1");
-const OUT = path.resolve("public/images");
+const OUT = path.resolve("assets/prepared");
 const BUDGET = 600 * 1024;
 
 // Degrees to turn each photo clockwise so it stands upright. These files carry

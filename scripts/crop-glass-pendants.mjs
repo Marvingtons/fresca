@@ -9,8 +9,8 @@ import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 
-const SRC = path.resolve("public/images/black-hood-kitchen-island.jpg");
-const OUT = path.resolve("public/images/glass-pendants-crop.jpg");
+const SRC = path.resolve("assets/prepared/black-hood-kitchen-island.jpg");
+const OUT = path.resolve("assets/prepared/glass-pendants-crop.jpg");
 const BUDGET = 600 * 1024;
 // Portrait, to match the Approach photo frame (about 0.82 : 1).
 const REGION = { left: 690, top: 0, width: 960, height: 1170 };

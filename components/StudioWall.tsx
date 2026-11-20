@@ -1,21 +1,17 @@
 "use client";
 
-import Image from "next/image";
 import { useRef, type CSSProperties } from "react";
 import { studio, type WallItem } from "@/content/site";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { DESKTOP_MOTION, MOTION, revealLines } from "@/lib/motion";
 import Line from "./LineReveal";
+import Photo from "./Photo";
 
 const at = (x: string, y: string, w?: string) => ({ "--x": x, "--y": y, "--w": w }) as CSSProperties;
 
 // Every piece is absolutely placed on desktop; on mobile the wall becomes a
 // staggered single column in source order.
 const placed = "absolute left-[var(--x)] top-[var(--y)]";
-
-/** Grid coordinate of a plate's top-left corner, e.g. C06·R01 (12 columns, rows every 5%). */
-const coord = (x: string, y: string) =>
-  `C${String(Math.round(parseFloat(x) / (100 / 12)) + 1).padStart(2, "0")}·R${String(Math.round(parseFloat(y) / 5)).padStart(2, "0")}`;
 
 function WallPiece({ item }: { item: WallItem }) {
   if (item.kind === "word") {
@@ -60,42 +56,26 @@ function WallPiece({ item }: { item: WallItem }) {
     <figure
       data-speed={item.speed}
       style={at(item.x, item.y, item.w)}
-      className={`pl ${placed} z-[2] w-[var(--w)] text-ink ${
-        item.right ? "max-md:!w-1/2 max-md:self-end" : "max-md:!w-[64%]"
-      } ${item.dim?.dir === "h" ? "max-md:mt-4" : ""} ${item.dim?.dir === "v" && item.dim.side === "l" && !item.right ? "max-md:ml-4" : ""}`}
+      className={`pl ${placed} z-[2] w-[var(--w)] text-ink ${item.right ? "max-md:!w-1/2 max-md:self-end" : "max-md:!w-[64%]"}`}
     >
-      {/* .fr has no overflow clip, so dimension lines can sit outside the photo. */}
-      <div className="fr">
-        <div className="pl-frame relative overflow-hidden bg-ground-2" style={{ aspectRatio: item.ratio }}>
-          <div
-            data-focus={item.focus}
-            className={`pl-img absolute left-0 ${item.focus === "top" ? "top-0" : "top-[-10%]"} h-[120%] w-full`}
-          >
-            <Image
-              src={item.src}
-              alt={item.alt}
-              fill
-              quality={85}
-              sizes={`(min-width: 861px) ${parseFloat(item.w)}vw, ${mobileWidth}vw`}
-              className="object-cover"
-            />
-          </div>
+      <div className="pl-frame relative overflow-hidden bg-ground-2" style={{ aspectRatio: item.ratio }}>
+        <div
+          data-focus={item.focus}
+          className={`pl-img absolute left-0 ${item.focus === "top" ? "top-0" : "top-[-10%]"} h-[120%] w-full`}
+        >
+          <Photo src={item.src} alt={item.alt} sizes={`(min-width: 861px) ${parseFloat(item.w)}vw, ${mobileWidth}vw`} />
         </div>
-        {item.dim && (
-          <span className={`dim ${item.dim.dir} ${item.dim.side ?? ""}`} aria-hidden="true">
-            <i className="dl" />
-            <em>{item.dim.label}</em>
-          </span>
-        )}
       </div>
-      <figcaption className={`pl-label mt-2.5 grid md:w-[max(100%,180px)] ${item.right ? "md:ml-[min(0px,calc(100%-180px))]" : ""} grid-cols-[auto_1fr_auto] gap-x-3 gap-y-[3px] text-[10px] uppercase max-md:text-[12px] tracking-[.18em] text-muted`}>
-        <span>{item.no}</span>
-        <h3 className="font-medium text-ink">{item.title}</h3>
-        <span className="xy col-start-3 row-start-1 font-mono text-[9px] tracking-[.04em] text-ink/45">{coord(item.x, item.y)}</span>
-        {item.city && <span className="col-start-2">{item.city}</span>}
-        {item.caption && (
-          <span className="col-start-2 mt-1 normal-case leading-[1.5] tracking-[.02em]">{item.caption}</span>
-        )}
+      {/* Plate number, title, location, then a hairline. */}
+      <figcaption
+        className={`pl-label mt-2.5 grid grid-cols-[auto_1fr] gap-x-3 gap-y-[3px] border-b border-line pb-2.5 font-outfit md:w-[max(100%,180px)] ${
+          item.right ? "md:ml-[min(0px,calc(100%-180px))]" : ""
+        }`}
+      >
+        <span className="text-[11px] uppercase leading-[18px] tracking-[.16em] text-ink/55">{item.no}</span>
+        <h3 className="text-[12px] font-normal uppercase leading-[18px] tracking-[.14em] text-ink">{item.title}</h3>
+        {item.city && <span className="col-start-2 text-[11px] text-ink/55">{item.city}</span>}
+        {item.caption && <span className="col-start-2 text-[11px] leading-[1.5] text-ink/55">{item.caption}</span>}
       </figcaption>
     </figure>
   );
@@ -118,15 +98,6 @@ export default function StudioWall() {
       mm.add(MOTION, () => {
         revealLines(root.current!);
 
-        // Grid lines reveal top to bottom; column numbers and ruler labels fade in.
-        gsap.fromTo(
-          ".art-grid",
-          { clipPath: "inset(0 0 100% 0)" },
-          { clipPath: "inset(0 0 0% 0)", ease: "none", scrollTrigger: { trigger: root.current, start: "top 85%", end: "45% center", scrub: true } },
-        );
-        gsap.from(".art-cols span", { opacity: 0, y: -6, duration: 0.6, stagger: 0.04, ease: "power2.out", scrollTrigger: { trigger: root.current, start: "top 80%" } });
-        gsap.from(".art-ruler span", { opacity: 0, duration: 0.5, stagger: 0.03, scrollTrigger: { trigger: root.current, start: "top 80%" } });
-
         // Plates unmask from the bottom, then their label arrives; the photo drifts inside its frame.
         gsap.utils.toArray<HTMLElement>(".pl").forEach((pl) => {
           const enter = { trigger: pl, start: "top 92%" };
@@ -146,15 +117,6 @@ export default function StudioWall() {
             { yPercent: top ? 0 : 8, ease: "none", scrollTrigger: { trigger: pl, start: "top bottom", end: "bottom top", scrub: 0.8 } },
           );
 
-          // Dimension line draws in after the photo unmasks, then its label appears.
-          const annotate = { trigger: pl, start: "top 88%" };
-          const dim = pl.querySelector<HTMLElement>(".dim");
-          if (dim) {
-            const vertical = dim.classList.contains("v");
-            gsap.from(dim.querySelector(".dl"), { ...(vertical ? { scaleY: 0 } : { scaleX: 0 }), duration: 1.1, delay: 0.5, ease: "power3.inOut", scrollTrigger: annotate });
-            gsap.from(dim, { opacity: 0, duration: 0.4, delay: 0.45, scrollTrigger: annotate });
-            gsap.from(dim.querySelector("em"), { opacity: 0, duration: 0.5, delay: 1.1, scrollTrigger: annotate });
-          }
         });
 
         gsap.utils.toArray<HTMLElement>(".art-p").forEach((el) => {
@@ -186,38 +148,14 @@ export default function StudioWall() {
       style={{ "--wall-h": studio.height } as CSSProperties}
       className="relative mx-pad h-[var(--wall-h)] max-md:flex max-md:h-auto max-md:flex-col max-md:gap-7 max-md:pb-[72px] max-md:pt-24 max-md:[&>*]:!relative max-md:[&>*]:!left-auto max-md:[&>*]:!top-auto"
     >
-      {/* Drafting layer: 12 column lines, column numbers, and a ruler in the left margin. */}
-      <div className="art-grid" aria-hidden="true" />
-      <div className="art-cols" aria-hidden="true">
-        {Array.from({ length: studio.columns }, (_, i) => (
-          <span key={i}>{String(i + 1).padStart(2, "0")}</span>
-        ))}
-      </div>
-      <div className="art-ruler" aria-hidden="true">
-        {Array.from({ length: studio.rulerMarks }, (_, i) => (
-          <span key={i} style={{ top: `${i * 5}%` }}>
-            {String(i).padStart(2, "0")}
-          </span>
-        ))}
-      </div>
       {/* The big words are aria-hidden, so their line is read here. Keeps its margins
           (they space the mobile column). */}
       <p className="sr-only mx-0 my-5">{studio.srHeading}</p>
       <div className="wall-caption cap absolute inset-x-0 top-[3%] flex justify-between text-muted max-md:-order-1">
         <h2 className="whitespace-nowrap">{studio.caption[0]}</h2>
         <span className="text-right">
-          {studio.caption[1]}
-          <span className="max-md:hidden"> · {studio.caption[2]}</span>
-        </span>
+{studio.caption[1]}</span>
       </div>
-      {studio.marks.map((m) => (
-        <span
-          key={m.x + m.y}
-          aria-hidden="true"
-          style={at(m.x, m.y)}
-          className={`${placed} h-[15px] w-[15px] before:absolute before:left-[7px] before:top-0 before:h-[15px] before:w-px before:bg-ink/30 before:content-[''] after:absolute after:left-0 after:top-[7px] after:h-px after:w-[15px] after:bg-ink/30 after:content-[''] max-md:hidden`}
-        />
-      ))}
       {studio.items.map((item, i) => (
         <WallPiece key={i} item={item} />
       ))}

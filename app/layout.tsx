@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { getImageProps } from "next/image";
 import { Cormorant_Garamond, Hanken_Grotesk, IBM_Plex_Mono, Instrument_Serif, Outfit } from "next/font/google";
+import { photoSrcSet } from "@/components/Photo";
 import SmoothScroll from "@/components/SmoothScroll";
 import { heroFilm } from "@/content/media";
 import { hero, site } from "@/content/site";
-import { INTRO_FRAME, introScript } from "@/lib/intro";
+import { INTRO_SIZES, introScript } from "@/lib/intro";
 import { sharing } from "@/lib/metadata";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
@@ -65,8 +65,8 @@ export const metadata: Metadata = {
   ...sharing,
 };
 
-// The intro's first frame, preloaded by introScript only when the intro plays.
-const { props: introFrame } = getImageProps({ src: hero.cycle[0], alt: "", ...INTRO_FRAME });
+// The intro's first frame (AVIF), preloaded by introScript only when the intro plays.
+const introFrame = { srcSet: photoSrcSet(hero.cycle[0], "avif"), sizes: INTRO_SIZES };
 
 export const viewport: Viewport = {
   themeColor: "#F4F2EB",

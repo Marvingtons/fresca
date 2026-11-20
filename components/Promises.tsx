@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useRef } from "react";
 import { cta, promises } from "@/content/site";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { MOTION, revealLines } from "@/lib/motion";
 import Line from "./LineReveal";
+import Photo from "./Photo";
 import PlanIllustration from "./PlanIllustration";
 
 export default function Promises() {
@@ -66,21 +66,22 @@ export default function Promises() {
             <h3 className="mb-3 font-serif text-[clamp(30px,2.8vw,44px)] font-normal leading-[1.05]">{row.title}</h3>
             <p className="max-w-[440px] text-body">{row.text}</p>
           </div>
-          <div className="promise-media relative aspect-[16/10] overflow-hidden max-md:col-span-full">
-            {"plan" in row ? (
+          {/* Photos sit in a 16:10 box. The plan drawing sets its own height from the
+              same width, so its left and right edges line up with the photos. */}
+          {"plan" in row ? (
+            <div className="promise-media py-[4%] max-md:col-span-full">
               <PlanIllustration />
-            ) : (
-              <Image
+            </div>
+          ) : (
+            <div className="promise-media relative aspect-[16/10] overflow-hidden max-md:col-span-full">
+              <Photo
                 src={row.image.src}
                 alt={row.image.alt}
-                fill
-                quality={85}
                 sizes="(min-width: 861px) 38vw, 100vw"
                 style={row.image.focus ? { objectPosition: row.image.focus } : undefined}
-                className="object-cover"
               />
-            )}
-          </div>
+            </div>
+          )}
         </div>
       ))}
     </section>

@@ -1,5 +1,5 @@
 // Karen's round 2 photos (iPhone originals, 4032 px long edge, already upright)
-// → public/images/.
+// → assets/prepared/.
 //
 //   node scripts/prepare-karen-round2.mjs
 //
@@ -19,7 +19,7 @@ import path from "node:path";
 import sharp from "sharp";
 
 const SRC = path.resolve("assets/source/karen-round2");
-const OUT = path.resolve("public/images");
+const OUT = path.resolve("assets/prepared");
 
 const PHOTOS = {
   // Studio wall Pl. 05. Replaces lantern-pendant-kitchen (round 1).
