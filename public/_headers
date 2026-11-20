@@ -5,3 +5,6 @@
   Cache-Control: public, max-age=31536000, immutable
 /images/*
   Cache-Control: public, max-age=31536000, immutable
+# Next's hashed build output (JS, CSS, fonts).
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable

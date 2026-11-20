@@ -43,9 +43,53 @@ function wwwToApex() {
   ];
 }
 
+/**
+ * Content-Security-Policy. Scripts and styles allow 'unsafe-inline' because the
+ * pages are prerendered (no per-request nonce): Next's inline bootstrap, the
+ * intro script in <head> and GSAP's style attributes need it. Everything else
+ * is this origin only, plus the media bucket for the hero film.
+ */
+function contentSecurityPolicy() {
+  const media = new URL(process.env.NEXT_PUBLIC_MEDIA_BASE).origin;
+  return [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    `img-src 'self' data: ${media}`,
+    `media-src 'self' ${media}`,
+    "font-src 'self'",
+    "connect-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "upgrade-insecure-requests",
+  ].join("; ");
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: { SITEMAP_LASTMOD: sitemapLastmod() },
+  poweredByHeader: false,
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Content-Security-Policy", value: contentSecurityPolicy() },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
+      },
+      {
+        // Pages and text routes: the browser revalidates every time (ETag), so a
+        // deploy shows at once. Hashed assets are immutable (public/_headers).
+        source: "/((?!_next/static|images/|media/).*)",
+        headers: [{ key: "Cache-Control", value: "public, max-age=0, must-revalidate" }],
+      },
+    ];
+  },
   async redirects() {
     return wwwToApex();
   },

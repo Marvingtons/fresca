@@ -129,9 +129,9 @@ Every photo goes through `next/image`, which OpenNext serves with the Worker's `
 for u in http://frescainteriordesign.com http://www.frescainteriordesign.com https://www.frescainteriordesign.com; do curl -sI $u | grep -iE "^(HTTP|location)"; done
 ```
 
-- [ ] `curl -sI https://frescainteriordesign.com/` shows `strict-transport-security`. The site sets no Content-Security-Policy yet, so none appears; if one is added, its `media-src` and `img-src` must include the `NEXT_PUBLIC_MEDIA_BASE` host.
+- [ ] `curl -sI https://frescainteriordesign.com/` shows `strict-transport-security` and `content-security-policy` (set in `next.config.mjs`; its `img-src` and `media-src` take the `NEXT_PUBLIC_MEDIA_BASE` host at build time, so rebuild after changing it), and no `x-powered-by`.
 - [ ] SSL Labs grade A: https://www.ssllabs.com/ssltest/
-- [ ] Headers report reviewed: https://securityheaders.com (expect a note about the missing CSP).
+- [ ] Headers report reviewed: https://securityheaders.com (expect a note that the CSP allows `'unsafe-inline'`, needed by the prerendered pages).
 - [ ] mail-tester.com 9 or better: set `CONTACT_TO_EMAIL` to the address mail-tester.com shows, send the form, read the score, then set the secret back.
 - [ ] Rich Results Test on `https://frescainteriordesign.com/` finds LocalBusiness and FAQ: https://search.google.com/test/rich-results (Google only shows FAQ results for government and health sites, so the test passing is the goal).
 - [ ] `/sitemap.xml`, `/robots.txt`, `/llms.txt` answer 200; `/404` answers 404.
