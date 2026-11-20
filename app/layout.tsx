@@ -1,93 +1,74 @@
 import type { Metadata, Viewport } from "next";
-import { Hanken_Grotesk, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
+import { Cormorant_Garamond, Outfit } from "next/font/google";
+import { photoSrcSet } from "@/lib/photos";
 import SmoothScroll from "@/components/SmoothScroll";
 import { heroFilm } from "@/content/media";
-import { founder, site } from "@/content/site";
-import { introScript } from "@/lib/intro";
+import { hero, site } from "@/content/site";
+import { INTRO_SIZES, introScript } from "@/lib/intro";
+import { sharing } from "@/lib/metadata";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
-const serif = Instrument_Serif({
-  weight: "400",
+// The site's only two families, self-hosted by next/font (latin subset, swap,
+// preloaded). Serif headings and the hero: Cormorant Garamond 500.
+const cormorant = Cormorant_Garamond({
+  weight: "500",
   style: ["normal", "italic"],
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-instrument",
+  variable: "--font-cormorant",
 });
 
-const sans = Hanken_Grotesk({
-  weight: ["400", "500", "600"],
+// Body, labels and captions: Outfit 300 and 400.
+const outfit = Outfit({
+  weight: ["300", "400"],
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-hanken",
-});
-
-const mono = IBM_Plex_Mono({
-  weight: "400",
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-plex-mono",
+  variable: "--font-outfit",
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  // Defaults; each page sets its own title, description, canonical and sharing tags
+  // with pageMetadata (lib/metadata.ts).
   title: site.title,
   description: site.description,
-  alternates: { canonical: "/" },
-  openGraph: {
-    type: "website",
-    url: "/",
-    siteName: site.name,
-    title: site.title,
-    description: site.description,
-    locale: "en_US",
-    images: [site.ogImage],
+  // Temporary set from public/icon.svg (scripts/make-favicons.mjs) until the logo is final.
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
   },
-  twitter: {
-    card: "summary_large_image",
-    title: site.title,
-    description: site.description,
-    images: [site.ogImage.url],
-  },
+  ...sharing,
 };
 
-// Structured data for search engines (schema.org LocalBusiness).
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  name: site.legalName,
-  legalName: site.legalName,
-  description: site.description,
-  url: siteUrl,
-  image: new URL(site.ogImage.url, siteUrl).toString(),
-  email: site.email,
-  telephone: "+1-858-750-0665",
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Solana Beach",
-    addressRegion: "CA",
-    addressCountry: "US",
-  },
-  areaServed: ["Solana Beach", "Del Mar", "Carmel Valley", "North County San Diego"],
-  founder: { "@type": "Person", name: founder.name, jobTitle: founder.role },
-  sameAs: [site.instagram.href],
-};
+// The intro's first frame (AVIF), preloaded by introScript only when the intro plays.
+const introFrame = { srcSet: photoSrcSet(hero.cycle[0], "avif"), sizes: INTRO_SIZES };
 
 export const viewport: Viewport = {
   themeColor: "#F4F2EB",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+/**
+ * `ld` is the @ld parallel route: each page's structured data graph
+ * (lib/structured-data.ts), rendered here so it lands in <head> as one block.
+ */
+export default function RootLayout({ children, ld }: Readonly<{ children: React.ReactNode; ld: React.ReactNode }>) {
   return (
     // `intro` may be added to <html> before hydration by introScript.
-    <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${cormorant.variable} ${outfit.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: introScript }} />
-        {/* The hero poster is the LCP image. */}
-        <link rel="preload" as="image" href={heroFilm.poster.webp} type="image/webp" fetchPriority="high" />
+        {/* Also preloads the LCP image: the intro's first frame, or the hero poster. */}
+        <script dangerouslySetInnerHTML={{ __html: introScript(introFrame, heroFilm.poster.avif) }} />
+        {ld}
       </head>
       <body>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+        <a href="#main" className="skip-link">
+          Skip to content
+        </a>
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

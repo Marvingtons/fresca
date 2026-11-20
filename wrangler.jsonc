@@ -4,6 +4,14 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat"],
+  // Custom domains: `wrangler deploy` creates the DNS records and certificates.
+  // Delete any existing A, AAAA or CNAME on these names first (docs/DEPLOY.md).
+  // www is redirected to the apex by a Cloudflare Redirect Rule before it
+  // reaches the Worker, with a fallback in next.config.mjs for pages.
+  "routes": [
+    { "pattern": "frescainteriordesign.com", "custom_domain": true },
+    { "pattern": "www.frescainteriordesign.com", "custom_domain": true }
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
@@ -13,12 +21,10 @@
   "images": {
     "binding": "IMAGES"
   },
-  // Public values. NEXT_PUBLIC_* are inlined at build time from .env.local or the
-  // shell, so keep these in step with what the build uses.
-  "vars": {
-    "NEXT_PUBLIC_SITE_URL": "",
-    "NEXT_PUBLIC_MEDIA_BASE": "https://pub-364f647b29874b09922e1889f267c323.r2.dev"
-  },
+  // NEXT_PUBLIC_SITE_URL and NEXT_PUBLIC_MEDIA_BASE are inlined at build time
+  // from .env.local or the shell (see .env.example and docs/DEPLOY.md), so they
+  // are not Worker vars. Form secrets: RESEND_API_KEY, CONTACT_TO_EMAIL,
+  // CONTACT_FROM_EMAIL (docs/DEPLOY.md, section 7).
   "observability": {
     "enabled": true
   }

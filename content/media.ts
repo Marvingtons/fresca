@@ -1,8 +1,11 @@
 /**
- * Hero film and poster, hosted on the media bucket (Cloudflare R2).
+ * Hero film (Cloudflare R2) and its poster.
  *
- * Every URL is built from NEXT_PUBLIC_MEDIA_BASE, so moving the bucket to a
- * custom domain is a one-line env change. Files are named here only.
+ * Film URLs are built from NEXT_PUBLIC_MEDIA_BASE, so moving the bucket to a
+ * custom domain is a one-line env change (docs/DEPLOY.md). The poster is the
+ * page's LCP image, so it is served from the site's own origin
+ * (public/media/, cached for a year by public/_headers): no extra connection
+ * before first paint. Its filename must change if the poster changes.
  */
 
 // Referenced literally so Next inlines it into the client bundle.
@@ -14,8 +17,10 @@ export type FilmSource = { src: string; type: string };
 export const heroFilm = {
   /** First frame of the film. Shown before, and instead of, the video. */
   poster: {
-    webp: url("fresca-hero-poster.webp"),
-    jpg: url("fresca-hero-poster.jpg"),
+    // Graded with the photos (scripts/grade-images.mjs): AVIF 78 KB, WebP 90 KB.
+    avif: "/media/fresca-hero-poster-v2.avif",
+    webp: "/media/fresca-hero-poster-v2.webp",
+    jpg: "/media/fresca-hero-poster-v2.jpg",
     width: 1920,
     height: 1080,
   },

@@ -4,14 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/make-og-image.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "copy-lint": "node scripts/copy-lint.mjs",
+    "check:schema": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-structured-data.mjs"
   },
   "dependencies": {
-    "@gsap/react": "^2.1.2",
     "@opennextjs/cloudflare": "^1.20.17",
     "gsap": "^3.15.0",
     "lenis": "^1.3.26",
@@ -21,12 +23,15 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.5.29",
     "@types/node": "^20",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "eslint": "^8",
     "eslint-config-next": "^15.5.29",
+    "opentype.js": "^2.0.0",
     "postcss": "^8",
+    "schema-dts": "^2.1.0",
     "sharp": "^0.35.5",
     "tailwindcss": "^3.4.1",
     "typescript": "^5",

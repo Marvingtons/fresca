@@ -1,13 +1,25 @@
 "use client";
 
-import Image from "next/image";
 import { useRef, useState } from "react";
 import { showcase } from "@/content/site";
-import { gsap, useGSAP } from "@/lib/gsap";
+import { type Motion, useMotion } from "@/lib/gsap";
 import { MOTION, prefersReducedMotion } from "@/lib/motion";
+import Photo from "./Photo";
 
-const { projects, labels } = showcase;
+const { projects } = showcase;
 const pad2 = (n: number) => String(n).padStart(2, "0");
+const wrap = (n: number) => (n + projects.length) % projects.length;
+/** Slides worth having in the DOM when `n` is showing: it and its neighbours. */
+const around = (n: number) => [n, wrap(n + 1), wrap(n - 1)];
+
+/**
+ * Every slide is cropped into one 4:3 frame. The frame is never wider than
+ * FRAME_MAX, the widest 4:3 crop the narrowest source (1065px) can fill, so no
+ * photo is shown larger than its own pixels (CLAUDE.md).
+ */
+const FRAME_MAX = 1065;
+/** Height kept free around the frame: eyebrow above, caption row below, breathing room. */
+const CHROME = 216;
 
 function Arrow({ dir, onClick }: { dir: "prev" | "next"; onClick: () => void }) {
   return (
@@ -15,7 +27,7 @@ function Arrow({ dir, onClick }: { dir: "prev" | "next"; onClick: () => void }) 
       type="button"
       onClick={onClick}
       aria-label={dir === "prev" ? "Previous project" : "Next project"}
-      className="grid h-12 w-12 cursor-pointer place-items-center rounded-full border border-ground/50 bg-transparent text-ground transition-colors duration-300 hover:bg-ground hover:text-ink"
+      className="grid h-11 w-11 cursor-pointer place-items-center rounded-full border border-ink/40 bg-transparent text-ink transition-colors duration-300 hover:bg-ink hover:text-ground"
     >
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
         <path d={dir === "prev" ? "M10 3 5 8l5 5" : "m6 3 5 5-5 5"} />
@@ -31,24 +43,19 @@ export default function ProjectShowcase() {
   const cur = useRef(0);
   const busy = useRef(false);
   const [shown, setShown] = useState(0); // project whose text is displayed
-  const [ghost, setGhost] = useState(0); // project behind the opening frame
+  // Slides rendered so far: only the current one and its neighbours load, and
+  // once loaded a slide stays so going back is instant.
+  const [loaded, setLoaded] = useState(() => new Set(around(0)));
 
-  const { contextSafe } = useGSAP(
-    () => {
+  const { run } = useMotion(
+    ({ gsap }) => {
       const mm = gsap.matchMedia();
       mm.add(MOTION, () => {
-        // Ground-colored blocks collapse as the section arrives.
-        gsap.fromTo(".sc-chess-l", { height: "65vh" }, { height: 0, ease: "power2.out", scrollTrigger: { trigger: root.current, start: "top bottom", end: "top 30%", scrub: 0.8 } });
-        gsap.fromTo(".sc-chess-r", { height: "25vh" }, { height: 0, ease: "power2.out", scrollTrigger: { trigger: root.current, start: "top bottom", end: "top 45%", scrub: 0.8 } });
-
-        // The clipped frame opens to the full panel, then the details arrive.
+        // The clipped frame opens to the full photo, then the caption row arrives.
         gsap
           .timeline({ scrollTrigger: { trigger: root.current, start: "top top", end: "bottom bottom", scrub: 0.8 } })
-          .fromTo(".sc-media", { clipPath: "inset(24% 28% 24% 28% round 4px)" }, { clipPath: "inset(0% 0% 0% 0% round 0px)", duration: 3, ease: "power2.out" }, 0)
+          .fromTo(".sc-media", { clipPath: "inset(24% 28% 24% 28%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 3, ease: "power2.out" }, 0)
           .fromTo(".sc-img", { scale: 1.4 }, { scale: 1, duration: 3, ease: "power2.out" }, 0)
-          .fromTo(".sc-ghost-2", { scale: 0.65 }, { scale: 1.5, duration: 3, ease: "power2.out" }, 0)
-          .fromTo(".sc-ghost-1", { scale: 0.65 }, { scale: 1.25, duration: 3, ease: "power2.out" }, 0.1)
-          .fromTo(".sc-shade", { opacity: 0 }, { opacity: 1, duration: 1 }, 1.6)
           .fromTo(".sc-title-mask", { yPercent: -40, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1 }, 1.9)
           .fromTo(".sc-fade", { opacity: 0, y: -24 }, { opacity: 1, y: 0, duration: 1, stagger: 0.15 }, 2.1);
       });
@@ -58,21 +65,24 @@ export default function ProjectShowcase() {
   );
 
   // Prev/next: the incoming photo wipes across while the title swaps through its mask.
-  const go = contextSafe((dir: 1 | -1) => {
+  const go = (dir: 1 | -1) => {
     if (busy.current) return;
-    const n = (cur.current + dir + projects.length) % projects.length;
+    const n = wrap(cur.current + dir);
+    setLoaded((prev) => (around(n).every((i) => prev.has(i)) ? prev : new Set([...prev, ...around(n)])));
     const prev = slides.current[cur.current];
     const next = slides.current[n];
     cur.current = n;
-    setGhost(n);
 
-    if (prefersReducedMotion()) {
-      gsap.set(prev, { opacity: 0 });
-      gsap.set(next, { opacity: 1 });
+    // Reduced motion, or GSAP not loaded yet: a plain swap.
+    const swap = () => {
+      if (prev) prev.style.opacity = "0";
+      if (next) next.style.opacity = "1";
       setShown(n);
-      return;
-    }
+    };
+    if (prefersReducedMotion() || !run(({ gsap }) => wipe(gsap, prev, next, n, dir))) swap();
+  };
 
+  const wipe = (gsap: Motion["gsap"], prev: HTMLImageElement | null, next: HTMLImageElement | null, n: number, dir: 1 | -1) => {
     busy.current = true;
     gsap.set(next, { opacity: 1, zIndex: 2, clipPath: dir > 0 ? "inset(0 0 0 100%)" : "inset(0 100% 0 0)" });
     gsap.to(next, {
@@ -95,78 +105,59 @@ export default function ProjectShowcase() {
         gsap.fromTo(titleRef.current, { yPercent: 110 }, { yPercent: 0, duration: 0.8, ease: "power3.out" });
       },
     });
-    gsap.fromTo(".sc-stats dd", { opacity: 1 }, { opacity: 0, duration: 0.3, yoyo: true, repeat: 1, repeatDelay: 0.25 });
-  });
+    gsap.fromTo(".sc-city", { opacity: 1 }, { opacity: 0, duration: 0.3, yoyo: true, repeat: 1, repeatDelay: 0.25 });
+  };
 
   const p = projects[shown];
-  const ghostSrc = projects[ghost].image.src;
 
   return (
     <section ref={root} id="work" aria-label="Selected projects" className="relative h-[280vh]">
-      <div className="sticky top-0 h-svh p-1.5">
-        <div className="relative h-full overflow-hidden rounded-lg bg-panel text-ground">
-          {[1, 2].map((g) => (
-            <div
-              key={g}
-              aria-hidden="true"
-              className={`sc-ghost-${g} absolute left-[28%] top-[24%] h-[52%] w-[44%] overflow-hidden rounded opacity-35`}
-            >
-              <Image src={ghostSrc} alt="" fill quality={85} sizes="44vw" className="object-cover" />
+      {/* The page ground shows around the slide: no backdrop, nothing drawn over the photo.
+          Header height --hh: 72px, 88px on desktop. */}
+      <div className="sticky top-0 flex h-svh items-center justify-center pt-[var(--hh)] [--hh:72px] md:[--hh:88px]">
+        {/* Eyebrow, one 4:3 slide, caption row: all the width of the slide, which is as
+            large as the screen and FRAME_MAX allow. */}
+        <div style={{ width: `min(${FRAME_MAX}px, calc(100vw - 2 * var(--pad)), calc((100svh - var(--hh) - ${CHROME}px) * 4 / 3))` }}>
+          <h2 className="cap sc-fade mb-4 text-muted">{showcase.eyebrow}</h2>
+
+          <div className="sc-media relative aspect-[4/3] overflow-hidden">
+            {projects.map((project, i) =>
+              loaded.has(i) ? (
+                <Photo
+                  key={project.title}
+                  ref={(el) => {
+                    slides.current[i] = el;
+                  }}
+                  src={project.image.src}
+                  alt={project.image.alt}
+                  sizes={`min(${FRAME_MAX}px, 100vw)`}
+                  box={4 / 3}
+                  style={project.image.focus ? { objectPosition: project.image.focus } : undefined}
+                  className={`sc-img ${i === 0 ? "opacity-100" : "opacity-0"}`}
+                />
+              ) : null,
+            )}
+          </div>
+
+          {/* Caption row. Phones: title on its own line, then location with the counter
+              and arrows. Desktop: title over location on the left, counter and arrows right. */}
+          <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-1">
+            <div className="sc-title-mask overflow-hidden max-md:col-span-2 max-md:min-h-[65px]">
+              <h3 ref={titleRef} className="font-cormorant text-[28px] font-medium leading-[1.15]">
+                {p.title}
+              </h3>
             </div>
-          ))}
-
-          <div className="sc-media absolute inset-0 overflow-hidden will-change-[clip-path]">
-            {projects.map((project, i) => (
-              <Image
-                key={project.title}
-                ref={(el) => {
-                  slides.current[i] = el;
-                }}
-                src={project.image.src}
-                alt={project.image.alt}
-                fill
-                quality={85}
-                // A `fit` photo is shown whole, never larger than its source, centered on
-                // the panel color (which also hides the slide underneath).
-                sizes={project.image.fit ? `min(100vw, ${project.image.fit.width}px)` : "100vw"}
-                className={`sc-img ${project.image.fit ? "bg-panel object-scale-down" : "object-cover"} ${i === 0 ? "opacity-100" : "opacity-0"}`}
-              />
-            ))}
-            <div className="sc-shade absolute inset-0 z-[3] bg-[rgba(14,13,12,.42)]" />
-          </div>
-
-          <div aria-hidden="true" className="sc-chess-l absolute left-0 top-0 z-[6] h-0 w-1/2 bg-ground" />
-          <div aria-hidden="true" className="sc-chess-r absolute right-0 top-0 z-[6] h-0 w-1/2 bg-ground" />
-
-          <div className="sc-fade absolute inset-x-0 top-0 z-[5] flex items-start justify-between px-[clamp(20px,3vw,48px)] pt-24 max-md:pt-[84px]">
-            <span className="cap">{showcase.eyebrow}</span>
-            <span className="font-serif text-[22px] tabular-nums" aria-live="polite">
-              {pad2(shown + 1)} / {pad2(projects.length)}
-            </span>
-          </div>
-
-          <div className="absolute inset-x-0 bottom-0 z-[5] flex flex-wrap items-end justify-between gap-7 px-[clamp(20px,3vw,48px)] pb-[clamp(24px,4vh,44px)]">
-            <div>
-              <div className="sc-title-mask overflow-hidden">
-                <h3 ref={titleRef} className="max-w-[780px] font-serif text-[clamp(44px,6vw,96px)] font-normal leading-[.95]">
-                  {p.title}
-                </h3>
+            <p className="sc-city sc-fade col-start-1 font-outfit text-[12px] uppercase tracking-[.16em] text-ink/65 md:row-start-2">
+              {p.city}
+            </p>
+            <div className="sc-fade col-start-2 flex items-center gap-4 md:row-span-2 md:row-start-1">
+              <span className="font-outfit text-[12px] tabular-nums" aria-live="polite">
+                {pad2(shown + 1)} / {pad2(projects.length)}
+              </span>
+              <div className="flex items-center gap-2">
+                <Arrow dir="prev" onClick={() => go(-1)} />
+                <Arrow dir="next" onClick={() => go(1)} />
               </div>
-              <dl className="sc-stats sc-fade mt-6 flex flex-wrap gap-x-11 gap-y-5">
-                {p.city && (
-                  <div className="min-w-[96px]">
-                    <dt className="text-[10px] uppercase tracking-[.22em] text-on-dark">{labels.city}</dt>
-                    <dd className="mt-1.5 font-serif text-[30px] leading-none">{p.city}</dd>
-                  </div>
-                )}
-              </dl>
-            </div>
-            <div className="sc-fade flex items-center gap-2.5">
-              <Arrow dir="prev" onClick={() => go(-1)} />
-              <Arrow dir="next" onClick={() => go(1)} />
-              <a className="pill pill-light" href={showcase.projectLink.href}>
-                {showcase.projectLink.label}
-              </a>
             </div>
           </div>
         </div>

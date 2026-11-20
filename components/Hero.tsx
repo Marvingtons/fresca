@@ -1,14 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { heroFilm } from "@/content/media";
-import { hero } from "@/content/site";
-import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
-import { INTRO_KEY, introIsPlaying } from "@/lib/intro";
+import { hero, site } from "@/content/site";
+import { useMotion } from "@/lib/gsap";
+import { INTRO_KEY, INTRO_SIZES, introIsPlaying } from "@/lib/intro";
 import { MOTION } from "@/lib/motion";
 import HeroFilm from "./HeroFilm";
 import Line from "./LineReveal";
+import Photo from "./Photo";
 import { useSmoothScroll } from "./SmoothScroll";
 
 export default function Hero() {
@@ -26,21 +26,23 @@ export default function Hero() {
     else setIntroDone(true);
   }, []);
 
-  useGSAP(
-    () => {
+  useMotion(
+    ({ gsap, ScrollTrigger }) => {
       if (introIsPlaying() && !laterFrames) return; // build the intro once every frame is in the DOM
+      if (!introIsPlaying()) setIntroDone(true); // the intro was skipped by its timeout (lib/intro.ts)
       const mm = gsap.matchMedia();
       mm.add(MOTION, () => {
         // Intro: photos cycle in a small frame while the counter runs, then it opens to full screen.
         if (introIsPlaying()) {
           window.scrollTo(0, 0);
           const html = document.documentElement;
+          html.setAttribute("data-intro-run", ""); // stops the fallback in lib/intro.ts
           const header = document.querySelector(".site-header");
           const imgs = gsap.utils.toArray<HTMLElement>(".hero-media img");
           const counter = { v: 0 };
 
           // Take over from the pre-paint CSS (html.intro) with matching inline states.
-          gsap.set(".hero-media", { clipPath: "inset(37% 41.5% 37% 41.5% round 3px)" });
+          gsap.set(".hero-media", { clipPath: "inset(37% 41.5% 37% 41.5%)" });
           gsap.set(imgs, { autoAlpha: 0 });
           gsap.set(imgs[0], { autoAlpha: 1 });
           gsap.set(".hero-ln > span", { y: 0, yPercent: 110 });
@@ -70,8 +72,8 @@ export default function Hero() {
             // values, which would make the frame open from the bottom-left corner.
             .fromTo(
               ".hero-media",
-              { clipPath: "inset(37% 41.5% 37% 41.5% round 3px)" },
-              { clipPath: "inset(0% 0% 0% 0% round 0px)", duration: 1.5 },
+              { clipPath: "inset(37% 41.5% 37% 41.5%)" },
+              { clipPath: "inset(0% 0% 0% 0%)", duration: 1.5 },
               2.1,
             )
             .fromTo(".hero-final", { scale: 1.35 }, { scale: 1.06, duration: 1.9, ease: "power3.out" }, 2.1)
@@ -111,25 +113,24 @@ export default function Hero() {
 
   return (
     <section ref={root} id="top" className="relative h-svh min-h-[560px] overflow-hidden bg-ground">
-      <div className="hero-media absolute inset-0 overflow-hidden will-change-[clip-path]">
+      <div className="hero-media absolute inset-0 overflow-hidden">
         {/* Intro-only photos: display:none (and so never loaded) once the intro has played. */}
         {hero.cycle.map((src, i) => (
           <div key={src} className="hero-cycle absolute inset-0">
             {/* Each frame is a full-size photo clipped to the small intro window, so it
-                needs full-width resolution. The first one paints before hydration and is
-                the page's LCP, so it is preloaded (repeat visits skip the intro but are
-                in the same session, so it's cached). */}
-            {(i === 0 || laterFrames) && (
-              <Image src={src} alt="" fill priority={i === 0} sizes="100vw" quality={85} className="object-cover" />
-            )}
+                needs full-width resolution. The first one paints before hydration; it is
+                lazy (so never fetched while display:none) and preloaded by introScript
+                only when the intro plays. */}
+            {(i === 0 || laterFrames) && <Photo src={src} alt="" sizes={INTRO_SIZES} />}
           </div>
         ))}
         {/* Poster (the film's first frame, and the LCP image) with the film over it. The
             wrapper carries the intro zoom and the parallax so both layers move as one. */}
         <div className="hero-final absolute inset-0 scale-[1.06]">
           <picture>
+            <source srcSet={heroFilm.poster.avif} type="image/avif" />
             <source srcSet={heroFilm.poster.webp} type="image/webp" />
-            {/* eslint-disable-next-line @next/next/no-img-element -- remote poster, preloaded in the layout */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- poster in public/media, preloaded in the layout */}
             <img
               src={heroFilm.poster.jpg}
               alt={hero.image.alt}
@@ -141,7 +142,8 @@ export default function Hero() {
           </picture>
           <HeroFilm ready={introDone} />
         </div>
-        <div className="hero-shade absolute inset-0 bg-[rgba(18,17,15,.38)]" />
+        {/* Clear over the top 45% so the upper photo stays bright; darkens toward the type. */}
+        <div className="hero-shade absolute inset-0 bg-[linear-gradient(to_bottom,rgba(20,18,16,0)_45%,rgba(20,18,16,.72)_100%)]" />
       </div>
 
       <div
@@ -154,23 +156,19 @@ export default function Hero() {
         </span>
       </div>
 
-      <div className="hero-content absolute inset-x-0 bottom-0 flex flex-col items-center px-pad pb-[9vh] text-center text-white">
-        {/* The spec's `.hero-content p` rule outranks `.cap` here: 16px, white/86. */}
-        <p className="cap hero-fade mb-5 max-w-[480px] !text-base text-white/[.86]">{hero.eyebrow}</p>
-        <h1 className="font-serif text-[clamp(52px,7.4vw,124px)] font-normal leading-[.95] tracking-[-.015em]">
-          <Line reveal={false} className="hero-ln">
+      {/* The block's bottom edge sits 12% of the hero height above the bottom. */}
+      <div className="hero-content absolute inset-x-0 bottom-[12%] flex flex-col items-center px-pad text-center text-white">
+        <h1 className="font-cormorant text-[clamp(44px,7.2vw,112px)] font-medium leading-[.95] tracking-[-.01em]">
+          <span className="sr-only">{hero.srPrefix} </span>
+          <Line reveal={false} className="hero-ln -mb-[.22em] pb-[.22em]">
             {hero.lines[0]}
-          </Line>
-          <Line reveal={false} className="hero-ln">
-            <em>{hero.lines[1]}</em>
+          </Line>{" "}
+          <Line reveal={false} className="hero-ln -mb-[.22em] pb-[.22em]">
+            <em className="font-medium">{hero.lines[1]}</em>
           </Line>
         </h1>
-        <p className="hero-fade mt-[22px] max-w-[420px] text-base text-white/[.86]">{hero.text}</p>
-      </div>
-
-      <div aria-hidden="true" className="cap hero-fade absolute bottom-7 left-pad flex items-center gap-3 text-white">
-        <i className="relative block h-9 w-px overflow-hidden bg-white/40 after:absolute after:left-0 after:top-[-100%] after:h-full after:w-px after:animate-cue after:bg-white after:content-['']" />
-        Scroll
+        <p className="hero-fade mt-5 max-w-[34ch] font-outfit text-base font-light text-white/[.86] sm:text-[17px]">{hero.text}</p>
+        <p className="hero-fade mt-4 font-outfit text-[12px] font-normal uppercase tracking-[.18em] text-white/70">{site.location}</p>
       </div>
     </section>
   );

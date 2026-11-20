@@ -1,0 +1,263 @@
+{
+  "grade": "g1",
+  "images": {
+    "bay-window-dining": {
+      "width": 1792,
+      "height": 2400,
+      "widths": [
+        480,
+        768,
+        1200,
+        1600,
+        1792
+      ]
+    },
+    "bay-window-sitting-room": {
+      "width": 2400,
+      "height": 1601,
+      "widths": [
+        480,
+        768,
+        1200,
+        1600,
+        2000
+      ]
+    },
+    "black-hex-shower": {
+      "width": 1610,
+      "height": 2400,
+      "widths": [
+        480,
+        768,
+        1200,
+        1600,
+        1610
+      ]
+    },
+    "black-hood-kitchen-island": {
+      "width": 2400,
+      "height": 1610,
+      "widths": [
+        480,
+        768,
+        1200,
+        1600,
+        2000
+      ]
+    },
+    "blue-gray-island-kitchen": {
+      "width": 2400,
+      "height": 1792,
+      "widths": [
+        480,
+        768,
+        1200,
+        1600,
+        2000
+      ]
+    },
+    "blush-guest-bedroom": {
+      "width": 1792,
+      "height": 2400,
+      "widths": [
+        480,
+        768,
+        1200,
+        1600,
+        1792
+      ]
+    },
+    "cognac-linen-living-room-wide": {
+      "width": 2880,
+      "height": 2160,
+      "widths": [
+        480,
+        768,
+        1200,
+        1600,
+        2000
+      ]
+    },
+    "color-floor-plan": {
+      "width": 1561,
+      "height": 900,
+      "widths": [
+        480,
+        768,
+        1200,
+        1561
+      ]
+    },
+    "del-mar-primary-bath": {
+      "width": 1072,
+      "height": 1430,
+      "widths": [
+        480,
+        768,
+        1072
+      ]
+    },
+    "freestanding-tub-bath": {
+      "width": 1792,
+      "height": 2390,
+      "widths": [
+        480,
+        768,
+        1200,
+        1600,
+        1792
+      ]
+    },
+    "glass-pendants-crop": {
+      "width": 960,
+      "height": 1170,
+      "widths": [
+        480,
+        768,
+        960
+      ]
+    },
+    "gloss-kitchen": {
+      "width": 1448,
+      "height": 1086,
+      "widths": [
+        480,
+        768,
+        1200,
+        1448
+      ]
+    },
+    "iron-bed-bedroom": {
+      "width": 1792,
+      "height": 2390,
+      "widths": [
+        480,
+        768,
+        1200,
+        1600,
+        1792
+      ]
+    },
+    "kitchen-material-board": {
+      "width": 1437,
+      "height": 874,
+      "widths": [
+        480,
+        768,
+        1200,
+        1437
+      ]
+    },
+    "lantern-pendant-kitchen-wide": {
+      "width": 1600,
+      "height": 1200,
+      "widths": [
+        480,
+        768,
+        1200,
+        1600
+      ]
+    },
+    "lighting-ceiling-plan": {
+      "width": 1545,
+      "height": 899,
+      "widths": [
+        480,
+        768,
+        1200,
+        1545
+      ]
+    },
+    "linen-coastal-bedroom": {
+      "width": 1072,
+      "height": 1430,
+      "widths": [
+        480,
+        768,
+        1072
+      ]
+    },
+    "mosaic-fireplace-family-room": {
+      "width": 2400,
+      "height": 1792,
+      "widths": [
+        480,
+        768,
+        1200,
+        1600,
+        2000
+      ]
+    },
+    "navy-chair-great-room": {
+      "width": 2400,
+      "height": 1610,
+      "widths": [
+        480,
+        768,
+        1200,
+        1600,
+        2000
+      ]
+    },
+    "sectional-living-room": {
+      "width": 2400,
+      "height": 1610,
+      "widths": [
+        480,
+        768,
+        1200,
+        1600,
+        2000
+      ]
+    },
+    "stenciled-ceiling-guest-bath": {
+      "width": 1200,
+      "height": 1600,
+      "widths": [
+        480,
+        768,
+        1200
+      ]
+    },
+    "subway-tile-secondary-bath": {
+      "width": 1073,
+      "height": 1431,
+      "widths": [
+        480,
+        768,
+        1073
+      ]
+    },
+    "two-story-living-room": {
+      "width": 1792,
+      "height": 2400,
+      "widths": [
+        480,
+        768,
+        1200,
+        1600,
+        1792
+      ]
+    },
+    "walnut-island-kitchen": {
+      "width": 1792,
+      "height": 2400,
+      "widths": [
+        480,
+        768,
+        1200,
+        1600,
+        1792
+      ]
+    },
+    "white-oak-ceiling-bedroom": {
+      "width": 1065,
+      "height": 1420,
+      "widths": [
+        480,
+        768,
+        1065
+      ]
+    }
+  }
+}

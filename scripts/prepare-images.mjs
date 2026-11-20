@@ -1,4 +1,4 @@
-// Copy the photos the design uses into public/images/ with descriptive names,
+// Copy the photos the design uses into assets/prepared/ with descriptive names,
 // flattened to RGB JPEG.
 //
 //   node scripts/prepare-images.mjs ["/path/to/FRESCA PHOTOS"]
@@ -15,7 +15,7 @@ import sharp from "sharp";
 
 const SRC = process.argv[2] ?? path.join(homedir(), "Downloads", "FRESCA PHOTOS");
 const UPSCALED = path.resolve("reference/upscaled");
-const OUT = path.resolve("public/images");
+const OUT = path.resolve("assets/prepared");
 const BUDGET = 600 * 1024;
 
 // Keep in sync with the IMAGE MAP comment in content/site.ts.
@@ -30,19 +30,19 @@ const MAP = {
   9: "gloss-kitchen",
   21: "kitchen-material-board",
   23: "color-floor-plan",
-  24: "lighting-fixture-sheet",
+  // 24 lighting-fixture-sheet: replaced by the plan drawing (components/PlanIllustration.tsx).
   25: "lighting-ceiling-plan",
   26: "freestanding-tub-bath",
   29: "black-hex-shower",
   31: "navy-double-vanity",
   32: "hammered-sink-bath",
-  34: "walnut-guest-bath",
+  // 34 walnut-guest-bath: replaced on Pl. 06 by Karen's round 2 photo (prepare-karen-round2.mjs).
   37: "blush-guest-bedroom",
   38: "reclaimed-wood-bedroom",
   39: "bay-window-sitting-room",
   40: "iron-bed-bedroom",
   41: "mosaic-fireplace-family-room",
-  42: "cognac-living-room",
+  // 42 cognac-living-room: replaced by Karen's round 2 photo (prepare-karen-round2.mjs).
   43: "two-story-living-room",
   44: "sectional-living-room",
 };
@@ -111,13 +111,4 @@ for (const [key, name] of Object.entries(MAP)) {
   console.log(`${label.padEnd(16)} → images/${name}.jpg  ${info.width}×${info.height}  q${quality}  ${(data.length / 1024).toFixed(0)} KB`);
 }
 
-// Open Graph card: the hero kitchen cropped to 1.91:1, 1200px wide at most.
-const hero = await source(1);
-const meta = await (await pipeline(1, hero.file)).toBuffer({ resolveWithObject: true }).then((r) => r.info);
-const ogH = Math.round(meta.width / 1.91);
-const og = await (await pipeline(1, hero.file))
-  .extract({ left: 0, top: Math.round((meta.height - ogH) / 2), width: meta.width, height: ogH })
-  .resize({ width: 1200, withoutEnlargement: true })
-  .jpeg({ quality: 85, mozjpeg: true })
-  .toFile(path.join(OUT, "og-image.jpg"));
-console.log(`og-image.jpg  ${og.width}×${og.height}  ${(og.size / 1024).toFixed(0)} KB`);
+// The Open Graph card is made from the hero poster by scripts/make-og-image.mjs.

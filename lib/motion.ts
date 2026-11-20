@@ -1,4 +1,4 @@
-import { gsap } from "./gsap";
+import type { Motion } from "./gsap";
 
 /** Media queries for gsap.matchMedia(). Animations only run under MOTION. */
 export const MOTION = "(prefers-reduced-motion: no-preference)";
@@ -9,7 +9,7 @@ export function prefersReducedMotion() {
 }
 
 /** Masked line reveals: every `.ln.rv` inside root slides up when it enters. */
-export function revealLines(root: Element) {
+export function revealLines(gsap: Motion["gsap"], root: Element) {
   root.querySelectorAll<HTMLElement>(".rv").forEach((line) => {
     gsap.from(line.firstElementChild, {
       yPercent: 110,

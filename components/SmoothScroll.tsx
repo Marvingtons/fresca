@@ -1,8 +1,8 @@
 "use client";
 
-import Lenis from "lenis";
+import type Lenis from "lenis";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
-import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { loadMotion } from "@/lib/gsap";
 import { introIsPlaying } from "@/lib/intro";
 import { prefersReducedMotion } from "@/lib/motion";
 
@@ -31,38 +31,53 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
   const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     let lenis: Lenis | null = null;
-    let tick: ((time: number) => void) | null = null;
-
-    if (!prefersReducedMotion()) {
-      lenis = new Lenis({ lerp: 0.09, autoRaf: false });
-      lenis.on("scroll", ScrollTrigger.update);
-      tick = (time: number) => lenis!.raf(time * 1000);
-      gsap.ticker.add(tick);
-      gsap.ticker.lagSmoothing(0);
-      if (introIsPlaying()) lenis.stop();
-      lenisRef.current = lenis;
-    }
-
-    // Recalculate trigger positions once fonts and images have settled.
+    let removeTick = () => {};
+    let offScroll = () => {};
     let timer: number | undefined;
-    const refresh = () => {
-      window.clearTimeout(timer);
-      timer = window.setTimeout(() => ScrollTrigger.refresh(), 150);
-    };
+    let refresh = () => {};
     const onLoadCapture = (e: Event) => {
       if (e.target instanceof HTMLImageElement) refresh();
     };
-    document.fonts?.ready.then(refresh);
-    if (document.readyState === "complete") refresh();
-    else window.addEventListener("load", refresh, { once: true });
-    document.addEventListener("load", onLoadCapture, true);
+
+    // GSAP and Lenis load after hydration (lib/gsap.ts). No Lenis under reduced motion.
+    (async () => {
+      const { gsap, ScrollTrigger } = await loadMotion();
+      if (cancelled) return;
+      if (!prefersReducedMotion()) {
+        const { default: LenisClass } = await import("lenis");
+        if (cancelled) return;
+        lenis = new LenisClass({ lerp: 0.09, autoRaf: false });
+        offScroll = lenis.on("scroll", ScrollTrigger.update);
+        // Lenis runs on GSAP's ticker: one requestAnimationFrame loop for both.
+        const tick = (time: number) => lenis!.raf(time * 1000);
+        gsap.ticker.add(tick);
+        gsap.ticker.lagSmoothing(0);
+        removeTick = () => gsap.ticker.remove(tick);
+        if (introIsPlaying()) lenis.stop();
+        lenisRef.current = lenis;
+      }
+
+      // Recalculate trigger positions once fonts and images have settled.
+      refresh = () => {
+        if (cancelled) return;
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => ScrollTrigger.refresh(), 150);
+      };
+      document.fonts?.ready.then(() => refresh());
+      if (document.readyState === "complete") refresh();
+      else window.addEventListener("load", refresh, { once: true });
+      document.addEventListener("load", onLoadCapture, true);
+    })();
 
     return () => {
+      cancelled = true;
       window.clearTimeout(timer);
       window.removeEventListener("load", refresh);
       document.removeEventListener("load", onLoadCapture, true);
-      if (tick) gsap.ticker.remove(tick);
+      removeTick();
+      offScroll();
       lenis?.destroy();
       lenisRef.current = null;
     };
@@ -88,6 +103,8 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       if (!el) return;
       e.preventDefault();
       scrollTo(el);
+      // Move focus too (skip link, keyboard users), without a second scroll jump.
+      if (el.hasAttribute("tabindex")) el.focus({ preventScroll: true });
     };
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);

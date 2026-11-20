@@ -1,46 +1,27 @@
-"use client";
-
-import Image from "next/image";
-import { useRef } from "react";
 import { cta, promises } from "@/content/site";
-import { gsap, useGSAP } from "@/lib/gsap";
-import { MOTION, revealLines } from "@/lib/motion";
 import Line from "./LineReveal";
+import Photo from "./Photo";
+import PlanIllustration from "./PlanIllustration";
+import { PromisesMotion } from "./SectionMotion";
 
 export default function Promises() {
-  const root = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION, () => {
-        revealLines(root.current!);
-        // As each row rises: the veil lifts, the photo settles and the number darkens.
-        gsap.utils.toArray<HTMLElement>(".promise-row").forEach((row) => {
-          gsap
-            .timeline({ scrollTrigger: { trigger: row, start: "top 85%", end: "top 35%", scrub: 0.8 } })
-            .fromTo(row.querySelector(".veil"), { opacity: 1 }, { opacity: 0, ease: "power2.out" }, 0)
-            .fromTo(row.querySelector(".promise-media img"), { scale: 1.18 }, { scale: 1, ease: "power2.out" }, 0)
-            .fromTo(row.querySelector(".promise-n"), { color: "#b5afa3" }, { color: "#1D1C1A", ease: "none" }, 0);
-        });
-      });
-      return () => mm.revert();
-    },
-    { scope: root },
-  );
 
   return (
-    <section ref={root} id="process" className="px-pad py-[clamp(96px,14vh,160px)]">
+    <section id="process" className="px-pad py-[clamp(96px,14vh,160px)]">
       <div className="flex flex-wrap items-end justify-between gap-x-20 gap-y-8 border-b border-line pb-14">
         <div className="min-w-0 flex-[1_1_560px]">
-          <p className="cap mb-5 text-muted">{promises.eyebrow}</p>
-          {/* Karen's heading is a full sentence, so it runs smaller than the old two-word lines. */}
-          <h2 className="max-w-[17em] text-balance font-serif text-[clamp(34px,3.6vw,60px)] font-normal leading-[1.04]">
-            <Line>{promises.heading[0]}</Line>
-            <Line>
-              <em>{promises.heading[1]}</em>
-            </Line>
-          </h2>
+          {/* The eyebrow names the section, so it is the H2; the display line is its subheading. */}
+          <hgroup>
+            <h2 className="cap mb-5 text-muted">{promises.eyebrow}</h2>
+            {/* Karen's heading is a full sentence, so it runs smaller than the old two-word lines. */}
+            <p className="max-w-[17em] text-balance font-serif text-[clamp(34px,3.6vw,60px)] font-normal leading-[1.04]">
+              <Line>{promises.heading[0]}</Line>{" "}
+              <Line>
+                <em>{promises.heading[1]}</em>
+              </Line>
+            </p>
+          </hgroup>
         </div>
         <div className="flex max-w-[360px] flex-col items-start gap-6">
           <p className="text-body">{promises.intro}</p>
@@ -60,19 +41,26 @@ export default function Promises() {
             <h3 className="mb-3 font-serif text-[clamp(30px,2.8vw,44px)] font-normal leading-[1.05]">{row.title}</h3>
             <p className="max-w-[440px] text-body">{row.text}</p>
           </div>
-          <div className={`promise-media relative aspect-[16/10] overflow-hidden max-md:col-span-full ${row.board ? "bg-white" : "bg-ground-2"}`}>
-            <Image
-              src={row.image.src}
-              alt={row.image.alt}
-              fill
-              quality={85}
-              sizes="(min-width: 861px) 38vw, 100vw"
-              className={row.board ? "object-contain p-2.5" : "object-cover"}
-            />
-            <div className="veil absolute inset-0 bg-ground opacity-0" />
-          </div>
+          {/* Photos sit in a 16:10 box. The plan drawing sets its own height from the
+              same width, so its left and right edges line up with the photos. */}
+          {"plan" in row ? (
+            <div className="promise-media py-[4%] max-md:col-span-full">
+              <PlanIllustration />
+            </div>
+          ) : (
+            <div className="promise-media relative aspect-[16/10] overflow-hidden max-md:col-span-full">
+              <Photo
+                src={row.image.src}
+                alt={row.image.alt}
+                sizes="(min-width: 861px) 38vw, 100vw"
+                box={16 / 10}
+                style={row.image.focus ? { objectPosition: row.image.focus } : undefined}
+              />
+            </div>
+          )}
         </div>
       ))}
+      <PromisesMotion />
     </section>
   );
 }
