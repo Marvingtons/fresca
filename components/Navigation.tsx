@@ -18,12 +18,22 @@ function usePastHero(headerRef: React.RefObject<HTMLElement | null>) {
     }
     // A scroll check rather than an IntersectionObserver, so a scroll position the
     // browser restores on reload is picked up straight away too.
-    const check = () => setPast(hero.getBoundingClientRect().bottom <= (headerRef.current?.offsetHeight ?? 0));
-    check();
+    const measure = () => setPast(hero.getBoundingClientRect().bottom <= (headerRef.current?.offsetHeight ?? 0));
+    // At most one measurement per frame, however many scroll events arrive.
+    let frame = 0;
+    const check = () => {
+      if (!frame)
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          measure();
+        });
+    };
+    measure();
     window.addEventListener("scroll", check, { passive: true });
     window.addEventListener("resize", check);
     window.addEventListener("load", check);
     return () => {
+      cancelAnimationFrame(frame);
       window.removeEventListener("scroll", check);
       window.removeEventListener("resize", check);
       window.removeEventListener("load", check);

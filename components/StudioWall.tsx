@@ -79,10 +79,10 @@ function WallPiece({ item }: { item: WallItem }) {
           item.right ? "md:ml-[min(0px,calc(100%-180px))]" : ""
         }`}
       >
-        <span className="text-[11px] uppercase leading-[18px] tracking-[.16em] text-ink/55">{item.no}</span>
+        <span className="text-[11px] uppercase leading-[18px] tracking-[.16em] text-ink/65">{item.no}</span>
         <h3 className="text-[12px] font-normal uppercase leading-[18px] tracking-[.14em] text-ink">{item.title}</h3>
-        {item.city && <span className="col-start-2 text-[11px] text-ink/55">{item.city}</span>}
-        {item.caption && <span className="col-start-2 text-[11px] leading-[1.5] text-ink/55">{item.caption}</span>}
+        {item.city && <span className="col-start-2 text-[11px] text-ink/65">{item.city}</span>}
+        {item.caption && <span className="col-start-2 text-[11px] leading-[1.5] text-ink/65">{item.caption}</span>}
       </figcaption>
     </figure>
   );

@@ -147,7 +147,7 @@ export default function ProjectShowcase() {
                 {p.title}
               </h3>
             </div>
-            <p className="sc-city sc-fade col-start-1 font-outfit text-[12px] uppercase tracking-[.16em] text-ink/55 md:row-start-2">
+            <p className="sc-city sc-fade col-start-1 font-outfit text-[12px] uppercase tracking-[.16em] text-ink/65 md:row-start-2">
               {p.city}
             </p>
             <div className="sc-fade col-start-2 flex items-center gap-4 md:row-span-2 md:row-start-1">

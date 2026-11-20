@@ -24,9 +24,10 @@ export function AboutMotion() {
       mm.add(MOTION, () => {
         revealLines(gsap, byId("about-us"));
         // The quote's words light up one by one as it scrolls through the screen.
+        // They start at 0.5, the faintest that still reads at 3:1 (large text).
         gsap.fromTo(
           ".w",
-          { opacity: 0.14 },
+          { opacity: 0.5 },
           { opacity: 1, stagger: 0.08, ease: "none", scrollTrigger: { trigger: ".about-quote", start: "top 80%", end: "bottom 55%", scrub: true } },
         );
       });
@@ -66,7 +67,7 @@ export function PromisesMotion() {
         gsap.utils.toArray<HTMLElement>(".promise-row").forEach((row) => {
           gsap.fromTo(
             row.querySelector(".promise-n"),
-            { color: "#b5afa3" },
+            { color: "#8a8478" }, // 3.3:1 on the ground, the minimum for 30px type
             { color: "#1D1C1A", ease: "none", scrollTrigger: { trigger: row, start: "top 85%", end: "top 35%", scrub: 0.8 } },
           );
         });
