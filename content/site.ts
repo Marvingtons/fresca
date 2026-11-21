@@ -17,7 +17,7 @@
  *    4 → bay-window-dining.jpg             31 → navy-double-vanity.jpg
  *    5 → walnut-island-kitchen.jpg         32 → hammered-sink-bath.jpg
  *    6 → orb-chandelier-dining.jpg         34 → walnut-guest-bath.jpg (replaced)
- *    7 → blue-gray-island-kitchen.jpg      37 → blush-guest-bedroom.jpg
+ *    7 → blue-gray-island-kitchen.jpg (removed) 37 → blush-guest-bedroom.jpg
  *    9 → gloss-kitchen.jpg                 38 → reclaimed-wood-bedroom.jpg
  *   21 → kitchen-material-board.jpg        39 → bay-window-sitting-room.jpg
  *   23 → color-floor-plan.jpg (trimmed)    40 → iron-bed-bedroom.jpg
@@ -28,7 +28,8 @@
  *
  * Not on the site and deleted from public/images: 1 black-hood-kitchen,
  * 31 navy-double-vanity, 32 hammered-sink-bath, 38 reclaimed-wood-bedroom,
- * 34 walnut-guest-bath, 42 cognac-living-room (scripts/prepare-images.mjs would
+ * 34 walnut-guest-bath, 42 cognac-living-room, 7 blue-gray-island-kitchen (Karen
+ * round 3: its orb pendant; scripts/prepare-images.mjs would
  * write them again).
  *
  * Karen's round 1 photos (assets/source/karen-round1/, prepared by
@@ -248,7 +249,8 @@ export const studio = {
 /**
  * Every slide is cropped into one 4:3 frame that is never wider than the
  * smallest source can fill (components/ProjectShowcase.tsx), so no photo is
- * enlarged. `focus` is the object-position for the crop.
+ * enlarged. `focus` is the object-position for the crop, or "top" to pin the
+ * photo's top edge in the frame, through the scroll zoom and the slide wipe too.
  */
 export type ShowcaseProject = {
   title: string;
@@ -278,7 +280,8 @@ export const showcase = {
     {
       title: "Primary Bedroom with White Oak Ceiling",
       city: "Del Mar",
-      image: { src: img("white-oak-ceiling-bedroom"), alt: "Primary bedroom in Del Mar with a white oak ceiling, gray upholstered bed and woven bench", focus: "50% 70%" },
+      // focus "top": the white oak ceiling is the point of the photo.
+      image: { src: img("white-oak-ceiling-bedroom"), alt: "Primary bedroom in Del Mar with a white oak ceiling, gray upholstered bed and woven bench", focus: "top" },
     },
     {
       title: "Primary Bathroom with Custom Cabinetry",
@@ -348,14 +351,15 @@ export const approach = {
     {
       title: "Design",
       text: "Cabinetry, stone, tile and paint are chosen together on one board, so every surface agrees with the one beside it.",
-      photo: { src: img("blue-gray-island-kitchen"), alt: "Kitchen with blue-gray island and patterned tile backsplash" },
+      // Karen round 3: the lantern kitchen replaces the orb pendant kitchen (blue-gray-island-kitchen).
+      photo: { src: img("lantern-pendant-kitchen-wide"), alt: "Kitchen with a brass cage pendant over a black island, white shaker cabinets and a geometric tile backsplash" },
       board: { src: img("kitchen-material-board"), alt: "Kitchen material and elevation board" },
       drawing: "elevation" as ApproachDrawingKind,
     },
     {
       title: "Light",
       text: "Each fixture is placed on a ceiling plan with the room’s daylight in mind, so the space works at noon and at night.",
-      // Tight crop of the Pl. 01 pendants, so the lantern kitchen (Pl. 05) isn't shown twice.
+      // Tight crop of the Pl. 01 pendants. (The lantern kitchen, Pl. 05, is also the Design panel photo.)
       photo: { src: img("glass-pendants-crop"), alt: "Three clear glass pendants over the marble island of the Solana Beach kitchen" },
       board: { src: img("lighting-ceiling-plan"), alt: "Reflected ceiling and lighting plan" },
       drawing: "ceiling" as ApproachDrawingKind,
@@ -413,7 +417,7 @@ export const faq = {
 export const contact = {
   eyebrow: "(07) Get in touch",
   heading: ["Let's talk about", "your home."], // second line is italic
-  text: "Please tell me about your project. Karen replies personally within two business days.",
+  text: "Please tell me about your project. I reply personally within two business days.",
   serviceArea: { label: "Service area", text: `${serviceArea.cities.join(", ")} and ${serviceArea.region}.` },
   fields: { name: "Name", email: "Email", message: "About your project" },
   submit: "Send inquiry",

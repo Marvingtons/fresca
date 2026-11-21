@@ -132,7 +132,14 @@ export default function ProjectShowcase() {
                   alt={project.image.alt}
                   sizes={`min(${FRAME_MAX}px, 100vw)`}
                   box={4 / 3}
-                  style={project.image.focus ? { objectPosition: project.image.focus } : undefined}
+                  style={
+                    project.image.focus === "top"
+                      ? // Crop and scale from the top edge, so the scroll zoom and the wipe never hide it.
+                        { objectPosition: "50% 0%", transformOrigin: "50% 0%" }
+                      : project.image.focus
+                        ? { objectPosition: project.image.focus }
+                        : undefined
+                  }
                   className={`sc-img ${i === 0 ? "opacity-100" : "opacity-0"}`}
                 />
               ) : null,

@@ -194,9 +194,13 @@ export default function Navigation() {
           href="#top"
           aria-label="Fresca Interior Design, home"
           onClick={closeIfOpen}
-          className="inline-flex min-h-[44px] items-center font-cormorant text-[26px] font-medium uppercase leading-none tracking-[.22em] no-underline [margin-right:-.22em]"
+          className="inline-flex min-h-[44px] flex-col items-center justify-center gap-[4px] uppercase leading-none no-underline"
         >
-          Fresca
+          {/* Each line pulls back its own trailing letter-spacing, so both centre on the same axis. */}
+          <span className="font-cormorant text-[26px] font-medium tracking-[.22em] [margin-right:-.22em]">Fresca</span>
+          <span className="font-outfit text-[8px] font-normal tracking-[.3em] opacity-70 [margin-right:-.3em] md:text-[9px]">
+            Interior Design LLC
+          </span>
         </a>
 
         <a href={cta.href} onClick={closeIfOpen} className="cta-link justify-self-end inline-flex min-h-[44px] items-center no-underline">
