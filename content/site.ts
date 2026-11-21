@@ -340,27 +340,28 @@ export type ApproachDrawingKind = "plan" | "elevation" | "ceiling";
 export const approach = {
   eyebrow: "(04) Approach",
   heading: ["Plan the space,", "then make it beautiful."],
+  /**
+   * One photo per card, 4:5, in its own slot above the drawing. Plan and Light
+   * reuse studio wall plates (Pl. 04, Pl. 06); Design is the lantern kitchen
+   * (Pl. 05), as Karen asked in round 3. `focus` is the object-position.
+   */
   panels: [
     {
       title: "Plan",
       text: "I start with how you move through the house: where you cook, gather and put things down. The floor plan comes before any finish.",
-      // `photo` is not shown at the moment: the cards are drawing and text only. Kept
-      // for the photo slot marked TODO in components/Approach.tsx.
-      photo: { src: img("navy-chair-great-room"), alt: "Great room with navy swivel chairs and linear fireplace" },
+      photo: { src: img("two-story-living-room"), alt: "Two-story living room in Carmel Valley with tall windows, a linen sectional and wood armchairs", focus: "50% 50%" },
       drawing: "plan" as ApproachDrawingKind,
     },
     {
       title: "Design",
       text: "Cabinetry, stone, tile and paint are chosen together on one board, so every surface agrees with the one beside it.",
-      // Karen round 3: the lantern kitchen replaces the orb pendant kitchen (blue-gray-island-kitchen).
-      photo: { src: img("lantern-pendant-kitchen-wide"), alt: "Kitchen with a brass cage pendant over a black island, white shaker cabinets and a geometric tile backsplash" },
+      photo: { src: img("lantern-pendant-kitchen-wide"), alt: "Kitchen with a brass cage pendant over a black island, white shaker cabinets and a geometric tile backsplash", focus: "40% 50%" },
       drawing: "elevation" as ApproachDrawingKind,
     },
     {
       title: "Light",
       text: "Each fixture is placed on a ceiling plan with the room’s daylight in mind, so the space works at noon and at night.",
-      // Tight crop of the Pl. 01 pendants. (The lantern kitchen, Pl. 05, is also the Design panel photo.)
-      photo: { src: img("glass-pendants-crop"), alt: "Three clear glass pendants over the marble island of the Solana Beach kitchen" },
+      photo: { src: img("stenciled-ceiling-guest-bath"), alt: "Guest bathroom in Solana Beach with a star-stenciled ceiling, a walk-in shower in vertical white tile, an oak vanity and black fixtures", focus: "50% 0%" },
       drawing: "ceiling" as ApproachDrawingKind,
     },
   ],
@@ -388,6 +389,40 @@ export const about = {
     alt: "Guest bathroom in Solana Beach with a star-stenciled ceiling, a walk-in shower in vertical white tile, an oak vanity and black fixtures",
     placeholder: "[PLACEHOLDER: About portrait of Karen, 4:5]",
   },
+  /** Under the portrait. */
+  portraitCaption: `${founder.name}, Solana Beach`,
+  /**
+   * Facts strip under the paragraph. A value that is still a [PLACEHOLDER: ...]
+   * hides its whole row until it is filled (content/placeholders.ts).
+   */
+  facts: [
+    { label: "Studio", value: site.location },
+    { label: "Work", value: "Kitchens, baths and whole homes" },
+    { label: "Serving", value: `${serviceArea.cities.join(", ")} and North County` },
+    { label: "Founded", value: "[PLACEHOLDER: year founded]" },
+  ],
+  /**
+   * Detail crops of existing plate photos: materials, not rooms. No new files:
+   * each is scaled `zoom` times about `focus` (also its object-position). At 180px
+   * a zoom never shows more CSS pixels than the source has (1200px wide for the
+   * bath, 1600 for the kitchen, 2880 for the living room), so nothing is upscaled;
+   * on a 2x screen the bath and kitchen crops are below full density.
+   */
+  details: [
+    {
+      src: img("stenciled-ceiling-guest-bath"), focus: "60% 6%", zoom: 5,
+      alt: "Detail of the star-stenciled ceiling in the Solana Beach guest bath",
+    },
+    {
+      src: img("lantern-pendant-kitchen-wide"), focus: "82% 40%", zoom: 6,
+      alt: "Detail of the geometric tile backsplash in the lantern pendant kitchen",
+    },
+    {
+      src: img("cognac-linen-living-room-wide"), focus: "86% 68%", zoom: 5,
+      alt: "Detail of a woven armchair with a striped throw beside a cognac leather sofa in the Solana Beach living room",
+    },
+  ],
+  detailsCaption: "Details from recent projects",
 };
 
 // ───────── founder quote

@@ -5,22 +5,49 @@ import { approach } from "@/content/site";
 import { useMotion } from "@/lib/gsap";
 import { MOTION } from "@/lib/motion";
 import ApproachDrawing from "./ApproachDrawing";
-import Reveal from "./Reveal";
+import Photo from "./Photo";
 
-// The pin is scrolled in two parts: the headline holds alone, then the cards
-// travel. HOLD is the first part as a fraction of the travel distance.
-const HOLD = 0.3;
-const RULER_LABELS = 28; // one every 2 ft at 120px to the foot
+/** Every animation here eases behind the scroll by this much (the one-off drawings excepted). */
+const SCRUB = 1.2;
+/**
+ * Titles and paragraphs travel at this fraction of the drawings' speed once
+ * their card has passed the viewport centre (aligned until then, so text never
+ * runs ahead of its card). 0.92 read as misalignment at 1440, hence 0.96.
+ */
+const TEXT_SPEED = 0.96;
+/** The ruler reads 0′ to this many feet across the cards' travel. */
+const FEET = 16;
+/** A drawing draws when its card's left edge crosses this fraction of the viewport width. */
+const DRAW_AT = 0.6;
 
 /**
- * (04) Approach. With motion the section holds one screen (CSS sticky) and plays in beats:
- *   1. the headline alone, two lines;
- *   2. the headline shrinks to one line and docks under the label (600ms, by
- *      time, not by scroll) while the cards come in from the right;
- *   3. the cards travel left; each drawing draws once, when its card's leading
- *      edge crosses the centre line. The pin ends with the last card centred.
+ * Beats, as fractions of the pin's scroll distance. The section's height in
+ * app/globals.css is sized so the travel (TRAVEL_FROM to 1) moves the cards
+ * about 1px per pixel scrolled: keep APPROACH_PIN there equal to 1 / (1 - TRAVEL_FROM).
+ */
+const GRID = [0, 0.2]; // grid lines draw in
+const DOCK = [0.2, 0.35]; // headline scales down to the docked line
+const LABEL_OUT = [0.28, 0.35]; // the (04) label fades as the docked line arrives
+const TRAVEL_FROM = 0.3; // cards start in from the right edge
+const EXIT = [0.9, 1]; // cards slow to a stop, the navy lightens 4% toward ivory
+
+/**
+ * (04) Approach. With motion the section holds one screen (CSS sticky, so
+ * engaging and releasing the hold shifts nothing) while one scrubbed timeline
+ * plays through it:
+ *   1. the grid lines draw in: verticals from the top, horizontals from the left;
+ *   2. the two-line headline scales into a 28px docked line, top left;
+ *   3. the cards travel left, drawings at full speed and their text a little
+ *      slower; a crosshair rides the scroll position behind them and the ruler
+ *      reads the distance under the viewport centre;
+ *   4. the cards ease to a stop with the last one centred.
+ * Each drawing draws once, on a timer, when its card crosses DRAW_AT.
  * Without motion nothing pins: headline, then the three cards in a column,
  * drawings complete (app/globals.css).
+ *
+ * Performance: transforms and opacity only, will-change on what moves, no
+ * filters. ScrollTrigger refreshes itself 200ms after a resize stops, and
+ * everything is reverted on unmount (useMotion's context and matchMedia).
  */
 export default function Approach() {
   const root = useRef<HTMLElement>(null);
@@ -32,79 +59,124 @@ export default function Approach() {
       mm.add(MOTION, () => {
         const section = root.current!;
         const q = gsap.utils.selector(section);
-        const track = q(".ap-track")[0] as HTMLElement;
-        const ruler = q(".ap-ruler")[0] as HTMLElement;
-        const dockAt = q(".ap-dock")[0] as HTMLElement;
+        const one = (sel: string) => q(sel)[0] as HTMLElement;
+        const track = one(".ap-track");
+        const ruler = one(".ap-ruler");
+        const readout = one(".ap-read-val");
+        const headline = one(".ap-headline");
+        const dockAt = one(".ap-dock");
         const [line1, line2] = q(".ap-headline .rv-line-mask") as HTMLElement[];
         const cards = q("[data-card]") as HTMLElement[];
         const last = cards[cards.length - 1];
+        const rulerLabels = q(".ap-ruler span") as HTMLElement[];
 
-        const startX = () => section.clientWidth; // first card just off the right edge
-        const endX = () => section.clientWidth / 2 - (last.offsetLeft + last.offsetWidth / 2); // last card centred
-        const travel = () => startX() - endX();
+        // Measured on every refresh, from layout boxes (offset*), which transforms never change.
+        let width = 0;
+        let startX = 0;
+        let endX = 0;
+        let foot = 1;
+        let centres: number[] = [];
+        let lefts: number[] = [];
+        const measure = () => {
+          width = section.clientWidth;
+          startX = width; // first card just off the right edge
+          endX = width / 2 - (last.offsetLeft + last.offsetWidth / 2); // last card centred
+          foot = (startX - endX) / FEET;
+          lefts = cards.map((c) => c.offsetLeft);
+          centres = cards.map((c) => c.offsetLeft + c.offsetWidth / 2);
+          // Ruler: 0′ under the centre at the start, a tick every inch and every foot.
+          ruler.style.setProperty("--ft", `${foot}px`);
+          rulerLabels.forEach((label, i) => (label.style.left = `${i * foot}px`));
+        };
+        measure();
+        ScrollTrigger.addEventListener("refreshInit", measure);
 
-        // No ScrollTrigger pin: .ap is position: sticky inside the section, whose
-        // height is set in CSS (app/globals.css). Nothing is resized or moved in
-        // or out of the flow when the pin starts and ends, so nothing shifts.
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 0.6,
-            invalidateOnRefresh: true,
-            onUpdate: (self) => setDocked(self.progress),
-          },
-        });
-        tl.to({}, { duration: HOLD })
-          .fromTo(track, { x: startX }, { x: endX, ease: "none", duration: 1 }, HOLD)
-          .fromTo(ruler, { x: 0 }, { x: () => -travel(), ease: "none", duration: 1 }, HOLD);
+        // The docked headline, from untransformed boxes in .ap's coordinates.
+        const headTop = () => headline.offsetTop - headline.offsetHeight / 2; // .ap-headline is centred with translate -50%
+        const dockScale = () => parseFloat(getComputedStyle(dockAt).fontSize) / parseFloat(getComputedStyle(line1).fontSize);
 
-        // Each drawing draws once, when its card's left edge passes the centre.
-        const draw = () => {
-          const centre = section.clientWidth / 2;
-          for (const card of cards) {
-            if (!card.classList.contains("drawn") && card.getBoundingClientRect().left < centre) card.classList.add("drawn");
+        // Card text and the crosshair follow the track. Per-frame setters, no tweens.
+        const textSetters = cards.map((card) => (q(`[data-card="${card.dataset.card}"] .ap-text`) as HTMLElement[]).map((el) => gsap.quickSetter(el, "x", "px")));
+        const rulerX = gsap.quickSetter(ruler, "x", "px");
+        const crossX = gsap.quickSetter(one(".ap-cross"), "x", "px");
+        let reading = "";
+        let hidden = -1;
+
+        const follow = () => {
+          const x = gsap.getProperty(track, "x") as number;
+          const travelled = Math.min(Math.max(startX - x, 0), startX - endX);
+          const centre = width / 2;
+          cards.forEach((card, i) => {
+            const offset = (1 - TEXT_SPEED) * Math.max(centre - (centres[i] + x), 0);
+            textSetters[i].forEach((set) => set(offset));
+            if (!card.classList.contains("drawn") && lefts[i] + x < width * DRAW_AT) card.classList.add("drawn");
+          });
+          crossX(width * (0.1 + (0.8 * travelled) / (startX - endX || 1)));
+          rulerX(x - startX);
+          // Readout in feet and inches; the ruler's own number under it steps aside.
+          const inches = Math.round((travelled / foot) * 12);
+          const text = `${Math.floor(inches / 12)}′ ${inches % 12}″`;
+          if (text !== reading) readout.textContent = reading = text;
+          const near = Math.round(travelled / foot);
+          const next = Math.abs(travelled / foot - near) < 0.5 ? near : -1;
+          if (next !== hidden) {
+            rulerLabels[hidden]?.style.removeProperty("opacity");
+            if (rulerLabels[next]) rulerLabels[next].style.opacity = "0";
+            hidden = next;
           }
         };
-        tl.eventCallback("onUpdate", draw);
 
-        // Beat 2: the two headline lines scale down and line up as one, at the
-        // dock marker under the label. Transform and opacity only, so nothing
-        // reflows. Rebuilt on every refresh because it is measured.
-        let dock: gsap.core.Timeline | undefined;
-        let docked = false;
-        const setDocked = (progress: number) => {
-          // Halfway through the hold, so it has landed by the time the cards arrive.
-          const next = progress * (1 + HOLD) > HOLD / 2;
-          if (next === docked) return;
-          docked = next;
-          if (docked) dock?.play();
-          else dock?.reverse();
-        };
-        const buildDock = () => {
-          dock?.kill();
-          gsap.set([line1, line2], { clearProps: "transform" });
-          const size = parseFloat(getComputedStyle(line1).fontSize);
-          const scale = parseFloat(getComputedStyle(dockAt).fontSize) / size;
-          const a = line1.getBoundingClientRect();
-          const b = line2.getBoundingClientRect();
-          const to = dockAt.getBoundingClientRect();
-          const gap = size * scale * 0.24; // a word space
-          dock = gsap
-            .timeline({ paused: true, defaults: { duration: 0.6, ease: "power2.inOut" } })
-            .to(line1, { x: to.left - a.left, y: to.top - a.top, scale }, 0)
-            .to(line2, { x: to.left + a.width * scale + gap - b.left, y: to.top - b.top, scale }, 0)
-            .to(ruler, { opacity: 1 }, 0);
-          dock.progress(docked ? 1 : 0);
-        };
-        buildDock();
-        ScrollTrigger.addEventListener("refresh", buildDock);
+        const span = (range: number[]) => range[1] - range[0];
+        // Cards travel linearly, then ease out over the last 10% with no jump in
+        // speed: power1.out starts at twice its average, so the eased stretch
+        // covers half of what the linear speed would.
+        const linear = EXIT[0] - TRAVEL_FROM;
+        const midX = () => startX - (startX - endX) * (linear / (linear + span(EXIT) / 2));
 
+        const tl = gsap.timeline({
+          defaults: { ease: "none" },
+          scrollTrigger: { trigger: section, start: "top top", end: "bottom bottom", scrub: SCRUB, invalidateOnRefresh: true },
+          onUpdate: follow,
+        });
+        tl.fromTo(".ap-grid-v", { scaleY: 0 }, { scaleY: 1, duration: span(GRID) }, GRID[0])
+          .fromTo(".ap-grid-h", { scaleX: 0 }, { scaleX: 1, duration: span(GRID) }, GRID[0])
+          .fromTo(
+            line1,
+            { x: 0, y: 0, scale: 1 },
+            { x: () => dockAt.offsetLeft - headline.offsetLeft - line1.offsetLeft, y: () => dockAt.offsetTop - headTop() - line1.offsetTop, scale: dockScale, duration: span(DOCK), ease: "power2.inOut" },
+            DOCK[0],
+          )
+          .fromTo(
+            line2,
+            { x: 0, y: 0, scale: 1 },
+            {
+              // After line 1 at its docked width, one word space along.
+              x: () => dockAt.offsetLeft + line1.offsetWidth * dockScale() + parseFloat(getComputedStyle(dockAt).fontSize) * 0.24 - headline.offsetLeft - line2.offsetLeft,
+              y: () => dockAt.offsetTop - headTop() - line2.offsetTop,
+              scale: dockScale,
+              duration: span(DOCK),
+              ease: "power2.inOut",
+            },
+            DOCK[0],
+          )
+          .fromTo(".ap-label", { opacity: 1 }, { opacity: 0, duration: span(LABEL_OUT), immediateRender: false }, LABEL_OUT[0])
+          .fromTo([".ap-ruler", ".ap-read", ".ap-cross"], { opacity: 0 }, { opacity: 1, duration: span(DOCK) }, DOCK[0])
+          .fromTo(track, { x: () => startX }, { x: midX, duration: linear }, TRAVEL_FROM)
+          .to(track, { x: () => endX, duration: span(EXIT), ease: "power1.out" }, EXIT[0])
+          .fromTo(".ap-exit", { opacity: 0 }, { opacity: 0.04, duration: span(EXIT) }, EXIT[0]);
+
+        // Before the hold: the headline rises into its masks and the label fades
+        // in as the section scrolls up to the top, scrubbed like the rest.
+        gsap
+          .timeline({ scrollTrigger: { trigger: section, start: "top 85%", end: "top top", scrub: SCRUB } })
+          .fromTo(".ap-headline .rv-line", { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: 0.15, ease: "power2.out" }, 0)
+          .fromTo(".ap-label", { opacity: 0 }, { opacity: 1, ease: "none" }, 0);
+
+        follow();
         return () => {
-          ScrollTrigger.removeEventListener("refresh", buildDock);
-          dock?.kill();
-          gsap.set([line1, line2, ruler], { clearProps: "all" });
+          ScrollTrigger.removeEventListener("refreshInit", measure);
+          cards.forEach((card) => card.classList.remove("drawn"));
+          gsap.set([ruler, readout, ...q(".ap-text"), ...rulerLabels], { clearProps: "all" });
         };
       });
 
@@ -116,51 +188,62 @@ export default function Approach() {
   return (
     <section ref={root} id="approach" aria-label="My approach" className="ap-wrap text-ground">
       <div className="blueprint ap relative overflow-hidden px-6 py-24 md:px-12">
+        {/* Drawn grid: verticals extend from the top, horizontals from the left. */}
+        <div className="ap-grid ap-grid-v" aria-hidden="true" />
+        <div className="ap-grid ap-grid-h" aria-hidden="true" />
+        {/* Ivory veil for the exit: the navy lightens 4% toward the next section. */}
+        <div className="ap-exit" aria-hidden="true" />
+
         <hgroup>
-          <Reveal as="h2" variant="fade" className="ap-label cap text-on-dark">
-            {approach.eyebrow}
-          </Reveal>
-          <Reveal
-            as="p"
-            variant="lines"
-            lines={[approach.heading[0], <em key="2">{approach.heading[1]}</em>]}
-            className="ap-headline font-cormorant text-[clamp(34px,7vw,112px)] font-medium leading-[.95]"
-          />
+          <h2 className="ap-label cap text-on-dark">{approach.eyebrow}</h2>
+          <p className="ap-headline font-cormorant text-[clamp(34px,7vw,112px)] font-medium leading-[.95]">
+            <span className="rv-line-mask">
+              <span className="rv-line">{approach.heading[0]}</span>
+            </span>{" "}
+            <span className="rv-line-mask">
+              <span className="rv-line">
+                <em>{approach.heading[1]}</em>
+              </span>
+            </span>
+          </p>
         </hgroup>
-        {/* Where the headline docks in beat 2. Its font size is the docked size. */}
+        {/* Where the headline docks. Its font size is the docked size. */}
         <span className="ap-dock" aria-hidden="true" />
 
         <div className="ap-stage">
+          {/* Drafting-table cursor behind the cards (z-index -1), riding the scroll position. */}
+          <div className="ap-cross" aria-hidden="true" />
           <div className="ap-track">
             {approach.panels.map((panel, i) => (
-              <article key={panel.title} data-card className="ap-card">
-                <div className="flex items-baseline gap-4">
+              <article key={panel.title} data-card={i} className="ap-card">
+                <div className="ap-text flex items-baseline gap-4">
                   <span className="font-cormorant text-[20px] font-medium italic leading-none text-terracotta">{String(i + 1).padStart(2, "0")}</span>
-                  <Reveal as="h3" variant="lines" axis="x" className="font-cormorant text-[40px] font-medium leading-none">
-                    {panel.title}
-                  </Reveal>
+                  <h3 className="font-cormorant text-[40px] font-medium leading-none">{panel.title}</h3>
                 </div>
-                {/* TODO(photo): if a photo is wanted per card, it goes here in its own slot above
-                    the drawing, inside the card, never over the text. */}
+                <div className="ap-photo">
+                  <Photo src={panel.photo.src} alt={panel.photo.alt} sizes="(min-width: 861px) 220px, min(420px, 90vw)" box={4 / 5} style={{ objectPosition: panel.photo.focus }} />
+                </div>
                 <div className="ap-box">
                   <ApproachDrawing kind={panel.drawing} />
                 </div>
-                <Reveal as="p" variant="fade" axis="x" className="mt-5 max-w-[34ch] font-outfit text-[15px] font-light leading-[1.6] text-ground/80">
-                  {panel.text}
-                </Reveal>
-                <Reveal variant="rule" axis="x" className="mt-6 text-ground/20" />
+                <div className="ap-text">
+                  <p className="mt-4 max-w-[34ch] font-outfit text-[15px] font-light leading-[1.6] text-ground/80">{panel.text}</p>
+                  <div className="mt-5 h-px bg-ground/20" />
+                </div>
               </article>
             ))}
           </div>
         </div>
 
-        {/* Measurement ruler: travels with the cards. 768px and up, motion only. */}
+        {/* Measurement ruler: travels with the cards; the readout stays at the centre. 768px and up. */}
         <div className="ap-ruler" aria-hidden="true">
-          {Array.from({ length: RULER_LABELS }, (_, i) => (
-            <span key={i} style={{ left: i * 240 }}>
-              {i * 2}′
-            </span>
+          {Array.from({ length: FEET + 1 }, (_, i) => (
+            <span key={i}>{i}′</span>
           ))}
+        </div>
+        <div className="ap-read" aria-hidden="true">
+          <i />
+          <span className="ap-read-val">0′ 0″</span>
         </div>
       </div>
     </section>

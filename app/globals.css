@@ -232,17 +232,57 @@ html:not(.intro) .hero-cycle {
     grid-column: 1;
   }
 }
-/* ───────── (04) approach: navy ground with the faint grid. Layout and
+/* ───────── (04) approach: navy ground, drawn grid, three cards. Layout and
    beats are described in components/Approach.tsx. */
 .blueprint {
   background-color: var(--accent);
-  background-image: linear-gradient(rgba(244, 242, 235, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(244, 242, 235, 0.045) 1px, transparent 1px),
-    linear-gradient(rgba(244, 242, 235, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(244, 242, 235, 0.1) 1px, transparent 1px);
-  background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
-  background-position: -1px -1px;
 }
+/* Its own stacking context, so the grid, crosshair and exit veil (z-index -1)
+   sit over the navy and under everything else in either layout. */
+.ap {
+  isolation: isolate;
+}
+.ap-grid,
+.ap-exit {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+/* Bone at 8% every 120px, 4% every 24px. One layer per direction, so each can
+   draw in along its own axis with a transform. */
+.ap-grid-v {
+  background-image: linear-gradient(90deg, rgba(244, 242, 235, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 242, 235, 0.04) 1px, transparent 1px);
+  background-size: 120px 100%, 24px 100%;
+  background-position: -1px 0;
+  transform-origin: 50% 0;
+}
+.ap-grid-h {
+  background-image: linear-gradient(rgba(244, 242, 235, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(244, 242, 235, 0.04) 1px, transparent 1px);
+  background-size: 100% 120px, 100% 24px;
+  background-position: 0 -1px;
+  transform-origin: 0 50%;
+}
+.ap-exit {
+  background: var(--ground);
+  opacity: 0;
+}
+/* A 200px crosshair, 1px lines, bone at 15%. */
+.ap-cross {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  z-index: -1;
+  width: 200px;
+  height: 200px;
+  margin: -100px 0 0 -100px;
+  pointer-events: none;
+  background: linear-gradient(rgba(244, 242, 235, 0.15), rgba(244, 242, 235, 0.15)) center / 1px 100% no-repeat,
+    linear-gradient(rgba(244, 242, 235, 0.15), rgba(244, 242, 235, 0.15)) center / 100% 1px no-repeat;
+}
+
 /* Stacked layout: the default, and all there is under reduced motion. */
 .ap-headline {
   margin: 28px 0 56px;
@@ -253,7 +293,10 @@ html:not(.intro) .hero-cycle {
   transform-origin: 0 0;
 }
 .ap-dock,
-.ap-ruler {
+.ap-ruler,
+.ap-read,
+.ap-cross,
+.ap-exit {
   display: none;
 }
 .ap-track {
@@ -267,11 +310,19 @@ html:not(.intro) .hero-cycle {
   width: 100%;
   max-width: 420px;
 }
+/* The card's photo: 4:5, in its own slot between the title and the drawing. */
+.ap-photo {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  width: 100%;
+  margin-top: 20px;
+}
 /* The drawing's 3:2 box. The drawings are 9:5, centred inside it. */
 .ap-box {
   aspect-ratio: 3 / 2;
   width: 100%;
-  margin-top: 20px;
+  margin-top: 16px;
 }
 .ap-draw {
   display: block;
@@ -279,11 +330,14 @@ html:not(.intro) .hero-cycle {
   height: 100%;
   overflow: visible;
 }
-.ap-draw .dw {
+/* Plotted strokes scale with the drawing (about 0.9 to 1.2px at the sizes
+   used): non-scaling strokes would make Chrome measure the dashes in screen
+   space, and a pathLength-1 dash would then stop short of the line's end. */
+.ap-draw .dw,
+.ap-draw .tk {
   fill: none;
   stroke: var(--ground);
   stroke-width: 1;
-  vector-effect: non-scaling-stroke;
 }
 .ap-draw .fd {
   fill: none;
@@ -292,7 +346,8 @@ html:not(.intro) .hero-cycle {
   vector-effect: non-scaling-stroke;
   stroke-dasharray: 3 4;
 }
-.ap-draw .dm {
+.ap-draw .dm,
+.ap-draw .tk {
   stroke: #b5593a;
 }
 .ap-draw text.lbl {
@@ -302,15 +357,17 @@ html:not(.intro) .hero-cycle {
   fill: rgba(244, 242, 235, 0.6);
 }
 
-/* Pinned layout: one screen tall, everything placed inside it. The track
-   starts off the right edge so nothing flashes before the script runs. */
+/* Held layout: one screen tall, everything placed inside it. The track starts
+   off the right edge so nothing flashes before the script runs. */
 @media (prefers-reduced-motion: no-preference) {
   /* The section is the scroll length; .ap sticks inside it for one screen.
-     Length = one screen + (1 + HOLD) x the cards' travel, where the travel is
-     half the viewport + two and a half cards + two gaps (components/Approach.tsx). */
+     Length = one screen + --pin x the cards' travel, where the travel is half
+     the viewport + two and a half cards + two gaps, and --pin is
+     1 / (1 - TRAVEL_FROM) in components/Approach.tsx. */
   .ap-wrap {
     --card: 320px;
-    height: calc(100svh + 1.3 * (50vw + 2.5 * var(--card) + 96px));
+    --pin: 1.43;
+    height: calc(100svh + var(--pin) * (50vw + 2.5 * var(--card) + 96px));
   }
   .ap {
     position: sticky;
@@ -318,6 +375,24 @@ html:not(.intro) .hero-cycle {
     height: 100svh;
     padding-top: 0;
     padding-bottom: 0;
+  }
+  .ap-cross,
+  .ap-exit {
+    display: block;
+  }
+  .ap-grid-v,
+  .ap-grid-h,
+  .ap-cross,
+  .ap-track,
+  .ap-text,
+  .ap-headline .rv-line-mask {
+    will-change: transform;
+  }
+  .ap-exit {
+    will-change: opacity;
+  }
+  .ap-cross {
+    opacity: 0;
   }
   .ap-label,
   .ap-headline,
@@ -341,63 +416,113 @@ html:not(.intro) .hero-cycle {
   .ap-stage {
     position: absolute;
     inset: 176px 0 24px;
-    display: flex;
-    align-items: center;
   }
   .ap-track {
     flex-direction: row;
+    height: 100%;
     transform: translateX(100vw);
   }
   .ap-card {
     flex: none;
     width: var(--card);
+    height: 100%;
+  }
+  /* The photo takes whatever height the title, drawing and text leave, at 4:5. */
+  .ap-photo {
+    flex: 1 1 0;
+    min-height: 0;
+    width: auto;
+    max-width: 100%;
+    align-self: flex-start;
+    margin-top: 16px;
   }
   .ap-box {
-    max-height: min(280px, 30svh);
+    flex: none;
+    max-height: min(216px, 24svh);
   }
+
+  /* Approach drawings: plotted once when the card gains .drawn. Walls 700ms,
+     fixtures 500ms, dimension lines 400ms out from their ticks, then the labels
+     letter by letter over 300ms (each letter's delay is set inline). */
   .ap-draw .dw {
-    stroke-dasharray: 1;
+    stroke-dasharray: 1 1;
     stroke-dashoffset: 1;
-    transition: stroke-dashoffset 1.8s cubic-bezier(0.6, 0, 0.2, 1);
+  }
+  .ap-draw .wall {
+    transition: stroke-dashoffset 700ms cubic-bezier(0.6, 0, 0.2, 1);
+  }
+  .ap-draw .fx {
+    transition: stroke-dashoffset 500ms cubic-bezier(0.6, 0, 0.2, 1) 700ms;
   }
   .ap-draw .fd {
     opacity: 0;
-    transition: opacity 1s 1s;
+    transition: opacity 500ms ease 700ms;
   }
-  .ap-draw text {
+  .ap-draw .tk {
     opacity: 0;
-    transition: opacity 0.8s 1.3s;
+    transition: opacity 100ms linear 1200ms;
+  }
+  .ap-draw .dm {
+    transition: stroke-dashoffset 400ms cubic-bezier(0.2, 0.6, 0.2, 1) 1200ms;
+  }
+  .ap-draw .lbl tspan {
+    fill-opacity: 0;
+    transition: fill-opacity 80ms linear var(--d, 1600ms);
   }
   .drawn .ap-draw .dw {
     stroke-dashoffset: 0;
   }
   .drawn .ap-draw .fd,
-  .drawn .ap-draw text {
+  .drawn .ap-draw .tk {
     opacity: 1;
+  }
+  .drawn .ap-draw .lbl tspan {
+    fill-opacity: 1;
   }
 }
 @media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
-  /* Quiet on purpose: bone at 25%, 1px ticks, 10px numbers. Fades in at beat 2. */
-  .ap-ruler {
+  /* The ruler: bone at 25%, a tick every inch and a longer one every foot
+     (--ft is set from the travel, so the pin reads 0′ to 16′). It travels with
+     the cards; the readout and its 60% tick stay at the centre. */
+  .ap-ruler,
+  .ap-read {
     display: block;
     position: absolute;
-    left: 0;
+    left: 50%;
     bottom: 26px;
-    width: 6720px;
     height: 26px;
     opacity: 0;
-    border-top: 1px solid rgba(244, 242, 235, 0.25);
-    background: repeating-linear-gradient(to right, rgba(244, 242, 235, 0.25) 0 1px, transparent 1px 12px) left top / 100% 5px no-repeat,
-      repeating-linear-gradient(to right, rgba(244, 242, 235, 0.25) 0 1px, transparent 1px 120px) left top / 100% 10px no-repeat;
   }
-  .ap-ruler span {
+  .ap-ruler {
+    --ft: 120px;
+    width: calc(var(--ft) * 32);
+    will-change: transform;
+    border-top: 1px solid rgba(244, 242, 235, 0.25);
+    background: repeating-linear-gradient(to right, rgba(244, 242, 235, 0.25) 0 1px, transparent 1px calc(var(--ft) / 12)) left top / 100% 5px no-repeat,
+      repeating-linear-gradient(to right, rgba(244, 242, 235, 0.25) 0 1px, transparent 1px var(--ft)) left top / 100% 10px no-repeat;
+  }
+  .ap-ruler span,
+  .ap-read-val {
     position: absolute;
     top: 13px;
     translate: -50% 0;
     font-family: var(--mono);
     font-size: 10px;
     line-height: 1;
+    white-space: nowrap;
     color: rgba(244, 242, 235, 0.25);
+  }
+  .ap-read i {
+    position: absolute;
+    left: 0;
+    top: -1px;
+    width: 1px;
+    height: 12px;
+    background: rgba(244, 242, 235, 0.6);
+  }
+  .ap-read-val {
+    left: 0;
+    color: rgba(244, 242, 235, 0.6);
   }
   .ap-stage {
     bottom: 68px;
@@ -420,26 +545,6 @@ html:not(.intro) .hero-cycle {
   }
   .ap-wrap {
     --card: 420px;
-  }
-}
-
-/* Ruler and playhead belong to the pinned desktop track only (mobile, and
-   reduced motion, where the panels stack). */
-@media (max-width: 860px), (prefers-reduced-motion: reduce) {
-  .ap-ruler,
-  .ap-head-r {
-    display: none;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ap-draw .dw {
-    stroke-dashoffset: 0;
-    transition: none;
-  }
-  .ap-draw .fd,
-  .ap-draw text {
-    opacity: 1;
-    transition: none;
   }
 }
 
