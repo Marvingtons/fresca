@@ -232,7 +232,8 @@ html:not(.intro) .hero-cycle {
     grid-column: 1;
   }
 }
-/* ───────── approach blueprint (v6) */
+/* ───────── (04) approach: navy ground with the faint grid. Layout and
+   beats are described in components/Approach.tsx. */
 .blueprint {
   background-color: var(--accent);
   background-image: linear-gradient(rgba(244, 242, 235, 0.045) 1px, transparent 1px),
@@ -242,101 +243,184 @@ html:not(.intro) .hero-cycle {
   background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
   background-position: -1px -1px;
 }
+/* Stacked layout: the default, and all there is under reduced motion. */
+.ap-headline {
+  margin: 28px 0 56px;
+}
+.ap-headline .rv-line-mask {
+  width: fit-content;
+  white-space: nowrap;
+  transform-origin: 0 0;
+}
+.ap-dock,
+.ap-ruler {
+  display: none;
+}
+.ap-track {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+.ap-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 420px;
+}
+/* The drawing's 3:2 box. The drawings are 9:5, centred inside it. */
+.ap-box {
+  aspect-ratio: 3 / 2;
+  width: 100%;
+  margin-top: 20px;
+}
 .ap-draw {
   display: block;
   width: 100%;
-  max-width: 380px;
-  height: auto;
-  margin: 0 0 22px;
+  height: 100%;
   overflow: visible;
 }
 .ap-draw .dw {
   fill: none;
-  stroke: rgba(244, 242, 235, 0.8);
-  stroke-width: 1.2;
+  stroke: var(--ground);
+  stroke-width: 1;
   vector-effect: non-scaling-stroke;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  transition: stroke-dashoffset 1.8s cubic-bezier(0.6, 0, 0.2, 1);
-}
-.ap-draw .wall {
-  stroke-width: 2.2;
 }
 .ap-draw .fd {
   fill: none;
   stroke: rgba(244, 242, 235, 0.45);
   stroke-width: 1;
+  vector-effect: non-scaling-stroke;
   stroke-dasharray: 3 4;
-  opacity: 0;
-  transition: opacity 1s 1s;
 }
 .ap-draw .dm {
-  stroke: #c9a86a;
-}
-.ap-draw text {
-  font-family: var(--mono);
-  font-size: 10px;
-  fill: #c9a86a;
-  opacity: 0;
-  transition: opacity 0.8s 1.3s;
+  stroke: #b5593a;
 }
 .ap-draw text.lbl {
-  fill: rgba(244, 242, 235, 0.6);
+  font-family: var(--mono);
   font-size: 8.5px;
   letter-spacing: 0.12em;
+  fill: rgba(244, 242, 235, 0.6);
 }
-.drawn .ap-draw .dw {
-  stroke-dashoffset: 0;
+
+/* Pinned layout: one screen tall, everything placed inside it. The track
+   starts off the right edge so nothing flashes before the script runs. */
+@media (prefers-reduced-motion: no-preference) {
+  /* The section is the scroll length; .ap sticks inside it for one screen.
+     Length = one screen + (1 + HOLD) x the cards' travel, where the travel is
+     half the viewport + two and a half cards + two gaps (components/Approach.tsx). */
+  .ap-wrap {
+    --card: 320px;
+    height: calc(100svh + 1.3 * (50vw + 2.5 * var(--card) + 96px));
+  }
+  .ap {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .ap-label,
+  .ap-headline,
+  .ap-dock {
+    position: absolute;
+    left: 24px;
+  }
+  .ap-label {
+    top: 96px;
+  }
+  .ap-dock {
+    display: block;
+    top: 126px;
+    font-size: min(28px, 5.1vw);
+  }
+  .ap-headline {
+    top: 50%;
+    margin: 0;
+    translate: 0 -50%;
+  }
+  .ap-stage {
+    position: absolute;
+    inset: 176px 0 24px;
+    display: flex;
+    align-items: center;
+  }
+  .ap-track {
+    flex-direction: row;
+    transform: translateX(100vw);
+  }
+  .ap-card {
+    flex: none;
+    width: var(--card);
+  }
+  .ap-box {
+    max-height: min(280px, 30svh);
+  }
+  .ap-draw .dw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1.8s cubic-bezier(0.6, 0, 0.2, 1);
+  }
+  .ap-draw .fd {
+    opacity: 0;
+    transition: opacity 1s 1s;
+  }
+  .ap-draw text {
+    opacity: 0;
+    transition: opacity 0.8s 1.3s;
+  }
+  .drawn .ap-draw .dw {
+    stroke-dashoffset: 0;
+  }
+  .drawn .ap-draw .fd,
+  .drawn .ap-draw text {
+    opacity: 1;
+  }
 }
-.drawn .ap-draw .fd,
-.drawn .ap-draw text {
-  opacity: 1;
+@media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+  /* Quiet on purpose: bone at 25%, 1px ticks, 10px numbers. Fades in at beat 2. */
+  .ap-ruler {
+    display: block;
+    position: absolute;
+    left: 0;
+    bottom: 26px;
+    width: 6720px;
+    height: 26px;
+    opacity: 0;
+    border-top: 1px solid rgba(244, 242, 235, 0.25);
+    background: repeating-linear-gradient(to right, rgba(244, 242, 235, 0.25) 0 1px, transparent 1px 12px) left top / 100% 5px no-repeat,
+      repeating-linear-gradient(to right, rgba(244, 242, 235, 0.25) 0 1px, transparent 1px 120px) left top / 100% 10px no-repeat;
+  }
+  .ap-ruler span {
+    position: absolute;
+    top: 13px;
+    translate: -50% 0;
+    font-family: var(--mono);
+    font-size: 10px;
+    line-height: 1;
+    color: rgba(244, 242, 235, 0.25);
+  }
+  .ap-stage {
+    bottom: 68px;
+  }
 }
-.ap-ruler {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(100% + 5vh);
-  height: 30px;
-  background: repeating-linear-gradient(to right, rgba(244, 242, 235, 0.35) 0 1px, transparent 1px 12px) left top / 100% 6px no-repeat,
-    repeating-linear-gradient(to right, rgba(244, 242, 235, 0.7) 0 1px, transparent 1px 120px) left top / 100% 12px no-repeat;
-  border-top: 1px solid rgba(244, 242, 235, 0.35);
-}
-.ap-ruler span {
-  position: absolute;
-  top: 15px;
-  transform: translateX(-50%);
-  font-family: var(--mono);
-  font-size: 9px;
-  color: rgba(244, 242, 235, 0.55);
-}
-.ap-head-r {
-  position: absolute;
-  left: 50%;
-  top: calc(50% + min(31vh, 280px) + 5vh - 22px);
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  font-family: var(--mono);
-  font-size: 10px;
-  color: #c9a86a;
-  pointer-events: none;
-}
-.ap-head-r i {
-  display: block;
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 7px solid #c9a86a;
-}
-.ap-head-r b {
-  display: block;
-  width: 1px;
-  height: 44px;
-  background: #c9a86a;
+@media (prefers-reduced-motion: no-preference) and (min-width: 861px) {
+  .ap-label,
+  .ap-headline,
+  .ap-dock {
+    left: 48px;
+  }
+  .ap-label {
+    top: 120px;
+  }
+  .ap-dock {
+    top: 152px;
+  }
+  .ap-stage {
+    top: 208px;
+  }
+  .ap-wrap {
+    --card: 420px;
+  }
 }
 
 /* Ruler and playhead belong to the pinned desktop track only (mobile, and
@@ -457,4 +541,121 @@ html:not(.intro) .hero-cycle {
   .plan.drawn .plan-row {
     opacity: 1;
   }
+}
+
+/* ───────── reveal system (components/Reveal.tsx). One curve, three variants.
+   The hidden states sit behind scripting + motion, so without either the page
+   is simply final. Nothing here changes a box: masks clip, the rest is
+   transform and opacity. */
+.rv-line-mask {
+  display: block;
+  /* Clip the rising line top and bottom only; a hanging quote mark may sit
+     outside the left edge. The padding keeps descenders out of the clip. */
+  overflow-x: visible !important;
+  overflow-y: clip !important;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+.rv-line {
+  display: block;
+}
+[data-reveal="rule"] {
+  position: relative;
+  height: 1px;
+}
+[data-reveal="rule"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  transform-origin: 0 50%;
+}
+@media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  :root {
+    --rv-ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+  }
+  /* Until the text has been split into lines there is nothing to mask. */
+  [data-reveal="lines"]:not([data-split], [data-revealed]) {
+    visibility: hidden;
+  }
+  [data-reveal="lines"] .rv-line {
+    opacity: 0;
+    transform: translateY(100%);
+    transition: transform 900ms var(--rv-ease), opacity 900ms var(--rv-ease);
+    transition-delay: calc(var(--i, 0) * 80ms);
+  }
+  [data-reveal="fade"]:not([data-stagger]),
+  [data-reveal="fade"][data-stagger] > * {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: transform 600ms var(--rv-ease), opacity 600ms var(--rv-ease);
+    transition-delay: calc(var(--i, 0) * 60ms);
+  }
+  [data-reveal="rule"]::before {
+    transform: scaleX(0);
+    transition: transform 800ms var(--rv-ease);
+  }
+  [data-reveal="lines"][data-revealed] .rv-line,
+  [data-reveal="fade"][data-revealed]:not([data-stagger]),
+  [data-reveal="fade"][data-stagger][data-revealed] > * {
+    opacity: 1;
+    transform: none;
+  }
+  [data-reveal="rule"][data-revealed]::before {
+    transform: none;
+  }
+}
+
+/* ───────── body call to action (components/BodyCta.tsx): text, a hairline
+   6px under it, and an arrow that steps 4px right on hover. */
+.body-cta {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.6em;
+  font-family: var(--outfit);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+}
+.body-cta-label {
+  position: relative;
+  padding-bottom: 7px;
+}
+.body-cta-label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0.2em; /* the last letter's tracking */
+  bottom: 0;
+  height: 1px;
+  background: currentColor;
+}
+.body-cta-arrow {
+  /* Sits on the text line, not the padded box. */
+  padding-bottom: 7px;
+  letter-spacing: 0;
+  transition: transform 300ms cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+.body-cta:hover .body-cta-arrow,
+.body-cta:focus-visible .body-cta-arrow {
+  transform: translateX(4px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .body-cta-arrow {
+    transition: none;
+  }
+}
+
+/* ───────── (05) about: the quote's opening mark hangs in the margin. Once
+   Reveal has split the quote, the first line carries the hang instead. */
+.about-quote {
+  text-indent: -0.4em;
+}
+.about-quote .rv-line-mask:first-child > .rv-line {
+  margin-left: -0.4em;
 }

@@ -12,31 +12,6 @@ import { DESKTOP_MOTION, MOTION, revealLines } from "@/lib/motion";
 
 const byId = (id: string) => document.getElementById(id)!;
 
-// Approach
-const MOBILE_MOTION = "(max-width: 860px) and (prefers-reduced-motion: no-preference)";
-const REDUCED = "(prefers-reduced-motion: reduce)";
-const FOOT = 120; // ruler scale: 120px = 1 ft
-
-export function AboutMotion() {
-  useMotion(
-    ({ gsap }) => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION, () => {
-        revealLines(gsap, byId("about-us"));
-        // The quote's words light up one by one as it scrolls through the screen.
-        // They start at 0.5, the faintest that still reads at 3:1 (large text).
-        gsap.fromTo(
-          ".w",
-          { opacity: 0.5 },
-          { opacity: 1, stagger: 0.08, ease: "none", scrollTrigger: { trigger: ".about-quote", start: "top 80%", end: "bottom 55%", scrub: true } },
-        );
-      });
-      return () => mm.revert();
-    },
-    { scope: "about-us" },
-  );
-  return null;
-}
 
 export function PromisesMotion() {
   // The plan drawing (PlanIllustration) draws on once 35% of it is on screen.
@@ -84,7 +59,6 @@ export function FooterMotion() {
     ({ gsap }) => {
       const mm = gsap.matchMedia();
       mm.add(MOTION, () => {
-        revealLines(gsap, byId("contact"));
         // The giant wordmark rises into place.
         gsap.fromTo(
           ".f-word",
@@ -159,90 +133,6 @@ export function StudioWallMotion({ drift }: { drift: number }) {
       return () => mm.revert();
     },
     { scope: "about" },
-  );
-  return null;
-}
-
-export function ApproachMotion() {
-  useMotion(
-    ({ gsap, ScrollTrigger }) => {
-      const mm = gsap.matchMedia();
-      const panels = gsap.utils.toArray<HTMLElement>("[data-panel]");
-
-      mm.add(DESKTOP_MOTION, () => {
-        const track = byId("approach").querySelector<HTMLElement>(".ap-track")!;
-        const ruler = byId("approach").querySelector<HTMLElement>(".ap-ruler")!;
-        const readout = byId("approach").querySelector<HTMLElement>(".ap-read")!;
-        const dist = () => track.scrollWidth - window.innerWidth;
-        gsap.set(track, { y: 0, yPercent: -50 });
-
-        // Ruler labels every 2 ft along the track; rebuilt whenever triggers refresh.
-        const buildRuler = () => {
-          ruler.textContent = "";
-          for (let px = 0; px < track.scrollWidth; px += FOOT * 2) {
-            const label = document.createElement("span");
-            label.style.left = `${px}px`;
-            label.textContent = `${px / FOOT}′`;
-            ruler.appendChild(label);
-          }
-        };
-        buildRuler();
-        ScrollTrigger.addEventListener("refreshInit", buildRuler);
-
-        // Playhead readout in feet and inches; panels draw once their left edge passes 72%.
-        const update = () => {
-          const x = Number(gsap.getProperty(track, "x"));
-          const pos = Math.max(0, (window.innerWidth / 2 - x) / FOOT);
-          let feet = Math.floor(pos);
-          let inches = Math.round((pos - feet) * 12);
-          if (inches === 12) {
-            feet++;
-            inches = 0;
-          }
-          readout.textContent = `${feet}′–${inches}″`;
-          panels.forEach((p) => {
-            if (p.getBoundingClientRect().left < window.innerWidth * 0.72) p.classList.add("drawn");
-          });
-        };
-
-        // The headline halves split apart while the track scales in, then the track scrolls sideways.
-        gsap
-          .timeline({
-            scrollTrigger: {
-              trigger: byId("approach"),
-              start: "top top",
-              end: () => `+=${dist() + window.innerHeight * 1.4}`,
-              pin: true,
-              scrub: 1,
-              invalidateOnRefresh: true,
-              onUpdate: update,
-            },
-          })
-          .to(".ap-l", { xPercent: -40, yPercent: -160, ease: "none", duration: 1 }, 0)
-          .to(".ap-r", { xPercent: 30, yPercent: 160, ease: "none", duration: 1 }, 0)
-          .to(".ap-l, .ap-r", { opacity: 0, ease: "power1.in", duration: 0.45 }, 0)
-          // No opacity here: a scrubbed fade left the photos part-transparent mid-scroll.
-          .fromTo(track, { scale: 0.5, x: () => window.innerWidth * 0.3 }, { scale: 1, x: 0, ease: "power2.out", duration: 1.1 }, 0.35)
-          .fromTo(".ap-head-r", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 1.1)
-          .to(track, { x: () => -dist(), ease: "none", duration: 3 }, 1.35);
-
-        return () => ScrollTrigger.removeEventListener("refreshInit", buildRuler);
-      });
-
-      // Mobile: each drawing plays once its panel is 75% of the way up the screen.
-      mm.add(MOBILE_MOTION, () => {
-        panels.forEach((p) => {
-          ScrollTrigger.create({ trigger: p, start: "top 75%", once: true, onEnter: () => p.classList.add("drawn") });
-        });
-      });
-
-      // Reduced motion: drawings are simply shown.
-      mm.add(REDUCED, () => {
-        panels.forEach((p) => p.classList.add("drawn"));
-      });
-      return () => mm.revert();
-    },
-    { scope: "approach" },
   );
   return null;
 }
