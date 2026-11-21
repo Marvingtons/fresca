@@ -99,6 +99,10 @@ export function FooterMotion() {
   return null;
 }
 
+/** Karen round 3: plates travel a third less than before, with heavier scrub smoothing. */
+const PLATE_TRAVEL = 2 / 3;
+const PLATE_SCRUB = 1.2;
+
 export function StudioWallMotion({ drift }: { drift: number }) {
   useMotion(
     ({ gsap }) => {
@@ -123,13 +127,13 @@ export function StudioWallMotion({ drift }: { drift: number }) {
           );
           gsap.from(pl.querySelector(".pl-label"), { opacity: 0, y: 8, duration: 0.8, delay: 0.35, ease: "power2.out", scrollTrigger: enter });
           // A top-anchored photo drifts a shorter way and ends flush with the
-          // frame's top edge, so the top of the photo is never more than ~4% hidden.
+          // frame's top edge, so the top of the photo is never more than ~3% hidden.
           const img = pl.querySelector<HTMLElement>(".pl-img")!;
           const top = img.dataset.focus === "top";
           gsap.fromTo(
             img,
-            { yPercent: top ? -4 : -8 },
-            { yPercent: top ? 0 : 8, ease: "none", scrollTrigger: { trigger: pl, start: "top bottom", end: "bottom top", scrub: 0.8 } },
+            { yPercent: (top ? -4 : -8) * PLATE_TRAVEL },
+            { yPercent: top ? 0 : 8 * PLATE_TRAVEL, ease: "none", scrollTrigger: { trigger: pl, start: "top bottom", end: "bottom top", scrub: PLATE_SCRUB } },
           );
 
         });
@@ -140,13 +144,15 @@ export function StudioWallMotion({ drift }: { drift: number }) {
       });
 
       // Desktop: every word, plate and paragraph drifts up at its own speed.
+      // Plates travel less and smooth more (PLATE_TRAVEL, PLATE_SCRUB).
       mm.add(DESKTOP_MOTION, () => {
         gsap.utils.toArray<HTMLElement>("[data-speed]").forEach((el) => {
-          const speed = parseFloat(el.dataset.speed ?? "1");
+          const plate = el.classList.contains("pl");
+          const speed = parseFloat(el.dataset.speed ?? "1") * (plate ? PLATE_TRAVEL : 1);
           gsap.to(el, {
             y: () => -window.innerHeight * drift * speed,
             ease: "none",
-            scrollTrigger: { trigger: byId("about"), start: "top bottom", end: "bottom top", scrub: 0.8, invalidateOnRefresh: true },
+            scrollTrigger: { trigger: byId("about"), start: "top bottom", end: "bottom top", scrub: plate ? PLATE_SCRUB : 0.8, invalidateOnRefresh: true },
           });
         });
       });

@@ -52,8 +52,9 @@ export default function ProjectShowcase() {
       const mm = gsap.matchMedia();
       mm.add(MOTION, () => {
         // The clipped frame opens to the full photo, then the caption row arrives.
+        // scrub 1.2 (was 0.8, Karen round 3): the reveal trails the scroll a little more.
         gsap
-          .timeline({ scrollTrigger: { trigger: root.current, start: "top top", end: "bottom bottom", scrub: 0.8 } })
+          .timeline({ scrollTrigger: { trigger: root.current, start: "top top", end: "bottom bottom", scrub: 1.2 } })
           .fromTo(".sc-media", { clipPath: "inset(24% 28% 24% 28%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 3, ease: "power2.out" }, 0)
           .fromTo(".sc-img", { scale: 1.4 }, { scale: 1, duration: 3, ease: "power2.out" }, 0)
           .fromTo(".sc-title-mask", { yPercent: -40, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1 }, 1.9)

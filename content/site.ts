@@ -448,7 +448,7 @@ export const privacy = {
     {
       title: "Why",
       body: [
-        "To reply to your inquiry. Your message is emailed to Karen. It is not sold or shared with anyone.",
+        "To reply to your inquiry. Your message is emailed to me. It is not sold or shared with anyone.",
       ],
     },
     {
