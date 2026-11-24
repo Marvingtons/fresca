@@ -131,7 +131,7 @@ export default function Navigation() {
     <>
       <header
         ref={headerRef}
-        className={`site-header fixed inset-x-0 top-0 z-50 grid h-[72px] grid-cols-[1fr_auto_1fr] items-center px-6 transition-colors duration-200 motion-reduce:transition-none md:h-[88px] md:px-12 ${
+        className={`site-header fixed inset-x-0 top-0 z-[var(--z-header)] grid h-[72px] grid-cols-[1fr_auto_1fr] items-center px-6 transition-colors duration-200 motion-reduce:transition-none md:h-[88px] md:px-12 ${
           ink ? "text-[#2A2521]" : "text-white"
         }`}
       >
@@ -219,7 +219,7 @@ export default function Navigation() {
         aria-label="Menu"
         inert={!open}
         data-open={open}
-        className="menu-panel fixed inset-0 z-40 grid grid-rows-[72px_minmax(0,1fr)_72px] bg-[#F3EFE8] font-outfit text-[#2A2521] md:grid-rows-[88px_minmax(0,1fr)_72px]"
+        className="menu-panel fixed inset-0 z-[var(--z-menu)] grid grid-rows-[72px_minmax(0,1fr)_72px] bg-[#F3EFE8] font-outfit text-[#2A2521] md:grid-rows-[88px_minmax(0,1fr)_72px]"
       >
         <div aria-hidden="true" className="border-b border-[rgba(42,37,33,.14)]" />
 

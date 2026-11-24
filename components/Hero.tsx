@@ -21,9 +21,22 @@ export default function Hero() {
   const [laterFrames, setLaterFrames] = useState(false);
   // The film only gets its sources once the preloader is done (right away when it doesn't play).
   const [introDone, setIntroDone] = useState(false);
+  // The hero text stays hidden (CSS: html.intro .hero-content) and out of the
+  // accessibility tree until the preloader's complete event. Server HTML has it
+  // visible, so repeat visits, reduced motion and no-JS never hide it.
+  const [textHidden, setTextHidden] = useState(false);
   useEffect(() => {
-    if (introIsPlaying()) setLaterFrames(true);
-    else setIntroDone(true);
+    if (introIsPlaying()) {
+      setLaterFrames(true);
+      setTextHidden(true);
+    } else setIntroDone(true);
+    // If the intro is abandoned (lib/intro.ts timeout drops html.intro), the text comes back.
+    const html = document.documentElement;
+    const watch = new MutationObserver(() => {
+      if (!introIsPlaying()) setTextHidden(false);
+    });
+    watch.observe(html, { attributes: true, attributeFilter: ["class"] });
+    return () => watch.disconnect();
   }, []);
 
   useMotion(
@@ -31,7 +44,7 @@ export default function Hero() {
       if (introIsPlaying() && !laterFrames) return; // build the intro once every frame is in the DOM
       if (!introIsPlaying()) setIntroDone(true); // the intro was skipped by its timeout (lib/intro.ts)
       const mm = gsap.matchMedia();
-      mm.add(MOTION, () => {
+      mm.add(MOTION, (ctx) => {
         // Intro: photos cycle in a small frame while the counter runs, then it opens to full screen.
         if (introIsPlaying()) {
           window.scrollTo(0, 0);
@@ -45,10 +58,24 @@ export default function Hero() {
           gsap.set(".hero-media", { clipPath: "inset(37% 41.5% 37% 41.5%)" });
           gsap.set(imgs, { autoAlpha: 0 });
           gsap.set(imgs[0], { autoAlpha: 1 });
+          gsap.set(".hero-content", { visibility: "hidden" });
           gsap.set(".hero-ln > span", { y: 0, yPercent: 110 });
           gsap.set(".hero-fade", { autoAlpha: 0, y: 14 });
           gsap.set(".hero-shade", { opacity: 0 });
           gsap.set(header, { autoAlpha: 0 });
+
+          // The preloader's complete event: the counter has reached 100 and faded. Only now
+          // is the text layer shown and its reveal timeline created. Recorded in this
+          // matchMedia context (ctx.add), so it is reverted with everything else.
+          const onPreloaderComplete = ctx.add("onPreloaderComplete", () => {
+            // Starts 0.5s later (2.95s into the intro), as the frame opens behind it.
+            gsap
+              .timeline({ delay: 0.5 })
+              .set(".hero-content", { visibility: "visible" })
+              .add(() => setTextHidden(false), 0)
+              .to(".hero-ln > span", { yPercent: 0, duration: 1.2, stagger: 0.1, ease: "power4.out" }, 0)
+              .to(".hero-fade", { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.08, ease: "power2.out" }, 0.25);
+          });
 
           const intro = gsap.timeline({ defaults: { ease: "power3.inOut" } });
           intro.to(
@@ -68,6 +95,7 @@ export default function Hero() {
           });
           intro
             .to(".intro-ui", { autoAlpha: 0, duration: 0.4, ease: "power1.out" }, 2.05)
+            .add(() => onPreloaderComplete(), 2.45)
             // Explicit start shape: the browser shortens the computed inset() to two
             // values, which would make the frame open from the bottom-left corner.
             .fromTo(
@@ -78,8 +106,6 @@ export default function Hero() {
             )
             .fromTo(".hero-final", { scale: 1.35 }, { scale: 1.06, duration: 1.9, ease: "power3.out" }, 2.1)
             .to(".hero-shade", { opacity: 1, duration: 1, ease: "power1.out" }, 2.6)
-            .to(".hero-ln > span", { yPercent: 0, duration: 1.2, stagger: 0.1, ease: "power4.out" }, 2.95)
-            .to(".hero-fade", { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.08, ease: "power2.out" }, 3.2)
             .to(header, { autoAlpha: 1, duration: 0.8, ease: "power1.out" }, 3.2)
             .add(() => {
               try {
@@ -148,7 +174,7 @@ export default function Hero() {
 
       <div
         aria-hidden="true"
-        className="intro-ui pointer-events-none absolute inset-0 flex flex-col items-center justify-between pb-[18vh] pt-[24vh] text-ink"
+        className="intro-ui pointer-events-none absolute inset-0 z-[var(--z-preloader)] flex flex-col items-center justify-between pb-[18vh] pt-[24vh] text-ink"
       >
         <span className="cap">{hero.introLabel}</span>
         <span ref={countRef} className="font-serif text-xl tabular-nums">
@@ -157,7 +183,10 @@ export default function Hero() {
       </div>
 
       {/* The block's bottom edge sits 12% of the hero height above the bottom. */}
-      <div className="hero-content absolute inset-x-0 bottom-[12%] flex flex-col items-center px-pad text-center text-white">
+      <div
+        aria-hidden={textHidden || undefined}
+        className="hero-content absolute inset-x-0 bottom-[12%] flex flex-col items-center px-pad text-center text-white"
+      >
         <h1 className="font-cormorant text-[clamp(44px,7.2vw,112px)] font-medium leading-[.95] tracking-[-.01em]">
           <span className="sr-only">{hero.srPrefix} </span>
           <Line reveal={false} className="hero-ln -mb-[.22em] pb-[.22em]">

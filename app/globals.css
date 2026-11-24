@@ -19,6 +19,11 @@
   --sans: var(--outfit);
   --mono: var(--outfit);
   --pad: clamp(16px, 2.2vw, 32px);
+  /* Stacking scale. The preloader (the hero intro's counter layer) is the top. */
+  --z-menu: 40;
+  --z-header: 50;
+  --z-skip: 100;
+  --z-preloader: 200;
 }
 
 /* Lenis */
@@ -56,7 +61,7 @@ html.lenis body {
 
   /* Hidden until focused; the first tab stop on every page. */
   .skip-link {
-    @apply fixed left-4 top-4 z-[100] -translate-y-[200%] rounded bg-ink px-4 py-3 text-sm text-ground no-underline focus:translate-y-0;
+    @apply fixed left-4 top-4 z-[var(--z-skip)] -translate-y-[200%] rounded bg-ink px-4 py-3 text-sm text-ground no-underline focus:translate-y-0;
   }
 
   /* Missing client content, rendered by components/Copy.tsx. */
@@ -206,6 +211,11 @@ html.intro .hero-final {
 }
 html.intro .hero-shade {
   opacity: 0;
+}
+/* The hero text layer waits for the preloader's complete event (components/Hero.tsx).
+   visibility, not opacity: nothing of it paints, whatever the mask or transform. */
+html.intro .hero-content {
+  visibility: hidden;
 }
 html.intro .hero-ln > span {
   transform: translateY(110%);
