@@ -104,3 +104,11 @@ Also for Karen:
 **Docs to update:**
 - DEPLOY.md section 8 (Cloudflare Images) is out of date. Photos are now pre-built static files (`public/images/g1/`), not `next/image`, so no Images transformations are used. The `IMAGES` binding in `wrangler.jsonc` is unused and can go in a later release.
 - DEPLOY.md 5.2 and PERF.md disagree on the media Browser TTL (respect origin versus one year). Either is fine, because film files are renamed when they change.
+
+## v1.0.1 (2026-11-24)
+
+**Header lockup.** The header and preloader now read FRESCA INTERIOR DESIGN (no LLC) in Cormorant Garamond 500, letter-spacing 0.22em: one line at 18px from 768px, FRESCA (14px) over INTERIOR DESIGN (8px) below 768px. One component (`components/Lockup.tsx`) in the hero header, the ivory header, the menu overlay header and the preloader. Title tag, JSON-LD and the footer legal name are unchanged.
+
+- Worker version `6f87059c-aab8-4839-951b-1650f0f71960`.
+- Live checks: `/` and `/privacy` 200, `/nope` 404, `www` 301 to the apex (path kept). Header screenshotted live at 1440, 768 and 390. Contact form not re-tested (verified in v1.0.0).
+- At 768 the one-line lockup sits 19px from "Book a consultation". Clear, but tight.
