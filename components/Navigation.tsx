@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cta, founder, navLinks, site } from "@/content/site";
+import Lockup from "./Lockup";
 import { useSmoothScroll } from "./SmoothScroll";
 
 // Header and menu colors from the proposed brand palette (CLAUDE.md), used here only.
@@ -187,20 +188,16 @@ export default function Navigation() {
           </span>
         </div>
 
-        {/* TODO(logo): replace this text with the SVG lockups once they are in the repo:
+        {/* TODO(logo): replace the typeset lockup with the SVG lockups once they are in the repo:
             assets/brand/fresca-lockup-horizontal.svg in white, 40px tall (30px on phones),
             and assets/brand/fresca-mark.svg alone at 34px under 480px. */}
         <a
           href="#top"
           aria-label="Fresca Interior Design, home"
           onClick={closeIfOpen}
-          className="inline-flex min-h-[44px] flex-col items-center justify-center gap-[4px] uppercase leading-none no-underline"
+          className="inline-flex min-h-[44px] items-center justify-center no-underline"
         >
-          {/* Each line pulls back its own trailing letter-spacing, so both centre on the same axis. */}
-          <span className="font-cormorant text-[26px] font-medium tracking-[.22em] [margin-right:-.22em]">Fresca</span>
-          <span className="font-outfit text-[8px] font-normal tracking-[.3em] opacity-70 [margin-right:-.3em] md:text-[9px]">
-            Interior Design LLC
-          </span>
+          <Lockup />
         </a>
 
         <a href={cta.href} onClick={closeIfOpen} className="cta-link justify-self-end inline-flex min-h-[44px] items-center no-underline">
