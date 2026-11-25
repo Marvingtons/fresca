@@ -78,6 +78,8 @@ export const site = {
   email: "frescainteriordesign@gmail.com",
   instagram: { handle: "fresca.interior.design", href: "https://www.instagram.com/fresca.interior.design/" },
   legalName: "Fresca Interior Design, LLC",
+  /** The typeset wordmark in the header and preloader (components/Lockup.tsx). */
+  lockup: ["Fresca", "Interior Design"] as const,
 };
 
 /** Karen's service list, as in the page description. */
@@ -129,7 +131,6 @@ export const hero = {
   srPrefix: "Interior design in Solana Beach:",
   lines: ["Interiors that", "feel fresh."], // second line is italic
   text: "Beautiful spaces begin with thoughtful planning.",
-  introLabel: "Fresca · Interior Design",
   /** Photos that flash in the small frame during the intro, in order. None of
    *  them appears further down the page. */
   cycle: [img("walnut-island-kitchen"), img("sectional-living-room"), img("iron-bed-bedroom")],

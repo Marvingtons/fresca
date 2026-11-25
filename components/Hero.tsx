@@ -8,6 +8,7 @@ import { INTRO_KEY, INTRO_SIZES, introIsPlaying } from "@/lib/intro";
 import { MOTION } from "@/lib/motion";
 import HeroFilm from "./HeroFilm";
 import Line from "./LineReveal";
+import Lockup from "./Lockup";
 import Photo from "./Photo";
 import { useSmoothScroll } from "./SmoothScroll";
 
@@ -176,7 +177,7 @@ export default function Hero() {
         aria-hidden="true"
         className="intro-ui pointer-events-none absolute inset-0 z-[var(--z-preloader)] flex flex-col items-center justify-between pb-[18vh] pt-[24vh] text-ink"
       >
-        <span className="cap">{hero.introLabel}</span>
+        <Lockup />
         <span ref={countRef} className="font-serif text-xl tabular-nums">
           000
         </span>
